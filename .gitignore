@@ -57,6 +57,9 @@ playwright/.cache/
 Thumbs.db
 desktop.ini
 
+# === Claude Code 로컬 상태 ===
+.claude/
+
 # === 로그 · 임시 ===
 *.log
 logs/
