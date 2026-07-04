@@ -150,7 +150,7 @@ Run:
 ```bash
 npm run dev
 ```
-Expected: Server starts on `http://localhost:3000` and shows the default Next.js welcome page. Stop with Ctrl+C.
+Expected: Server starts on `http://localhost:3100` and shows the default Next.js welcome page. Stop with Ctrl+C.
 
 - [ ] **Step 3: Pin Node engine and lock package manager**
 
@@ -318,7 +318,7 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-http://localhost:3000 접속.
+http://localhost:3100 접속.
 
 ## 문서
 - 설계: `docs/superpowers/specs/2026-07-03-mokjang-design.md`
@@ -384,7 +384,7 @@ TEST_SUPABASE_ANON_KEY=eyJhbGciOi...
 TEST_SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 
 # === App ===
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3100
 ```
 
 Copy to `.env.local` and fill in real values from Step 1. `.env.local` is gitignored.
@@ -1091,8 +1091,8 @@ Sarah does these steps in browsers:
 2. Copy Client ID and Client Secret
 3. In Supabase dashboard → Authentication → Providers → Google → paste both, save
 4. In Supabase dashboard → Authentication → URL Configuration:
-   - Site URL: `http://localhost:3000`
-   - Additional Redirect URLs: `http://localhost:3000/auth/callback`, and later the Vercel URL
+   - Site URL: `http://localhost:3100`
+   - Additional Redirect URLs: `http://localhost:3100/auth/callback`, and later the Vercel URL
 
 Also disable email confirmation for now to speed up dev:
 - Authentication → Providers → Email → uncheck "Confirm email"
@@ -1485,7 +1485,7 @@ export default function SignupPage() {
 
 - [ ] **Step 9: Smoke test the flow manually**
 
-Run `npm run dev`, navigate to http://localhost:3000/signup, create an account. Then http://localhost:3000/login and sign in. Verify:
+Run `npm run dev`, navigate to http://localhost:3100/signup, create an account. Then http://localhost:3100/login and sign in. Verify:
 
 1. Signup succeeds and redirects to `/join` (which will 404 for now — Task 7 creates it)
 2. Login succeeds and redirects to `/` landing page
@@ -2868,7 +2868,7 @@ Supabase 대시보드 → Authentication → URL Configuration:
 - Site URL: Vercel 프로덕션 도메인
 - Redirect URLs: 
   - `https://your-vercel-domain.vercel.app/auth/callback`
-  - `http://localhost:3000/auth/callback` (dev)
+  - `http://localhost:3100/auth/callback` (dev)
 
 ## 4. Google OAuth 리다이렉트 URI 업데이트
 
@@ -2937,13 +2937,13 @@ export default defineConfig({
   fullyParallel: false, // sessions share DB — serial is safer for foundation
   retries: 0,
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3100",
     trace: "on-first-retry",
     locale: "ko-KR",
   },
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:3000",
+    url: "http://localhost:3100",
     timeout: 60_000,
     reuseExistingServer: !process.env.CI,
     env: {

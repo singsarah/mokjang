@@ -11,7 +11,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-http://localhost:3000 접속.
+http://localhost:3100 접속.
 
 ## 문서
 - 설계: `docs/superpowers/specs/2026-07-03-mokjang-design.md`
