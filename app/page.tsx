@@ -5,7 +5,7 @@ export default function LandingPage() {
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-pasture-50 p-6">
       <h1 className="text-4xl font-bold text-pasture-600">🐑 목장 관리</h1>
       <p className="text-center text-lg text-gray-700">
-        교회 고등부 출석·일정·생일 관리
+        모든 모임 관리를 편하게
       </p>
       <div className="flex flex-col gap-3 pt-6 sm:flex-row">
         <Link
