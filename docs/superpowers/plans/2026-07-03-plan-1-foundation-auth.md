@@ -1573,7 +1573,7 @@ export default function PrivacyPage() {
 
         <div>
           <h2 className="text-lg font-semibold">6. 문의</h2>
-          <p>hyunkyu18@gmail.com</p>
+          <p>syoon5501@gmail.com</p>
         </div>
       </section>
     </main>
