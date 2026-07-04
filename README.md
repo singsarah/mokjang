@@ -6,7 +6,7 @@
 
 ```bash
 npm install
-cp .env.local.example .env.local
+cp .env.example .env.local
 # .env.local 을 Supabase 값으로 채운 뒤:
 npm run dev
 ```
