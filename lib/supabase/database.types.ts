@@ -189,7 +189,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      find_group_by_code: {
+        Args: { code_input: string }
+        Returns: string
+      }
     }
     Enums: {
       membership_status: "pending" | "active" | "removed"

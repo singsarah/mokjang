@@ -58,3 +58,58 @@ export async function createGroup(
   }
   return { error: "그룹 코드 발급에 실패했습니다. 다시 시도해주세요." };
 }
+
+const joinGroupSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z0-9]{8}$/, "8자리 영문+숫자 코드입니다"),
+});
+
+export async function joinGroup(
+  input: z.infer<typeof joinGroupSchema>,
+): Promise<{ error?: string }> {
+  const parsed = joinGroupSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]!.message };
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요합니다" };
+
+  // Look up the group by code (RLS: no policy for anonymous select — we allow
+  // matching a code only via the RPC below, which runs as SECURITY DEFINER).
+  const { data: group, error: lookupErr } = await supabase.rpc(
+    "find_group_by_code",
+    { code_input: parsed.data.code },
+  );
+  if (lookupErr || !group) return { error: "코드를 찾을 수 없습니다" };
+
+  // Check if user already has any membership with this group
+  const { data: existing } = await supabase
+    .from("memberships")
+    .select("status")
+    .eq("group_id", group)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existing?.status === "active") {
+    redirect("/");
+  }
+  if (existing?.status === "pending") {
+    redirect("/pending");
+  }
+  // 'removed' → allow re-request (fall through)
+
+  const { error: insertErr } = await supabase.from("memberships").insert({
+    group_id: group,
+    user_id: user.id,
+    role: "viewer", // placeholder; master sets real role on approval
+    status: "pending",
+  });
+  if (insertErr) return { error: insertErr.message };
+
+  redirect("/pending");
+}
