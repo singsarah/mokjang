@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState, useTransition } from "react";
 import { signInEmailPassword, signInWithGoogle } from "@/app/actions/auth";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const oauthFailed = searchParams.get("error") === "oauth";
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
+
+  // The form's own error takes priority; otherwise surface an OAuth failure
+  // redirected here by signInWithGoogle / the /auth/callback route.
+  const displayError =
+    error ??
+    (oauthFailed ? "구글 로그인에 실패했습니다. 다시 시도해주세요." : undefined);
 
   async function onSubmit(formData: FormData) {
     setError(undefined);
@@ -57,7 +66,7 @@ export default function LoginPage() {
             className="mt-1 w-full rounded-md border px-3 py-2"
           />
         </label>
-        {error && <p className="text-sm text-coral-500">{error}</p>}
+        {displayError && <p className="text-sm text-coral-500">{displayError}</p>}
         <button
           type="submit"
           disabled={isPending}
@@ -74,5 +83,14 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  // useSearchParams() requires a Suspense boundary in the App Router.
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
