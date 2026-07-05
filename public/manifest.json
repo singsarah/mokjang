@@ -1,0 +1,21 @@
+{
+  "name": "목장 관리",
+  "short_name": "목장",
+  "description": "교회 고등부 출석·일정·생일 관리",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0F9F0",
+  "theme_color": "#7FC181",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
