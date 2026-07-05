@@ -1,11 +1,31 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
+import { createServerClient } from "@/lib/supabase/server";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const { data: membership } = await supabase
+      .from("memberships")
+      .select("status")
+      .eq("user_id", user.id)
+      .in("status", ["active", "pending"])
+      .maybeSingle();
+
+    if (membership?.status === "active") redirect("/attendance");
+    if (membership?.status === "pending") redirect("/pending");
+    redirect("/join");
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-pasture-50 p-6">
       <h1 className="text-4xl font-bold text-pasture-600">🐑 목장 관리</h1>
       <p className="text-center text-lg text-gray-700">
-        모든 모임 관리를 편하게
+        교회 고등부 출석·일정·생일 관리
       </p>
       <div className="flex flex-col gap-3 pt-6 sm:flex-row">
         <Link
