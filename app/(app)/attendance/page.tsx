@@ -1,9 +1,28 @@
-export default function AttendancePage() {
+import { loadBoard } from "@/lib/attendance";
+import { AttendanceBoard } from "@/components/attendance-board";
+
+function todayISO(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+export default async function AttendancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
+  const { date } = await searchParams;
+  const iso = date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : todayISO();
+  const board = await loadBoard(iso);
   return (
-    <main className="min-h-screen bg-sage-soft px-6 py-8 pb-24 text-center">
-      <div className="mt-16 text-6xl">🐑</div>
-      <h1 className="mt-4 font-display text-xl font-bold text-ink">출석판</h1>
-      <p className="mt-2 text-sm text-ink-muted">(구현 예정 — Plan 3)</p>
-    </main>
+    <AttendanceBoard
+      date={board.date}
+      note={board.note}
+      canEdit={board.canEdit}
+      classes={board.classes}
+      students={board.students}
+      initialRecords={board.records}
+    />
   );
 }
