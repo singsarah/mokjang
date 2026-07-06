@@ -43,11 +43,20 @@ test.describe.serial("Foundation golden path", () => {
     await page.goto("/settings/teachers");
 
     await expect(page.locator("text=이교사")).toBeVisible();
-    await page.getByRole("button", { name: "편집 교사로 승인" }).click();
 
-    await expect(
-      page.locator("text=이교사").locator("xpath=ancestor::li"),
-    ).toContainText("편집 교사");
+    // In dev the first click can race React hydration (a no-op that sends no
+    // request) and the very first server action pays a one-time compile cost,
+    // so retry the click until the approval actually lands. Assert on the
+    // 활성 교사 section's role label — NOT the pending "편집 교사로 승인" button,
+    // whose text contains "편집 교사" and would pass even without approval.
+    const activeTeacher = page
+      .locator("section", { hasText: "활성 교사" })
+      .locator("li", { hasText: "이교사" });
+    await expect(async () => {
+      const button = page.getByRole("button", { name: "편집 교사로 승인" });
+      if (await button.isVisible()) await button.click();
+      await expect(activeTeacher).toContainText("편집 교사", { timeout: 8_000 });
+    }).toPass({ timeout: 45_000 });
   });
 
   test("approved teacher lands on attendance tab", async ({ browser }) => {
