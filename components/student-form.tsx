@@ -108,7 +108,8 @@ export function StudentForm({
     });
   }
 
-  const input = "mt-1 w-full rounded-md border px-3 py-2";
+  const input =
+    "mt-1 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink";
   return (
     <form action={onSubmit} className="space-y-4">
       <div className="flex items-center gap-4">
@@ -141,7 +142,7 @@ export function StudentForm({
             <p className="mt-1 text-xs text-ink-muted">업로드 중...</p>
           )}
           {photoError && (
-            <p className="mt-1 text-xs text-coral-500">{photoError}</p>
+            <p className="mt-1 text-xs text-danger">{photoError}</p>
           )}
         </div>
       </div>
@@ -227,11 +228,11 @@ export function StudentForm({
           className={input}
         />
       </label>
-      {error && <p className="text-sm text-coral-500">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
       <button
         type="submit"
         disabled={isPending || uploading}
-        className="w-full rounded-lg bg-pasture-500 py-3 text-white disabled:opacity-50"
+        className="w-full rounded-btn bg-sage py-3 font-medium text-white shadow-sm transition hover:bg-sage-deep disabled:opacity-50"
       >
         {isPending ? "저장 중..." : "저장"}
       </button>

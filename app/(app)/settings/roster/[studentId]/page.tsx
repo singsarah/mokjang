@@ -36,15 +36,16 @@ export default async function EditStudentPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-6">
+    <main className="min-h-screen bg-card pb-24">
+      <div className="mx-auto max-w-md px-6 py-8">
       <Link
         href="/settings/roster"
-        className="text-sm text-pasture-600 hover:underline"
+        className="text-sm text-ink-muted hover:text-ink"
       >
         ← 학적부
       </Link>
-      <h1 className="mt-2 font-display text-2xl font-bold">학생 수정</h1>
-      <div className="mt-6">
+      <h1 className="mt-2 font-display text-2xl font-bold text-ink">학생 수정</h1>
+      <div className="mt-6 rounded-card border border-border/60 bg-white p-5 shadow-sm">
         <StudentForm
           classes={classes}
           groupId={m.groupId}
@@ -76,10 +77,11 @@ export default async function EditStudentPage({
         }}
         className="mt-8"
       >
-        <button className="w-full rounded-lg border border-coral-500 py-3 text-coral-500">
+        <button className="w-full rounded-btn border border-danger py-3 text-danger transition hover:bg-unconfirmed-soft">
           학생 삭제 (숨김 처리)
         </button>
       </form>
+      </div>
     </main>
   );
 }
