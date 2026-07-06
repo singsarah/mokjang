@@ -13,6 +13,12 @@ export default async function SettingsPage() {
       </p>
 
       <nav className="mt-8 space-y-2">
+        <Link
+          href="/settings/roster"
+          className="block rounded-lg bg-white p-4 shadow-sm hover:bg-pasture-50"
+        >
+          📖 학적부 (학생 명단)
+        </Link>
         {m.role === "master" && (
           <>
             <Link
