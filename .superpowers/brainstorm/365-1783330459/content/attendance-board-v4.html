@@ -1,0 +1,77 @@
+<h2>출석판 미리보기 v4 — 동그라미(양 얼굴)</h2>
+<p class="subtitle">학생을 동그라미로 · 범례는 위 · 초록(출석)은 이름만. 탭 순환: 중립 → 초록 → 사유칸 → 노랑/빨강.</p>
+
+<div style="max-width:390px;margin:0 auto 14px;display:flex;gap:14px;justify-content:center;font-size:12px;color:#6E7C6C;font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif">
+  <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#90B484;margin-right:5px;vertical-align:middle"></i>출석</span>
+  <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#F0C86E;margin-right:5px;vertical-align:middle"></i>사유결석</span>
+  <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid #D9645F;margin-right:5px;vertical-align:middle"></i>무단(사유없음)</span>
+  <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#fff;border:1px solid #E4E1D3;margin-right:5px;vertical-align:middle"></i>미체크</span>
+</div>
+
+<style>
+  .phone { max-width:390px; margin:0 auto; background:#FBF6EC; border:1px solid #E4E1D3; border-radius:28px;
+           padding:14px 12px 0; box-shadow:0 10px 30px rgba(0,0,0,.08);
+           font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif; color:#2C382F; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:6px 6px 12px; }
+  .topbar .date { font-weight:700; font-size:15px; }
+  .topbar .session { font-size:12px; color:#6E7C6C; background:#FBEDC9; padding:3px 10px; border-radius:8px; }
+  .tabwrap { position:relative; }
+  .tabs { display:flex; gap:8px; overflow-x:auto; padding:2px 4px 14px; }
+  .tab { flex:0 0 auto; padding:7px 14px; border-radius:11px; background:#fff; border:1px solid #E4E1D3; font-size:13px; color:#6E7C6C; white-space:nowrap; }
+  .tab.active { background:#90B484; color:#fff; border-color:#90B484; font-weight:700; }
+  .fade { position:absolute; right:0; top:0; height:38px; width:34px; pointer-events:none; background:linear-gradient(90deg,rgba(251,246,236,0),#FBF6EC); }
+
+  .grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; padding:6px 4px 16px; }
+  .cell { display:flex; justify-content:center; }
+  .circ { width:96px; height:96px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:2px; text-align:center; border:1px solid #E4E1D3; background:#fff; }
+  .circ .nm { font-size:15px; font-weight:700; }
+  .circ .sub { font-size:10px; color:#6E7C6C; }
+  .circ.present { background:#90B484; color:#fff; border-color:#90B484; }
+  .circ.excused { background:#FBEDC9; border-color:#F0C86E; }
+  .circ.excused .sub { color:#C9A24C; }
+  .circ.absent  { background:#fff; border:3px solid #D9645F; }
+  .circ.absent .nm { color:#D9645F; }
+
+  /* 사유칸 열린 상태 (한번 더 탭) — 동그라미 옆에 입력칸 */
+  .editrow { grid-column:span 3; display:flex; align-items:center; gap:10px; background:#fff;
+             border:1px solid #F0C86E; border-radius:18px; padding:10px 12px; }
+  .editrow .ecirc { width:52px; height:52px; border-radius:50%; background:#FBEDC9; border:1px solid #F0C86E;
+                    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:0 0 auto; }
+  .editrow input { flex:1; border:1px solid #E4E1D3; border-radius:11px; padding:9px 10px; font-size:14px; }
+  .editrow .save { background:#90B484; color:#fff; border:none; border-radius:11px; padding:9px 14px; font-weight:700; }
+
+  .tabbar { border-top:1px solid #E4E1D3; padding:12px 4px; text-align:center; font-size:12px; color:#6E7C6C; }
+</style>
+
+<div class="phone">
+  <div class="topbar">
+    <div class="date">◀ &nbsp;7월 6일 (일)&nbsp; ▶</div>
+    <div class="session">주일예배</div>
+  </div>
+  <div class="tabwrap">
+    <div class="tabs">
+      <span class="tab active">믿음반</span><span class="tab">소망반</span><span class="tab">사랑반</span>
+      <span class="tab">은혜반</span><span class="tab">평화반</span><span class="tab">기쁨반</span>
+      <span class="tab">감사반</span><span class="tab">반 없음</span>
+    </div>
+    <div class="fade"></div>
+  </div>
+  <div class="grid">
+    <div class="cell"><div class="circ"><span class="nm">김민준</span></div></div>
+    <div class="cell"><div class="circ present"><span class="nm">이서연</span></div></div>
+    <div class="cell"><div class="circ present"><span class="nm">정하은</span></div></div>
+    <div class="cell"><div class="circ excused"><span class="nm">최지우</span><span class="sub">가족여행</span></div></div>
+    <div class="cell"><div class="circ absent"><span class="nm">강시우</span></div></div>
+    <div class="cell"><div class="circ"><span class="nm">윤서준</span></div></div>
+    <!-- 사유칸 열린 상태 -->
+    <div class="editrow">
+      <div class="ecirc">박도윤</div>
+      <input placeholder="결석 사유 입력 (비우면 빨강)" />
+      <button class="save">저장</button>
+    </div>
+    <div class="cell"><div class="circ"><span class="nm">임하윤</span></div></div>
+    <div class="cell"><div class="circ present"><span class="nm">한지호</span></div></div>
+  </div>
+  <div class="tabbar">🐑 출석 &nbsp;·&nbsp; 📅 일정 &nbsp;·&nbsp; 📊 대시보드 &nbsp;·&nbsp; ⚙️ 설정</div>
+</div>

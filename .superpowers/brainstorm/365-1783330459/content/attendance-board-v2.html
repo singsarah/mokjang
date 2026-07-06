@@ -1,0 +1,108 @@
+<h2>출석판 미리보기 v2</h2>
+<p class="subtitle">한 줄 3명 · 반 8개(가로 스크롤) · 이름 탭 = 즉시 출석 · 사유 입력 화면 포함. 탭이 많을 때 스크롤로 할지, 여러 줄로 펼칠지 알려주세요.</p>
+
+<style>
+  .phone {
+    max-width: 390px; margin: 0 auto; background: #FBF6EC;
+    border: 1px solid #E4E1D3; border-radius: 28px; padding: 14px 12px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #2C382F;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding: 6px 6px 12px; }
+  .topbar .date { font-weight:700; font-size:15px; }
+  .topbar .session { font-size:12px; color:#6E7C6C; background:#FBEDC9; padding:3px 10px; border-radius:8px; }
+
+  /* 반 탭 — 가로 스크롤 1줄 (브라우저에서 좌우로 밀어보세요) */
+  .tabwrap { position:relative; }
+  .tabs { display:flex; gap:8px; overflow-x:auto; padding: 2px 4px 12px; scrollbar-width:thin; }
+  .tab { flex:0 0 auto; padding:7px 14px; border-radius:11px; background:#fff; border:1px solid #E4E1D3;
+         font-size:13px; color:#6E7C6C; white-space:nowrap; }
+  .tab.active { background:#90B484; color:#fff; border-color:#90B484; font-weight:700; }
+  .fade { position:absolute; right:0; top:0; height:38px; width:34px; pointer-events:none;
+          background:linear-gradient(90deg, rgba(251,246,236,0), #FBF6EC); }
+
+  .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; padding: 4px; }
+  .scard { border-radius:16px; padding:12px 6px; min-height:62px; display:flex; flex-direction:column;
+           justify-content:center; gap:3px; border:1px solid transparent; text-align:center; }
+  .scard .nm { font-size:15px; font-weight:700; }
+  .scard .st { font-size:10px; }
+  .scard.present     { background:#90B484; color:#fff; }
+  .scard.present .st { color:#EAF2E4; }
+  .scard.excused     { background:#FBEDC9; border-color:#F0C86E; }
+  .scard.excused .st { color:#C9A24C; }
+  .scard.unconfirmed { background:#fff; border:1px dashed #D9645F; }
+  .scard.unconfirmed .st { color:#D9645F; }
+  .reasonlink { font-size:10px; color:#6E7C6C; text-decoration:underline; }
+
+  .legend { display:flex; gap:14px; justify-content:center; padding:14px 0 12px; font-size:12px; color:#6E7C6C; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .legend .p { background:#90B484; } .legend .e { background:#F0C86E; } .legend .u { background:#D9645F; }
+  .tabbar { border-top:1px solid #E4E1D3; padding:12px 4px; text-align:center; font-size:12px; color:#6E7C6C; }
+
+  .callout { max-width:390px; margin:18px auto 0; background:#E4F0FA; border:1px solid #9FCDEC;
+             border-radius:14px; padding:12px 14px; font-size:13px; color:#2C382F; line-height:1.7; }
+
+  .detail { max-width:390px; margin:16px auto 0; }
+  .detail .cap { font-size:12px; color:#6E7C6C; margin-bottom:6px; }
+  .reasonbox { background:#fff; border:1px solid #F0C86E; border-radius:16px; padding:14px; }
+  .reasonbox .rname { font-weight:700; margin-bottom:8px; }
+  .reasonbox .rrow { display:flex; gap:8px; }
+  .reasonbox input { flex:1; border:1px solid #E4E1D3; border-radius:11px; padding:9px 10px; font-size:14px; }
+  .reasonbox .save { background:#90B484; color:#fff; border:none; border-radius:11px; padding:0 16px; font-weight:700; }
+</style>
+
+<div class="phone">
+  <div class="topbar">
+    <div class="date">◀ &nbsp;7월 6일 (일)&nbsp; ▶</div>
+    <div class="session">주일예배</div>
+  </div>
+
+  <div class="tabwrap">
+    <div class="tabs">
+      <span class="tab active">믿음반</span>
+      <span class="tab">소망반</span>
+      <span class="tab">사랑반</span>
+      <span class="tab">은혜반</span>
+      <span class="tab">평화반</span>
+      <span class="tab">기쁨반</span>
+      <span class="tab">감사반</span>
+      <span class="tab">반 없음</span>
+    </div>
+    <div class="fade"></div>
+  </div>
+
+  <div class="grid">
+    <div class="scard present"><span class="nm">김민준</span><span class="st">✓ 출석</span></div>
+    <div class="scard present"><span class="nm">이서연</span><span class="st">✓ 출석</span></div>
+    <div class="scard unconfirmed"><span class="nm">박도윤</span><span class="reasonlink">사유 입력</span></div>
+    <div class="scard present"><span class="nm">정하은</span><span class="st">✓ 출석</span></div>
+    <div class="scard excused"><span class="nm">최지우</span><span class="st">가족여행</span></div>
+    <div class="scard unconfirmed"><span class="nm">강시우</span><span class="reasonlink">사유 입력</span></div>
+    <div class="scard present"><span class="nm">윤서준</span><span class="st">✓ 출석</span></div>
+    <div class="scard unconfirmed"><span class="nm">임하윤</span><span class="reasonlink">사유 입력</span></div>
+    <div class="scard present"><span class="nm">한지호</span><span class="st">✓ 출석</span></div>
+  </div>
+
+  <div class="legend">
+    <span><i class="p"></i>출석</span>
+    <span><i class="e"></i>사유결석</span>
+    <span><i class="u"></i>미확인</span>
+  </div>
+  <div class="tabbar">🐑 출석 &nbsp;·&nbsp; 📅 일정 &nbsp;·&nbsp; 📊 대시보드 &nbsp;·&nbsp; ⚙️ 설정</div>
+</div>
+
+<div class="callout">
+  <b>이름을 탭하면?</b> → 카드가 <b>바로 초록(출석)</b>으로 바뀌고 즉시 저장돼요. 한 번 더 탭하면 해제.<br>
+  결석인 학생은 카드의 <b>"사유 입력"</b>을 누르면 아래처럼 사유칸이 나와요.
+</div>
+
+<div class="detail">
+  <div class="cap">▼ "사유 입력"을 눌렀을 때 (박도윤)</div>
+  <div class="reasonbox">
+    <div class="rname">박도윤 — 결석 사유</div>
+    <div class="rrow">
+      <input value="가족여행" />
+      <button class="save">저장</button>
+    </div>
+  </div>
+</div>

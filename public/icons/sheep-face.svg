@@ -1,0 +1,19 @@
+<svg width="140" height="140" viewBox="270 45 140 140" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="양 얼굴">
+  <g transform="rotate(34 294 112)"><ellipse cx="294" cy="112" rx="11" ry="16" fill="#F6C9C0" stroke="#3A322E" stroke-width="2"/><ellipse cx="294" cy="114" rx="5" ry="10" fill="#F9DBD4"/></g>
+  <g transform="rotate(-34 386 112)"><ellipse cx="386" cy="112" rx="11" ry="16" fill="#F6C9C0" stroke="#3A322E" stroke-width="2"/><ellipse cx="386" cy="114" rx="5" ry="10" fill="#F9DBD4"/></g>
+  <ellipse cx="340" cy="126" rx="47" ry="43" fill="#FBEEE6" stroke="#3A322E" stroke-width="2.4"/>
+  <circle cx="306" cy="96" r="16" fill="#FFFFFF" stroke="#3A322E" stroke-width="2.2"/>
+  <circle cx="325" cy="82" r="16" fill="#FFFFFF" stroke="#3A322E" stroke-width="2.2"/>
+  <circle cx="345" cy="78" r="16.5" fill="#FFFFFF" stroke="#3A322E" stroke-width="2.2"/>
+  <circle cx="365" cy="82" r="16" fill="#FFFFFF" stroke="#3A322E" stroke-width="2.2"/>
+  <circle cx="384" cy="96" r="16" fill="#FFFFFF" stroke="#3A322E" stroke-width="2.2"/>
+  <circle cx="327" cy="120" r="5" fill="#2C2A28"/>
+  <circle cx="353" cy="120" r="5" fill="#2C2A28"/>
+  <circle cx="328.6" cy="118.4" r="1.4" fill="#FFFFFF"/>
+  <circle cx="354.6" cy="118.4" r="1.4" fill="#FFFFFF"/>
+  <ellipse cx="316" cy="131" rx="8" ry="5" fill="#F4A9B8" opacity="0.85"/>
+  <ellipse cx="364" cy="131" rx="8" ry="5" fill="#F4A9B8" opacity="0.85"/>
+  <path d="M335 126 Q340 124.5 345 126 Q343 132 340 134 Q337 132 335 126 Z" fill="#8A6244"/>
+  <path d="M340 134 Q334 139 329 136" fill="none" stroke="#3A322E" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M340 134 Q346 139 351 136" fill="none" stroke="#3A322E" stroke-width="1.7" stroke-linecap="round"/>
+</svg>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/icon";
 
 export default async function LandingPage() {
   const supabase = await createServerClient();
@@ -22,8 +23,10 @@ export default async function LandingPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-sage-soft p-6">
-      <h1 className="font-display text-4xl font-bold text-sage-deep">🐑 목장 관리</h1>
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-sage-soft p-6">
+      <Icon name="cross" size={26} className="opacity-80" alt="십자가" />
+      <Icon name="sheep-face" size={104} alt="양 얼굴 로고" />
+      <h1 className="font-display text-4xl font-bold text-sage-deep">목장 관리</h1>
       <p className="text-center text-lg text-ink">
         교회 고등부 출석·일정·생일 관리
       </p>

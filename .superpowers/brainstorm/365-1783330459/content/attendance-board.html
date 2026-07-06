@@ -1,0 +1,67 @@
+<h2>출석판 미리보기</h2>
+<p class="subtitle">반별 탭 → 반 선택 → 학생 카드. 카드를 눌러 3색(출석/사유결석/미확인)으로 체크. 이 모습이 괜찮은지 봐주세요.</p>
+
+<style>
+  .phone {
+    max-width: 380px; margin: 0 auto; background: #FBF6EC;
+    border: 1px solid #E4E1D3; border-radius: 28px; padding: 14px 12px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; color: #2C382F;
+  }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding: 6px 6px 12px; }
+  .topbar .date { font-weight: 700; font-size: 15px; }
+  .topbar .session { font-size: 12px; color:#6E7C6C; background:#FBEDC9; padding:3px 10px; border-radius:8px; }
+  .tabs { display:flex; gap:8px; overflow-x:auto; padding: 2px 4px 12px; }
+  .tab { flex:0 0 auto; padding:7px 16px; border-radius:11px; background:#fff; border:1px solid #E4E1D3;
+         font-size:13px; color:#6E7C6C; }
+  .tab.active { background:#90B484; color:#fff; border-color:#90B484; font-weight:700; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; padding: 4px; }
+  .scard { border-radius:18px; padding:16px 12px; min-height:74px; display:flex; flex-direction:column;
+           justify-content:center; gap:4px; border:1px solid transparent; text-align:center; }
+  .scard .nm { font-size:16px; font-weight:700; }
+  .scard .st { font-size:11px; }
+  .scard.present     { background:#90B484; color:#fff; }
+  .scard.present .st { color:#EAF2E4; }
+  .scard.excused     { background:#FBEDC9; border-color:#F0C86E; color:#2C382F; }
+  .scard.excused .st { color:#C9A24C; }
+  .scard.unconfirmed { background:#fff; border:1px dashed #D9645F; color:#2C382F; }
+  .scard.unconfirmed .st { color:#D9645F; }
+  .legend { display:flex; gap:16px; justify-content:center; padding:14px 0 12px; font-size:12px; color:#6E7C6C; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .legend .p { background:#90B484; } .legend .e { background:#F0C86E; } .legend .u { background:#D9645F; }
+  .tabbar { border-top:1px solid #E4E1D3; padding:12px 4px; text-align:center; font-size:12px; color:#6E7C6C; }
+  .note { max-width:380px; margin:16px auto 0; font-size:13px; color:#6E7C6C; line-height:1.7; }
+</style>
+
+<div class="phone">
+  <div class="topbar">
+    <div class="date">◀ &nbsp;7월 6일 (일)&nbsp; ▶</div>
+    <div class="session">주일예배</div>
+  </div>
+  <div class="tabs">
+    <span class="tab active">믿음반</span>
+    <span class="tab">소망반</span>
+    <span class="tab">사랑반</span>
+    <span class="tab">반 없음</span>
+  </div>
+  <div class="grid">
+    <div class="scard present"><span class="nm">김민준</span><span class="st">✓ 출석</span></div>
+    <div class="scard present"><span class="nm">이서연</span><span class="st">✓ 출석</span></div>
+    <div class="scard excused"><span class="nm">박도윤</span><span class="st">사유: 가족여행</span></div>
+    <div class="scard unconfirmed"><span class="nm">최지우</span><span class="st">미확인 · 연락필요</span></div>
+    <div class="scard present"><span class="nm">정하은</span><span class="st">✓ 출석</span></div>
+    <div class="scard unconfirmed"><span class="nm">강시우</span><span class="st">미확인 · 연락필요</span></div>
+  </div>
+  <div class="legend">
+    <span><i class="p"></i>출석</span>
+    <span><i class="e"></i>사유결석</span>
+    <span><i class="u"></i>미확인</span>
+  </div>
+  <div class="tabbar">🐑 출석 &nbsp;·&nbsp; 📅 일정 &nbsp;·&nbsp; 📊 대시보드 &nbsp;·&nbsp; ⚙️ 설정</div>
+</div>
+
+<p class="note">
+  · 위 <b>반 탭</b>을 눌러 반을 바꾸고, 학생 카드를 눌러 출석 체크해요.<br>
+  · <b>초록 = 출석</b>(이름 탭) · <b>노랑 = 사유결석</b>(사유 입력 시) · <b>코럴 = 미확인</b>(안 건드림).<br>
+  · 제목/글씨는 실제 앱에선 교보손글씨체로 나와요. 색·배치가 이 느낌이면 좋을지 봐주세요.
+</p>

@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Icon, type IconName } from "@/components/icon";
 
-const TABS = [
-  { href: "/attendance", label: "출석", icon: "🐑" },
+const TABS: { href: string; label: string; icon: string; img?: IconName }[] = [
+  { href: "/attendance", label: "출석", icon: "🐑", img: "sheep-face" },
   { href: "/calendar", label: "일정", icon: "📅" },
   { href: "/dashboard", label: "대시보드", icon: "📊" },
   { href: "/settings", label: "설정", icon: "⚙️" },
-] as const;
+];
 
 export function TabBar() {
   const pathname = usePathname();
@@ -30,7 +31,11 @@ export function TabBar() {
                     : "text-ink-muted hover:text-ink",
                 )}
               >
-                <span className="text-xl">{tab.icon}</span>
+                {tab.img ? (
+                  <Icon name={tab.img} size={26} />
+                ) : (
+                  <span className="text-xl">{tab.icon}</span>
+                )}
                 <span>{tab.label}</span>
               </Link>
             </li>

@@ -22,6 +22,7 @@ export type RosterStudent = {
   name: string;
   grade: number | null;
   classId: string | null;
+  birthdayMonth: number | null;
   phoneSelf: string | null;
   phoneGuardian: string | null;
   guardianRelation: string | null;
@@ -45,7 +46,7 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
 
   let q = supabase
     .from("students")
-    .select("id, name, grade, class_id, phone_self, phone_guardian, guardian_relation, deleted_at")
+    .select("id, name, grade, class_id, birthday_month, phone_self, phone_guardian, guardian_relation, deleted_at")
     .eq("group_id", m.groupId)
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
@@ -58,6 +59,7 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
     name: s.name,
     grade: s.grade,
     classId: s.class_id,
+    birthdayMonth: s.birthday_month,
     phoneSelf: mask ? maskPhone(s.phone_self) : s.phone_self,
     phoneGuardian: mask ? maskPhone(s.phone_guardian) : s.phone_guardian,
     guardianRelation: s.guardian_relation,

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { loadRoster } from "@/lib/students";
+import { Icon } from "@/components/icon";
 
 export default async function RosterPage() {
   const { canEdit, classes, students } = await loadRoster();
   const classMap = new Map(classes.map((c) => [c.id, c]));
+  const currentMonth = new Date().getMonth() + 1; // 이번 달 생일 학생에 ⭐ 배지
 
   const groups = new Map<string, { label: string; sort: number; items: typeof students }>();
   for (const s of students) {
@@ -82,7 +84,12 @@ export default async function RosterPage() {
                         🐑
                       </span>
                       <span className="min-w-0">
-                        <span className="block font-medium text-ink">{s.name}</span>
+                        <span className="flex items-center gap-1 font-medium text-ink">
+                          {s.name}
+                          {s.birthdayMonth === currentMonth && (
+                            <Icon name="star" size={14} alt="이번 달 생일" />
+                          )}
+                        </span>
                         {s.phoneSelf && (
                           <span className="block text-xs text-ink-muted">
                             {s.phoneSelf}
