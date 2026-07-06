@@ -1,9 +1,9 @@
 export default function CalendarPage() {
   return (
-    <main className="px-6 py-8 text-center">
+    <main className="min-h-screen bg-sky-soft px-6 py-8 pb-24 text-center">
       <div className="mt-16 text-6xl">📅</div>
-      <h1 className="mt-4 font-display text-xl font-bold">일정</h1>
-      <p className="mt-2 text-sm text-gray-500">(구현 예정 — Plan 5)</p>
+      <h1 className="mt-4 font-display text-xl font-bold text-ink">일정</h1>
+      <p className="mt-2 text-sm text-ink-muted">(구현 예정 — Plan 5)</p>
     </main>
   );
 }

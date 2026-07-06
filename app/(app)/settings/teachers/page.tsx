@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
@@ -40,115 +41,130 @@ export default async function TeachersPage() {
   const active = rows.filter((m) => m.status === "active");
 
   return (
-    <main className="mx-auto max-w-2xl px-6 py-6">
-      <h1 className="font-display text-2xl font-bold">교사 관리</h1>
+    <main className="min-h-screen bg-[#E6EAE0] pb-24">
+      <div className="mx-auto max-w-md px-6 py-8">
+        <Link
+          href="/settings"
+          className="text-sm text-ink-muted hover:text-ink"
+        >
+          ← 설정
+        </Link>
+        <h1 className="mt-2 font-display text-2xl font-bold text-ink">교사 관리</h1>
 
-      <section className="mt-8">
-        <h2 className="text-lg font-semibold">승인 대기 ({pending.length})</h2>
-        {pending.length === 0 ? (
-          <p className="mt-2 text-sm text-gray-500">대기 중인 요청이 없습니다.</p>
-        ) : (
+        <section className="mt-8">
+          <h2 className="text-sm font-bold text-ink-muted">
+            승인 대기 ({pending.length})
+          </h2>
+          {pending.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-muted">대기 중인 요청이 없습니다.</p>
+          ) : (
+            <ul className="mt-3 space-y-3">
+              {pending.map((m) => {
+                const profile = profileMap.get(m.user_id);
+                return (
+                  <li
+                    key={m.id}
+                    className="rounded-card border border-border/60 bg-white p-4 shadow-sm"
+                  >
+                    <div className="mb-3">
+                      <div className="font-medium text-ink">
+                        {profile?.display_name ?? "(이름 없음)"}
+                      </div>
+                      <div className="text-xs text-ink-muted">{profile?.email}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <form
+                        action={async () => {
+                          "use server";
+                          await approveMembership({ id: m.id, role: "editor" });
+                        }}
+                      >
+                        <button className="rounded-btn bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep">
+                          편집 교사로 승인
+                        </button>
+                      </form>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await approveMembership({ id: m.id, role: "viewer" });
+                        }}
+                      >
+                        <button className="rounded-btn border border-sage px-4 py-2 text-sm text-sage-deep transition hover:bg-sage-soft">
+                          조회 교사로 승인
+                        </button>
+                      </form>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await denyMembership({ id: m.id });
+                        }}
+                      >
+                        <button className="rounded-btn border border-border px-4 py-2 text-sm text-ink-muted transition hover:bg-card">
+                          반려
+                        </button>
+                      </form>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <section className="mt-10">
+          <h2 className="text-sm font-bold text-ink-muted">
+            활성 교사 ({active.length})
+          </h2>
           <ul className="mt-3 space-y-3">
-            {pending.map((m) => {
+            {active.map((m) => {
               const profile = profileMap.get(m.user_id);
               return (
                 <li
                   key={m.id}
-                  className="rounded-lg border bg-white p-4 shadow-sm"
+                  className="rounded-card border border-border/60 bg-white p-4 shadow-sm"
                 >
                   <div className="mb-3">
-                    <div className="font-medium">
-                      {profile?.display_name ?? "(이름 없음)"}
+                    <div className="font-medium text-ink">
+                      {profile?.display_name ?? "(이름 없음)"}{" "}
+                      <span className="ml-2 rounded-tag bg-sky-soft px-2 py-0.5 text-xs text-ink-muted">
+                        {ROLE_LABELS_KO[m.role]}
+                      </span>
                     </div>
-                    <div className="text-xs text-gray-500">{profile?.email}</div>
+                    <div className="text-xs text-ink-muted">{profile?.email}</div>
                   </div>
-                  <div className="flex gap-2">
-                    <form
-                      action={async () => {
-                        "use server";
-                        await approveMembership({ id: m.id, role: "editor" });
-                      }}
-                    >
-                      <button className="rounded-md bg-pasture-500 px-4 py-2 text-sm text-white">
-                        편집 교사로 승인
-                      </button>
-                    </form>
-                    <form
-                      action={async () => {
-                        "use server";
-                        await approveMembership({ id: m.id, role: "viewer" });
-                      }}
-                    >
-                      <button className="rounded-md border border-pasture-500 px-4 py-2 text-sm text-pasture-600">
-                        조회 교사로 승인
-                      </button>
-                    </form>
-                    <form
-                      action={async () => {
-                        "use server";
-                        await denyMembership({ id: m.id });
-                      }}
-                    >
-                      <button className="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600">
-                        반려
-                      </button>
-                    </form>
-                  </div>
+                  {m.role !== "master" && (
+                    <div className="flex gap-2">
+                      <form
+                        action={async () => {
+                          "use server";
+                          await changeRole({
+                            id: m.id,
+                            role: m.role === "editor" ? "viewer" : "editor",
+                          });
+                        }}
+                      >
+                        <button className="rounded-btn border border-border px-3 py-1 text-xs text-ink transition hover:bg-card">
+                          {m.role === "editor" ? "→ 조회로" : "→ 편집으로"}
+                        </button>
+                      </form>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await removeMembership({ id: m.id });
+                        }}
+                      >
+                        <button className="rounded-btn border border-danger px-3 py-1 text-xs text-danger transition hover:bg-unconfirmed-soft">
+                          내보내기
+                        </button>
+                      </form>
+                    </div>
+                  )}
                 </li>
               );
             })}
           </ul>
-        )}
-      </section>
-
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold">활성 교사 ({active.length})</h2>
-        <ul className="mt-3 space-y-3">
-          {active.map((m) => {
-            const profile = profileMap.get(m.user_id);
-            return (
-              <li key={m.id} className="rounded-lg border bg-white p-4 shadow-sm">
-                <div className="mb-3">
-                  <div className="font-medium">
-                    {profile?.display_name ?? "(이름 없음)"}{" "}
-                    <span className="ml-2 text-xs text-gray-500">
-                      {ROLE_LABELS_KO[m.role]}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">{profile?.email}</div>
-                </div>
-                {m.role !== "master" && (
-                  <div className="flex gap-2">
-                    <form
-                      action={async () => {
-                        "use server";
-                        await changeRole({
-                          id: m.id,
-                          role: m.role === "editor" ? "viewer" : "editor",
-                        });
-                      }}
-                    >
-                      <button className="rounded-md border px-3 py-1 text-xs">
-                        {m.role === "editor" ? "→ 조회로" : "→ 편집으로"}
-                      </button>
-                    </form>
-                    <form
-                      action={async () => {
-                        "use server";
-                        await removeMembership({ id: m.id });
-                      }}
-                    >
-                      <button className="rounded-md border border-coral-500 px-3 py-1 text-xs text-coral-500">
-                        내보내기
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }

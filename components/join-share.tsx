@@ -18,15 +18,15 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
 
   return (
     <div>
-      <div className="text-sm text-gray-500">참여 코드</div>
+      <div className="text-sm text-ink-muted">참여 코드</div>
       <div className="mt-1 flex items-center gap-2">
-        <span className="select-all font-mono text-2xl font-bold tracking-widest text-pasture-600">
+        <span className="select-all font-mono text-2xl font-bold tracking-widest text-sage-deep">
           {code}
         </span>
         <button
           type="button"
           onClick={() => copy(code, "code")}
-          className="rounded-md border px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+          className="rounded-btn border border-border px-2 py-1 text-xs text-ink-muted hover:bg-card"
         >
           {copied === "code" ? "복사됨 ✓" : "복사"}
         </button>
@@ -34,18 +34,18 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
 
       {url && (
         <>
-          <div className="mt-5 text-sm text-gray-500">참여 링크</div>
+          <div className="mt-5 text-sm text-ink-muted">참여 링크</div>
           <div className="mt-1 flex items-center gap-2">
             <a
               href={url}
-              className="select-all break-all text-sm text-pasture-600 underline"
+              className="select-all break-all text-sm text-sky-deep underline"
             >
               {url}
             </a>
             <button
               type="button"
               onClick={() => copy(url, "link")}
-              className="shrink-0 rounded-md border px-2 py-1 text-xs text-gray-600 hover:bg-gray-50"
+              className="shrink-0 rounded-btn border border-border px-2 py-1 text-xs text-ink-muted hover:bg-card"
             >
               {copied === "link" ? "복사됨 ✓" : "복사"}
             </button>
@@ -53,7 +53,7 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
         </>
       )}
 
-      <p className="mt-3 text-xs text-gray-500">
+      <p className="mt-3 text-xs text-ink-muted">
         코드나 링크를 다른 교사에게 공유하세요. 링크를 열면 참여 화면에 코드가
         자동으로 입력됩니다.
       </p>

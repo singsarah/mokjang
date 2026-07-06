@@ -15,7 +15,7 @@ export function TabBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white">
       <ul className="mx-auto flex max-w-md">
         {TABS.map((tab) => {
           const active = pathname.startsWith(tab.href);
@@ -26,8 +26,8 @@ export function TabBar() {
                 className={cn(
                   "flex flex-col items-center gap-1 py-3 text-xs",
                   active
-                    ? "text-pasture-600 font-semibold"
-                    : "text-gray-500 hover:text-gray-700",
+                    ? "font-semibold text-sage-deep"
+                    : "text-ink-muted hover:text-ink",
                 )}
               >
                 <span className="text-xl">{tab.icon}</span>
