@@ -48,7 +48,8 @@ export async function loadBoard(dateISO: string): Promise<{
   if (session) {
     const { data: recRows } = await supabase
       .from("attendance_records").select("student_id, status, reason")
-      .eq("session_id", session.id);
+      .eq("session_id", session.id)
+      .eq("group_id", m.groupId);
     for (const r of recRows ?? []) {
       records[r.student_id] = { status: r.status as AttStatus, reason: r.reason };
     }

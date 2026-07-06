@@ -26,7 +26,16 @@ async function ensureSessionId(
     .from("attendance_sessions")
     .insert({ group_id: groupId, session_date: dateISO, note: "주일예배", created_by: userId })
     .select("id").single();
-  if (error) return null;
+  if (error) {
+    // 동시 첫 기록 시 다른 편집자가 먼저 세션을 만들었을 수 있음 → 재조회.
+    if (error.code === "23505") {
+      const { data: race } = await supabase
+        .from("attendance_sessions").select("id")
+        .eq("group_id", groupId).eq("session_date", dateISO).maybeSingle();
+      return race?.id ?? null;
+    }
+    return null;
+  }
   return created.id;
 }
 
