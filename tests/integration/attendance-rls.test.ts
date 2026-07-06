@@ -47,9 +47,25 @@ describe("RLS: attendance", () => {
     const a = await groupWithRoles("ATT00002");
     const b = await groupWithRoles("ATT00003");
     const admin = adminClient();
-    await admin.from("attendance_sessions").insert({ group_id: a.group.id, session_date: "2026-07-06" });
+    const { error } = await admin.from("attendance_sessions").insert({ group_id: a.group.id, session_date: "2026-07-06" });
+    expect(error).toBeNull();
     const asB = anonClient(b.master.accessToken);
     const { data: seen } = await asB.from("attendance_sessions").select("id");
     expect(seen ?? []).toEqual([]);
+  });
+
+  it("rejects a record whose group_id mismatches its session/student", async () => {
+    const a = await groupWithRoles("ATTX0001");
+    const b = await groupWithRoles("ATTX0002");
+    const admin = adminClient();
+    const { data: session, error: sErr } = await admin
+      .from("attendance_sessions")
+      .insert({ group_id: a.group.id, session_date: "2026-07-07" })
+      .select("id").single();
+    expect(sErr).toBeNull();
+    const { error } = await admin.from("attendance_records").insert({
+      group_id: b.group.id, session_id: session!.id, student_id: a.student.id, status: "present",
+    });
+    expect(error).not.toBeNull();
   });
 });
