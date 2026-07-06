@@ -152,6 +152,74 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          group_id: string
+          id: string
+          reason: string | null
+          session_id: string
+          status: string
+          student_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          reason?: string | null
+          session_id: string
+          status: string
+          student_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          reason?: string | null
+          session_id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          group_id: string
+          id: string
+          note: string | null
+          session_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          group_id: string
+          id?: string
+          note?: string | null
+          session_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          group_id?: string
+          id?: string
+          note?: string | null
+          session_date?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
