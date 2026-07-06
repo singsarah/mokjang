@@ -79,21 +79,31 @@ export function AttendanceBoard({
     void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status, reason }));
   }
 
-  const cardCls = (st: AttStatus | null) =>
-    st === "present" ? "bg-sage-deep text-white border-sage-deep"
-    : st === "absent_with_reason" ? "bg-gold border-gold-deep"
-    : st === "unconfirmed" ? "bg-white border-2 border-danger"
-    : "bg-white border-border";
+  const sheepCls = (st: AttStatus | null) =>
+    st === "present" ? "bg-sage-deep text-white border-[#3c5238]"
+    : st === "absent_with_reason" ? "bg-gold border-gold-deep text-ink"
+    : st === "unconfirmed" ? "bg-danger text-white border-[#b64a45]"
+    : "bg-[#FBEEE6] text-ink border-[rgba(58,50,46,.35)]";
 
   return (
-    <main className="min-h-screen bg-sage-soft pb-24">
-      <div className="mx-auto max-w-md px-5 py-6">
-        <div className="flex items-center justify-between">
+    <main className="min-h-screen bg-bg pb-24">
+      {/* 손그림 러프 필터 (1회) */}
+      <svg width="0" height="0" className="absolute">
+        <filter id="rough">
+          <feTurbulence type="fractalNoise" baseFrequency="0.018 0.03" numOctaves={2} seed={7} result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale={6} />
+        </filter>
+      </svg>
+
+      <div className="mx-auto max-w-md">
+        {/* 상단 날짜/세션 */}
+        <div className="flex items-center justify-between px-5 py-4">
           <span className="font-bold text-ink">{date}</span>
           <span className="rounded-tag bg-gold-soft px-3 py-1 text-xs text-ink-muted">{note}</span>
         </div>
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        {/* 반 탭 */}
+        <div className="flex gap-2 overflow-x-auto px-5 pb-2">
           {tabs.map((t) => (
             <button
               key={t.id ?? "none"}
@@ -109,45 +119,62 @@ export function AttendanceBoard({
           ))}
         </div>
 
-        {activeClass && (
-          <h2 className="mt-4 font-display text-2xl font-bold text-ink">
-            {activeClass.name}
-            {activeClass.teacherName && (
-              <span className="ml-2 text-sm font-normal text-ink-muted">{activeClass.teacherName} 선생님</span>
-            )}
-          </h2>
-        )}
+        {/* 범례 */}
+        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-[11px] text-ink-muted">
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full border border-[#b9a99a] bg-[#FBEEE6] align-middle" />미체크</span>
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-sage-deep align-middle" />출석</span>
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-gold align-middle" />사유결석</span>
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-danger align-middle" />연락필요</span>
+        </div>
 
-        {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+        {error && <p className="px-5 text-sm text-danger">{error}</p>}
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {shown.map((s) => {
-            const st = statusOf(s.id);
-            const absent = st === "unconfirmed" || st === "absent_with_reason";
-            return (
-              <div key={s.id} className="flex flex-col items-center gap-1">
-                <button
-                  onClick={() => onTap(s.id)}
-                  disabled={!canEdit}
-                  className={`w-full rounded-card px-2 py-3 text-center text-sm font-bold ${cardCls(st)}`}
-                >
-                  {s.name}
-                </button>
-                {absent && (
-                  <input
-                    defaultValue={records[s.id]?.reason ?? ""}
-                    onBlur={(e) => onReason(s.id, e.target.value)}
-                    placeholder="사유(비우면 연락필요)"
-                    disabled={!canEdit}
-                    className="w-full rounded-btn border border-border px-2 py-1 text-xs text-ink"
-                  />
-                )}
+        {/* 목장 씬 */}
+        <div className="relative px-3 pb-6 pt-3" style={{ background: "linear-gradient(180deg,#5F9E93 0%,#7DA98A 42%,#98BE86 100%)" }}>
+          {/* 나무 팻말 */}
+          {activeClass && (
+            <div className="relative z-10 mx-auto w-52">
+              <div className="flex justify-between px-9"><span className="block h-3.5 w-0.5 bg-[#7d5537]" /><span className="block h-3.5 w-0.5 bg-[#7d5537]" /></div>
+              <div className="absolute inset-x-0 bottom-0 top-3.5 rounded-lg border-[3px] border-[#7d5537] bg-[#9a6a48]" style={{ filter: "url(#rough)" }} />
+              <div className="relative flex items-baseline justify-center gap-2 px-2 pb-2.5 pt-2 text-center">
+                <span className="font-display text-2xl font-bold text-[#FDF3E7]">{activeClass.name}</span>
+                {activeClass.teacherName && <span className="text-xs text-[#F3E2CE]">{activeClass.teacherName} 선생님</span>}
               </div>
-            );
-          })}
-          {shown.length === 0 && (
-            <p className="col-span-3 mt-6 text-center text-ink-muted">이 반에 학생이 없어요.</p>
+            </div>
           )}
+
+          {/* 울타리 우리 */}
+          <div className="relative z-[2] mt-3 rounded-2xl bg-[#A7C58C] px-3 py-5">
+            <div className="pointer-events-none absolute rounded-[20px] border-[5px] border-[#8f5c44]" style={{ inset: "-4px", filter: "url(#rough)" }} />
+            <div className="relative z-[1] grid grid-cols-4 gap-x-2 gap-y-4">
+              {shown.map((s) => {
+                const st = statusOf(s.id);
+                const absent = st === "unconfirmed" || st === "absent_with_reason";
+                return (
+                  <div key={s.id} className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => onTap(s.id)}
+                      disabled={!canEdit}
+                      className={`relative flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(st)}`}
+                      style={{ borderRadius: "52% 48% 50% 50% / 56% 56% 44% 44%" }}
+                    >
+                      {s.name}
+                    </button>
+                    {absent && (
+                      <input
+                        defaultValue={records[s.id]?.reason ?? ""}
+                        onBlur={(e) => onReason(s.id, e.target.value)}
+                        placeholder="사유"
+                        disabled={!canEdit}
+                        className="w-16 rounded-btn border border-border bg-white px-1 py-0.5 text-[10px] text-ink"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+              {shown.length === 0 && <p className="col-span-4 py-4 text-center text-sm text-ink">이 반에 학생이 없어요.</p>}
+            </div>
+          </div>
         </div>
       </div>
     </main>
