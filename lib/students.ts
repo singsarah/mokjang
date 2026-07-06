@@ -16,7 +16,7 @@ export function maskPhone(phone: string | null): string | null {
     .join("");
 }
 
-export type RosterClass = { id: string; name: string; displayOrder: number };
+export type RosterClass = { id: string; name: string; teacherName: string | null; displayOrder: number };
 export type RosterStudent = {
   id: string;
   name: string;
@@ -40,7 +40,7 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
 
   const { data: classRows } = await supabase
     .from("classes")
-    .select("id, name, display_order")
+    .select("id, name, teacher_name, display_order")
     .eq("group_id", m.groupId)
     .order("display_order", { ascending: true });
 
@@ -71,6 +71,7 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
     classes: (classRows ?? []).map((c) => ({
       id: c.id,
       name: c.name,
+      teacherName: c.teacher_name,
       displayOrder: c.display_order,
     })),
     students,

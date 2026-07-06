@@ -11,14 +11,21 @@ async function requireEditor(): Promise<CurrentMembership> {
   return m;
 }
 
-export async function createClass(input: { name: string }): Promise<{ error?: string; id?: string }> {
+export async function createClass(input: {
+  name: string;
+  teacherName?: string | null;
+}): Promise<{ error?: string; id?: string }> {
   const parsed = classSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const m = await requireEditor();
   const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("classes")
-    .insert({ group_id: m.groupId, name: parsed.data.name })
+    .insert({
+      group_id: m.groupId,
+      name: parsed.data.name,
+      teacher_name: parsed.data.teacherName,
+    })
     .select("id")
     .single();
   if (error) {

@@ -30,6 +30,7 @@ export type StudentInput = z.infer<typeof studentSchema>;
 
 export const classSchema = z.object({
   name: z.string().trim().min(1, "반 이름을 입력해주세요").max(30),
+  teacherName: optionalText, // 반 담당 선생님 이름
 });
 
 export type ClassInput = z.infer<typeof classSchema>;

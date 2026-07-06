@@ -46,6 +46,7 @@ export type Database = {
           group_id: string
           id: string
           name: string
+          teacher_name: string | null
         }
         Insert: {
           created_at?: string
@@ -53,6 +54,7 @@ export type Database = {
           group_id: string
           id?: string
           name: string
+          teacher_name?: string | null
         }
         Update: {
           created_at?: string
@@ -60,6 +62,7 @@ export type Database = {
           group_id?: string
           id?: string
           name?: string
+          teacher_name?: string | null
         }
         Relationships: [
           {

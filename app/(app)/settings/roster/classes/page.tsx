@@ -30,18 +30,29 @@ export default async function ClassesPage() {
         <form
           action={async (formData: FormData) => {
             "use server";
-            await createClass({ name: String(formData.get("name") ?? "") });
+            await createClass({
+              name: String(formData.get("name") ?? ""),
+              teacherName: (formData.get("teacherName") as string) || null,
+            });
           }}
-          className="mt-6 flex gap-2"
+          className="mt-6 space-y-2"
         >
-          <input
-            name="name"
-            placeholder="반 이름"
-            required
-            className="flex-1 rounded-btn border border-border bg-white px-3 py-2 text-ink"
-            aria-label="반 이름"
-          />
-          <button className="rounded-btn bg-sage px-4 py-2 font-medium text-white shadow-sm transition hover:bg-sage-deep">
+          <div className="flex gap-2">
+            <input
+              name="name"
+              placeholder="반 이름"
+              required
+              className="flex-1 rounded-btn border border-border bg-white px-3 py-2 text-ink"
+              aria-label="반 이름"
+            />
+            <input
+              name="teacherName"
+              placeholder="선생님 이름 (선택)"
+              className="flex-1 rounded-btn border border-border bg-white px-3 py-2 text-ink"
+              aria-label="선생님 이름"
+            />
+          </div>
+          <button className="w-full rounded-btn bg-sage px-4 py-2 font-medium text-white shadow-sm transition hover:bg-sage-deep">
             추가
           </button>
         </form>
@@ -60,7 +71,10 @@ export default async function ClassesPage() {
                 className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm"
               >
                 <span className="text-ink">
-                  {c.name}{" "}
+                  {c.name}
+                  {c.teacherName && (
+                    <span className="text-sm text-ink-muted"> · {c.teacherName} 선생님</span>
+                  )}{" "}
                   <span className="text-xs text-ink-muted">({n}명)</span>
                 </span>
                 {n === 0 && (
