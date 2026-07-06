@@ -11,7 +11,7 @@ export default async function AppLayout({
 
   return (
     <PrivacyGate>
-      <div className="min-h-screen bg-gray-50 pb-20">{children}</div>
+      <div className="min-h-screen bg-bg pb-20">{children}</div>
       <TabBar />
     </PrivacyGate>
   );

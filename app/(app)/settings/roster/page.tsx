@@ -8,9 +8,22 @@ export default async function RosterPage() {
   const groups = new Map<string, { label: string; sort: number; items: typeof students }>();
   for (const s of students) {
     const cls = s.classId ? classMap.get(s.classId) : null;
-    const key = cls ? `c:${cls.id}` : `g:${s.grade}`;
-    const label = cls ? `${cls.grade}학년 ${cls.name}` : `${s.grade}학년 (반 없음)`;
-    const sort = cls ? cls.grade * 1000 + cls.displayOrder : s.grade * 1000 + 999;
+    // 반(이름) 섹션을 먼저(display_order 순), 그다음 반 없는 학생을 학년별로,
+    // 학년도 없으면 "반 미배정"으로 묶는다.
+    let key: string, label: string, sort: number;
+    if (cls) {
+      key = `c:${cls.id}`;
+      label = cls.name;
+      sort = cls.displayOrder;
+    } else if (s.grade != null) {
+      key = `g:${s.grade}`;
+      label = `${s.grade}학년 (반 없음)`;
+      sort = 100000 + s.grade;
+    } else {
+      key = "none";
+      label = "반 미배정";
+      sort = 200000;
+    }
     if (!groups.has(key)) groups.set(key, { label, sort, items: [] });
     groups.get(key)!.items.push(s);
   }
@@ -19,7 +32,7 @@ export default async function RosterPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">학적부</h1>
+        <h1 className="font-display text-2xl font-bold">학적부</h1>
         {canEdit && (
           <Link href="/settings/roster/new" className="rounded-md bg-pasture-500 px-4 py-2 text-sm text-white">
             + 학생 추가

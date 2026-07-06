@@ -43,7 +43,6 @@ export type Database = {
         Row: {
           created_at: string
           display_order: number
-          grade: number
           group_id: string
           id: string
           name: string
@@ -51,7 +50,6 @@ export type Database = {
         Insert: {
           created_at?: string
           display_order?: number
-          grade: number
           group_id: string
           id?: string
           name: string
@@ -59,7 +57,6 @@ export type Database = {
         Update: {
           created_at?: string
           display_order?: number
-          grade?: number
           group_id?: string
           id?: string
           name?: string
@@ -82,11 +79,15 @@ export type Database = {
           class_id: string | null
           created_at: string
           deleted_at: string | null
-          grade: number
+          grade: number | null
           group_id: string
           guardian_relation: string | null
+          guardian_relation_other: string | null
           id: string
           name: string
+          note: string | null
+          school: string | null
+          photo_path: string | null
           phone_guardian: string | null
           phone_self: string | null
           updated_at: string
@@ -98,11 +99,15 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
-          grade: number
+          grade?: number | null
           group_id: string
           guardian_relation?: string | null
+          guardian_relation_other?: string | null
           id?: string
           name: string
+          note?: string | null
+          school?: string | null
+          photo_path?: string | null
           phone_guardian?: string | null
           phone_self?: string | null
           updated_at?: string
@@ -114,11 +119,15 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
-          grade?: number
+          grade?: number | null
           group_id?: string
           guardian_relation?: string | null
+          guardian_relation_other?: string | null
           id?: string
           name?: string
+          note?: string | null
+          school?: string | null
+          photo_path?: string | null
           phone_guardian?: string | null
           phone_self?: string | null
           updated_at?: string

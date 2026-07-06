@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
@@ -17,7 +18,7 @@ export default async function EditStudentPage({
   const supabase = await createServerClient();
   const { data: s } = await supabase
     .from("students")
-    .select("id, name, grade, class_id, birthday_month, birthday_day, birthday_year, phone_self, phone_guardian, guardian_relation")
+    .select("id, name, grade, class_id, birthday_month, birthday_day, birthday_year, phone_self, phone_guardian, guardian_relation, guardian_relation_other, school, note, photo_path")
     .eq("id", studentId)
     .eq("group_id", m.groupId)
     .maybeSingle();
@@ -25,13 +26,30 @@ export default async function EditStudentPage({
 
   const { classes } = await loadRoster();
 
+  // 기존 사진이 있으면 미리보기용 서명 URL 생성 (비공개 버킷).
+  let initialPhotoUrl: string | undefined;
+  if (s.photo_path) {
+    const { data: signed } = await supabase.storage
+      .from("student-photos")
+      .createSignedUrl(s.photo_path, 3600);
+    initialPhotoUrl = signed?.signedUrl;
+  }
+
   return (
     <main className="mx-auto max-w-2xl px-6 py-6">
-      <h1 className="text-2xl font-bold">학생 수정</h1>
+      <Link
+        href="/settings/roster"
+        className="text-sm text-pasture-600 hover:underline"
+      >
+        ← 학적부
+      </Link>
+      <h1 className="mt-2 font-display text-2xl font-bold">학생 수정</h1>
       <div className="mt-6">
         <StudentForm
           classes={classes}
+          groupId={m.groupId}
           studentId={s.id}
+          initialPhotoUrl={initialPhotoUrl}
           initial={{
             name: s.name,
             grade: s.grade,
@@ -42,6 +60,10 @@ export default async function EditStudentPage({
             phoneSelf: s.phone_self,
             phoneGuardian: s.phone_guardian,
             guardianRelation: s.guardian_relation,
+            guardianRelationOther: s.guardian_relation_other,
+            school: s.school,
+            note: s.note,
+            photoPath: s.photo_path,
           }}
         />
       </div>

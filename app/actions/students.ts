@@ -22,6 +22,10 @@ function toRow(d: StudentInput) {
     phone_self: d.phoneSelf,
     phone_guardian: d.phoneGuardian,
     guardian_relation: d.guardianRelation,
+    guardian_relation_other: d.guardianRelationOther,
+    school: d.school,
+    note: d.note,
+    photo_path: d.photoPath,
   };
 }
 

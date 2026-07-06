@@ -1,54 +1,17 @@
-"use client";
+import { JoinForm } from "./join-form";
 
-import Link from "next/link";
-import { useState, useTransition } from "react";
-import { joinGroup } from "@/app/actions/groups";
+// URL(?code=)에 코드가 있으면 그걸 우선 넘긴다. 없으면(로그인 튕김 등)
+// JoinForm이 초대 링크가 남긴 쿠키(pending_join_code)를 클라이언트에서 읽는다.
+export default async function JoinPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
+  const { code } = await searchParams;
+  const codeFromUrl = (code ?? "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .slice(0, 8);
 
-export default function JoinPage() {
-  const [error, setError] = useState<string>();
-  const [isPending, startTransition] = useTransition();
-
-  async function onSubmit(formData: FormData) {
-    setError(undefined);
-    startTransition(async () => {
-      const result = await joinGroup({ code: formData.get("code") as string });
-      if (result?.error) setError(result.error);
-    });
-  }
-
-  return (
-    <div className="rounded-lg bg-white p-8 shadow">
-      <h2 className="mb-2 text-xl font-semibold">그룹 참여</h2>
-      <p className="mb-6 text-sm text-gray-600">
-        마스터에게 받은 8자리 코드를 입력하세요.
-      </p>
-      <form action={onSubmit} className="space-y-4">
-        <label className="block">
-          <span className="text-sm">그룹 코드</span>
-          <input
-            name="code"
-            required
-            maxLength={8}
-            style={{ textTransform: "uppercase" }}
-            className="mt-1 w-full rounded-md border px-3 py-3 text-center text-lg tracking-widest uppercase"
-            placeholder="ABCD2345"
-          />
-        </label>
-        {error && <p className="text-sm text-coral-500">{error}</p>}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full rounded-lg bg-pasture-500 py-3 text-white hover:bg-pasture-600 disabled:opacity-50"
-        >
-          {isPending ? "참여 신청 중..." : "참여 신청"}
-        </button>
-      </form>
-      <p className="mt-6 text-center text-sm text-gray-600">
-        아직 그룹이 없으신가요?{" "}
-        <Link href="/new-group" className="text-pasture-600 underline">
-          새 그룹 만들기
-        </Link>
-      </p>
-    </div>
-  );
+  return <JoinForm codeFromUrl={codeFromUrl} />;
 }

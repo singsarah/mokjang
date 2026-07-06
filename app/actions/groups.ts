@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { generateJoinCode } from "@/lib/join-code";
@@ -111,5 +112,7 @@ export async function joinGroup(
   });
   if (insertErr) return { error: insertErr.message };
 
+  // 초대 링크가 남긴 코드 쿠키는 참여를 마쳤으니 정리한다.
+  (await cookies()).delete("pending_join_code");
   redirect("/pending");
 }

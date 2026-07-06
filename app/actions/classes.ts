@@ -11,18 +11,18 @@ async function requireEditor(): Promise<CurrentMembership> {
   return m;
 }
 
-export async function createClass(input: { grade: number; name: string }): Promise<{ error?: string; id?: string }> {
+export async function createClass(input: { name: string }): Promise<{ error?: string; id?: string }> {
   const parsed = classSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const m = await requireEditor();
   const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("classes")
-    .insert({ group_id: m.groupId, grade: parsed.data.grade, name: parsed.data.name })
+    .insert({ group_id: m.groupId, name: parsed.data.name })
     .select("id")
     .single();
   if (error) {
-    if (error.code === "23505") return { error: "같은 학년에 같은 이름의 반이 있습니다" };
+    if (error.code === "23505") return { error: "같은 이름의 반이 이미 있습니다" };
     return { error: error.message };
   }
   revalidatePath("/settings/roster/classes");

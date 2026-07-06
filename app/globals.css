@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 제목용 손글씨체. public/fonts/ 에 파일을 넣으면 자동 적용된다.
+   파일이 없으면 tailwind font-display 스택의 다음 폰트(Gaegu)로 폴백. */
+@font-face {
+  font-family: "Kyobo2019";
+  src: url("/fonts/Kyobo2019.ttf") format("truetype");
+  font-weight: normal;
+  font-display: swap;
+}
+
+:root {
+  /* base */
+  --bg: #fbf6ec;
+  --card: #f4ecdc;
+  --white: #ffffff;
+  --text: #2c382f;
+  --text-muted: #6e7c6c;
+  --border: #e4e1d3;
+
+  /* theme */
+  --sage: #90b484;
+  --sage-deep: #4e6a47;
+  --sage-soft: #dce7d3;
+  --sky: #9fcdec;
+  --sky-deep: #5b93c4;
+  --sky-soft: #e4f0fa;
+  --gold: #f0c86e;
+  --gold-deep: #c9a24c;
+  --gold-soft: #fbedc9;
+
+  /* status (출석 3단계) */
+  --present: #90b484;
+  --present-soft: #dce7d3;
+  --excused: #f0c86e;
+  --excused-soft: #fbedc9;
+  --unconfirmed: #d9645f;
+  --unconfirmed-soft: #f6d8d6;
+
+  /* accent */
+  --coin: #f2b33d;
+  --star: #f0c86e;
+  --danger: #d9645f;
+
+  /* radius */
+  --radius-card: 18px;
+  --radius-btn: 11px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}

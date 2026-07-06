@@ -12,7 +12,7 @@ const optionalInt = (min: number, max: number) =>
 
 export const studentSchema = z.object({
   name: z.string().trim().min(1, "이름을 입력해주세요").max(50),
-  grade: z.coerce.number().int().min(1, "학년을 선택해주세요").max(6),
+  grade: optionalInt(1, 6), // 학년은 선택(반 중심 편성)
   classId: z.string().uuid().nullish().transform((v) => v ?? null),
   birthdayMonth: optionalInt(1, 12),
   birthdayDay: optionalInt(1, 31),
@@ -20,12 +20,15 @@ export const studentSchema = z.object({
   phoneSelf: optionalText,
   phoneGuardian: optionalText,
   guardianRelation: z.enum(["모", "부", "기타"]).nullish().transform((v) => v ?? null),
+  guardianRelationOther: optionalText, // 관계가 '기타'일 때 상세
+  school: optionalText, // 학교
+  note: optionalText, // 선생님 자유 메모
+  photoPath: optionalText, // Storage 내 사진 경로 (<group_id>/<uuid>)
 });
 
 export type StudentInput = z.infer<typeof studentSchema>;
 
 export const classSchema = z.object({
-  grade: z.coerce.number().int().min(1).max(6),
   name: z.string().trim().min(1, "반 이름을 입력해주세요").max(30),
 });
 

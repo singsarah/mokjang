@@ -8,7 +8,7 @@ export default function AuthLayout({
       <div className="mx-auto max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-2 text-4xl">🐑</div>
-          <h1 className="text-2xl font-bold text-pasture-600">목장 관리</h1>
+          <h1 className="font-display text-2xl font-bold text-pasture-600">목장 관리</h1>
         </div>
         {children}
       </div>

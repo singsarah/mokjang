@@ -6,7 +6,7 @@ export default function PrivacyPage() {
       <Link href="/" className="text-sm text-pasture-600 underline">
         ← 홈
       </Link>
-      <h1 className="mt-4 text-2xl font-bold">개인정보 처리 방침</h1>
+      <h1 className="mt-4 font-display text-2xl font-bold">개인정보 처리 방침</h1>
       <p className="mt-2 text-sm text-gray-500">최종 개정일: 2026-07-03</p>
 
       <section className="mt-8 space-y-6 text-gray-700">
