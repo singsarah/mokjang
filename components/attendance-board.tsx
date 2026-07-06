@@ -11,6 +11,14 @@ import {
 } from "@/lib/attendance-cycle";
 import { setAttendance, clearAttendance } from "@/app/actions/attendance";
 
+function shiftDate(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${dt.getUTCFullYear()}-${p(dt.getUTCMonth() + 1)}-${p(dt.getUTCDate())}`;
+}
+
 type RecMap = Record<string, BoardRecord>;
 
 export function AttendanceBoard({
@@ -98,7 +106,11 @@ export function AttendanceBoard({
       <div className="mx-auto max-w-md">
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">
-          <span className="font-bold text-ink">{date}</span>
+          <div className="flex items-center gap-3">
+            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-ink-muted">◀</a>
+            <span className="font-bold text-ink">{date}</span>
+            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-ink-muted">▶</a>
+          </div>
           <span className="rounded-tag bg-gold-soft px-3 py-1 text-xs text-ink-muted">{note}</span>
         </div>
 
