@@ -45,7 +45,47 @@ export async function createStudent(
 export async function updateStudent(
   input: { id: string } & StudentInput,
 ): Promise<{ error?: string }> {
-  // Slice 2에서 구현. Slice 1에서는 폼 타입만 만족시키는 스텁.
-  void input;
-  return { error: "아직 지원되지 않습니다" };
+  const parsed = studentSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]!.message };
+  if (!input.id) return { error: "잘못된 요청" };
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ ...toRow(parsed.data), updated_at: new Date().toISOString() })
+    .eq("id", input.id)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath(`/settings/roster/${input.id}`);
+  return {};
+}
+
+export async function softDeleteStudent(input: { id: string }): Promise<{ error?: string }> {
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", input.id)
+    .eq("group_id", m.groupId)
+    .is("deleted_at", null);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/hidden");
+  return {};
+}
+
+export async function restoreStudent(input: { id: string }): Promise<{ error?: string }> {
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ deleted_at: null })
+    .eq("id", input.id)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/hidden");
+  return {};
 }
