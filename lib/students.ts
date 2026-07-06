@@ -1,6 +1,21 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
 
+export function maskPhone(phone: string | null): string | null {
+  if (!phone) return null;
+  const parts = phone.split("-");
+  if (parts.length === 3) {
+    return `${parts[0]}-${"*".repeat(parts[1].length)}-${parts[2]}`;
+  }
+  if (/^\d{10,11}$/.test(phone)) {
+    return `${phone.slice(0, 3)}${"*".repeat(phone.length - 7)}${phone.slice(-4)}`;
+  }
+  return phone
+    .split("")
+    .map((ch, i) => (i < 3 || ch === "-" ? ch : "*"))
+    .join("");
+}
+
 export type RosterClass = { id: string; grade: number; name: string; displayOrder: number };
 export type RosterStudent = {
   id: string;
@@ -37,13 +52,14 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
   q = opts?.includeDeleted ? q.not("deleted_at", "is", null) : q.is("deleted_at", null);
   const { data: studentRows } = await q;
 
+  const mask = m.role === "viewer";
   const students: RosterStudent[] = (studentRows ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     grade: s.grade,
     classId: s.class_id,
-    phoneSelf: s.phone_self,
-    phoneGuardian: s.phone_guardian,
+    phoneSelf: mask ? maskPhone(s.phone_self) : s.phone_self,
+    phoneGuardian: mask ? maskPhone(s.phone_guardian) : s.phone_guardian,
     guardianRelation: s.guardian_relation,
   }));
 
