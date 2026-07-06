@@ -315,7 +315,7 @@ git commit -m "Add classes/students tables with RLS (Plan 2 Task 1)"
 
 ---
 
-## Slice 1: 학생 추가 + 목록 보기 (end-to-end, 첫 동작 확인 지점 🎉)
+## Task 2 — 학생 추가 + 목록 보기 (Slice 1, end-to-end · 첫 동작 확인 지점 🎉)
 
 목표: master/editor가 설정→학적부에서 **학생을 추가하면 목록에 뜬다.** 반은 아직 만들 수 없으니 "반 없음"으로만, 마스킹도 아직 없음. 목록/폼은 **처음부터 반·마스킹 확장 가능한 구조**로 만든다.
 
@@ -777,7 +777,7 @@ git commit -m "Slice 1: add + list students end-to-end (Plan 2)"
 
 ---
 
-## Slice 2: 수정 · 삭제(숨김) · 복원
+## Task 3 — 수정 · 삭제(숨김) · 복원 (Slice 2)
 
 목표: 학생 상세 페이지에서 수정/삭제, 숨김 탭에서 복원. Slice 1의 `updateStudent` 스텁을 실제 구현으로 교체.
 
@@ -1013,7 +1013,7 @@ git commit -m "Slice 2: edit, soft-delete, restore students (Plan 2)"
 
 ---
 
-## Slice 3: 반 만들기 · 관리
+## Task 4 — 반 만들기 · 관리 (Slice 3)
 
 목표: 반을 생성/삭제한다. 폼의 반 드롭다운과 목록의 반 그룹핑은 Slice 1에서 이미 준비됐으므로 **여기서는 반 CRUD만 추가**하면 자동으로 연결된다.
 
@@ -1198,7 +1198,7 @@ git commit -m "Slice 3: class create/manage (Plan 2)"
 
 ---
 
-## Slice 4: 조회 교사 연락처 마스킹
+## Task 5 — 조회 교사 연락처 마스킹 (Slice 4)
 
 목표: viewer 역할에게만 연락처를 `010-****-5678` 로 가린다. `loadRoster` 한 곳만 수정.
 
