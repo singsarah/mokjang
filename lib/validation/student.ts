@@ -23,3 +23,10 @@ export const studentSchema = z.object({
 });
 
 export type StudentInput = z.infer<typeof studentSchema>;
+
+export const classSchema = z.object({
+  grade: z.coerce.number().int().min(1).max(6),
+  name: z.string().trim().min(1, "반 이름을 입력해주세요").max(30),
+});
+
+export type ClassInput = z.infer<typeof classSchema>;
