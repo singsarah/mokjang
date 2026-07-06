@@ -7,7 +7,7 @@ export default function OnboardingLayout({
 }) {
   return (
     <PrivacyGate>
-      <div className="min-h-screen bg-pasture-50 px-6 py-12">
+      <div className="min-h-screen bg-sage-soft px-6 py-12">
         <div className="mx-auto max-w-md">{children}</div>
       </div>
     </PrivacyGate>

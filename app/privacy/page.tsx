@@ -2,14 +2,14 @@ import Link from "next/link";
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link href="/" className="text-sm text-pasture-600 underline">
+    <main className="mx-auto min-h-screen max-w-2xl px-6 py-12">
+      <Link href="/" className="text-sm text-sky-deep underline">
         ← 홈
       </Link>
-      <h1 className="mt-4 font-display text-2xl font-bold">개인정보 처리 방침</h1>
-      <p className="mt-2 text-sm text-gray-500">최종 개정일: 2026-07-03</p>
+      <h1 className="mt-4 font-display text-2xl font-bold text-ink">개인정보 처리 방침</h1>
+      <p className="mt-2 text-sm text-ink-muted">최종 개정일: 2026-07-03</p>
 
-      <section className="mt-8 space-y-6 text-gray-700">
+      <section className="mt-8 space-y-6 text-ink">
         <div>
           <h2 className="text-lg font-semibold">1. 수집 항목</h2>
           <ul className="ml-6 mt-2 list-disc">
