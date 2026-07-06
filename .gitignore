@@ -74,3 +74,6 @@ temp/
 supabase/.branches
 supabase/.temp
 supabase/functions/*/deno.lock
+
+# Superpowers scratch (brainstorm mockups, SDD ledger, runtime state)
+.superpowers/
