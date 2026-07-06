@@ -31,6 +31,13 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     testTimeout: 20000,
+    // Integration suites share one dev DB and a global cleanup() that deletes
+    // ALL test users — running files in parallel lets one file's cleanup wipe
+    // another file's in-flight fixtures, so run test files one at a time.
+    fileParallelism: false,
+    // cleanup() deletes leftover test auth users one-by-one via the admin API,
+    // which can exceed the 10s default when several suites' users accumulate.
+    hookTimeout: 60000,
     env: loadEnvLocal(),
   },
   resolve: {

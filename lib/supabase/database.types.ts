@@ -39,6 +39,107 @@ export type Database = {
   }
   public: {
     Tables: {
+      classes: {
+        Row: {
+          created_at: string
+          display_order: number
+          grade: number
+          group_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          grade: number
+          group_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          grade?: number
+          group_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          birthday_day: number | null
+          birthday_month: number | null
+          birthday_year: number | null
+          class_id: string | null
+          created_at: string
+          deleted_at: string | null
+          grade: number
+          group_id: string
+          guardian_relation: string | null
+          id: string
+          name: string
+          phone_guardian: string | null
+          phone_self: string | null
+          updated_at: string
+        }
+        Insert: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
+          class_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          grade: number
+          group_id: string
+          guardian_relation?: string | null
+          id?: string
+          name: string
+          phone_guardian?: string | null
+          phone_self?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
+          class_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          grade?: number
+          group_id?: string
+          guardian_relation?: string | null
+          id?: string
+          name?: string
+          phone_guardian?: string | null
+          phone_self?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
