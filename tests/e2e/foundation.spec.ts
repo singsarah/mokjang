@@ -65,7 +65,8 @@ test.describe.serial("Foundation golden path", () => {
 
     await login(page, teacherEmail, password);
     await expect(page).toHaveURL(/\/attendance/);
-    await expect(page.locator("text=출석판")).toBeVisible();
+    // 출석 보드가 렌더됨을 확인 — 세션 기본 라벨 "주일예배"는 학생/반이 없어도 항상 표시됨
+    await expect(page.locator("text=주일예배")).toBeVisible();
     // Bottom tab bar order check
     const tabs = await page.locator("nav a").allTextContents();
     expect(tabs.join("")).toContain("출석");
