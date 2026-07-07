@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition, type ChangeEvent } from "react";
 import { createStudent, updateStudent } from "@/app/actions/students";
 import { createClient } from "@/lib/supabase/client";
+import { Icon } from "@/components/icon";
 import type { RosterClass } from "@/lib/students";
 import type { StudentInput } from "@/lib/validation/student";
 
@@ -124,8 +125,8 @@ export function StudentForm({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-3xl">
-              🐑
+            <div className="flex h-full w-full items-center justify-center">
+              <Icon name="sheep-face" size={48} alt="양" />
             </div>
           )}
         </div>

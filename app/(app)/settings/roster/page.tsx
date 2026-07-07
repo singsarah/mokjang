@@ -86,8 +86,9 @@ export default async function RosterPage() {
         </div>
 
         {sections.length === 0 ? (
-          <p className="mt-12 text-center text-ink-muted">
-            아직 등록된 학생이 없어요 🐑
+          <p className="mt-12 flex items-center justify-center gap-1.5 text-ink-muted">
+            아직 등록된 학생이 없어요
+            <Icon name="sheep-face" size={18} alt="" />
           </p>
         ) : (
           sections.map((sec) => (
@@ -96,42 +97,38 @@ export default async function RosterPage() {
                 {sec.label} ({sec.items.length})
               </h2>
               <ul className="space-y-2">
-                {sec.items.map((s) => (
-                  <li key={s.id}>
-                    <Link
-                      href={`/settings/roster/${s.id}`}
-                      className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-soft text-lg">
-                        🐑
-                      </span>
-                      <span className="min-w-0">
-                        <span className="flex items-center gap-1.5 font-medium text-ink">
-                          <span
-                            className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(s.gender)}`}
-                          />
-                          {s.name}
-                          {s.birthdayMonth === currentMonth && (
-                            <Icon name="star" size={14} alt="이번 달 생일" />
+                {sec.items.map((s) => {
+                  const meta = [s.grade ? `${s.grade}학년` : null, s.school, s.phoneSelf]
+                    .filter(Boolean)
+                    .join(" · ");
+                  return (
+                    <li key={s.id}>
+                      <Link
+                        href={`/settings/roster/${s.id}`}
+                        className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sky-soft">
+                          <Icon name="sheep-face" size={30} alt="양" />
+                        </span>
+                        <span className="flex min-w-0 flex-1 items-center gap-2">
+                          <span className="flex shrink-0 items-center gap-1.5 font-medium text-ink">
+                            <span
+                              className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(s.gender)}`}
+                            />
+                            {s.name}
+                            {s.birthdayMonth === currentMonth && (
+                              <Icon name="star" size={14} alt="이번 달 생일" />
+                            )}
+                          </span>
+                          {meta && (
+                            <span className="truncate text-xs text-ink-muted">{meta}</span>
                           )}
                         </span>
-                        {(s.grade || s.school) && (
-                          <span className="block text-xs text-ink-muted">
-                            {[s.grade ? `${s.grade}학년` : null, s.school]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </span>
-                        )}
-                        {s.phoneSelf && (
-                          <span className="block text-xs text-ink-muted">
-                            {s.phoneSelf}
-                          </span>
-                        )}
-                      </span>
-                      <span className="ml-auto text-lg text-ink-muted">›</span>
-                    </Link>
-                  </li>
-                ))}
+                        <span className="shrink-0 text-lg text-ink-muted">›</span>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           ))

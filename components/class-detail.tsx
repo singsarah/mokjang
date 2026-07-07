@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateClass, assignStudents, deleteClass } from "@/app/actions/classes";
+import { Icon } from "@/components/icon";
 
 type Member = { id: string; name: string; grade: number | null; school: string | null; gender: string | null };
 type Candidate = {
@@ -114,7 +115,7 @@ export function ClassDetail({
               <li key={s.id} className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm">
                 <span className="flex items-center gap-2">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                  <span className="text-ink">🐑 {s.name}
+                  <span className="flex items-center gap-1 text-ink"><Icon name="sheep-face" size={16} alt="" />{s.name}
                     {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
                   </span>
                 </span>
@@ -137,10 +138,10 @@ export function ClassDetail({
             <ul className="space-y-2">
               {candidates.map((s) => (
                 <li key={s.id}>
-                  <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-100" : "bg-white"}`}>
+                  <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-200" : "bg-white"}`}>
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                    <span className={s.currentClassName ? "text-ink-muted" : "text-ink"}>{s.name}
+                    <span className="text-ink">{s.name}
                       {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
                     </span>
                     <span className="ml-auto text-xs text-ink-muted">
