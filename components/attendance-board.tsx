@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import {
-  nextStatusOnTap,
-  statusForReason,
-  type AttStatus,
+  displayStatus,
+  tapAction,
+  reasonAction,
   type BoardClass,
   type BoardRecord,
   type BoardStudent,
+  type DisplayStatus,
 } from "@/lib/attendance-cycle";
 import { setAttendance, clearAttendance } from "@/app/actions/attendance";
 
@@ -52,10 +53,6 @@ export function AttendanceBoard({
   const activeClass = tabs.find((t) => t.id === activeTab) ?? tabs[0];
   const shown = students.filter((s) => (s.classId ?? null) === (activeTab ?? null));
 
-  function statusOf(id: string): AttStatus | null {
-    return records[id]?.status ?? null;
-  }
-
   async function apply(studentId: string, next: RecMap, action: Promise<{ error?: string }>) {
     const prev = records;
     setRecords(next);
@@ -69,29 +66,34 @@ export function AttendanceBoard({
 
   function onTap(studentId: string) {
     if (!canEdit) return;
-    const next = nextStatusOnTap(statusOf(studentId));
-    if (next === null) {
+    if (tapAction(records[studentId]) === "clear") {
       const nr = { ...records };
       delete nr[studentId];
       void apply(studentId, nr, clearAttendance({ dateISO: date, studentId }));
     } else {
-      const nr = { ...records, [studentId]: { status: next, reason: null } };
-      void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status: next, reason: null }));
+      const nr = { ...records, [studentId]: { status: "present" as const, reason: null } };
+      void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status: "present", reason: null }));
     }
   }
 
   function onReason(studentId: string, reason: string) {
     if (!canEdit) return;
-    const status = statusForReason(reason);
-    const nr = { ...records, [studentId]: { status, reason: status === "absent_with_reason" ? reason : null } };
-    void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status, reason }));
+    const a = reasonAction(reason);
+    if (a.kind === "clear") {
+      const nr = { ...records };
+      delete nr[studentId];
+      void apply(studentId, nr, clearAttendance({ dateISO: date, studentId }));
+    } else {
+      const nr = { ...records, [studentId]: { status: "absent_with_reason" as const, reason: a.reason } };
+      void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status: "absent_with_reason", reason: a.reason }));
+    }
   }
 
-  const sheepCls = (st: AttStatus | null) =>
-    st === "present" ? "bg-sage-deep text-white border-[#3c5238]"
-    : st === "absent_with_reason" ? "bg-gold border-gold-deep text-ink"
-    : st === "unconfirmed" ? "bg-danger text-white border-[#b64a45]"
-    : "bg-[#FBEEE6] text-ink border-[rgba(58,50,46,.35)]";
+  const sheepCls = (d: DisplayStatus) =>
+    d === "present" ? "bg-sage-deep text-white border-[#3c5238]"
+    : d === "absent_with_reason" ? "bg-gold border-gold-deep text-ink"
+    : d === "unconfirmed" ? "bg-danger text-white border-[#b64a45]"
+    : "bg-[#FBEEE6] text-ink border-[rgba(58,50,46,.35)]"; // unchecked(흰)
 
   return (
     <main className="min-h-screen bg-bg pb-24">
@@ -159,16 +161,18 @@ export function AttendanceBoard({
           <div className="relative z-[2] mt-3 rounded-2xl bg-[#A7C58C] px-3 py-5">
             <div className="pointer-events-none absolute rounded-[20px] border-[5px] border-[#8f5c44]" style={{ inset: "-4px", filter: "url(#rough)" }} />
             <div className="relative z-[1] grid grid-cols-4 gap-x-2 gap-y-4">
-              {shown.map((s) => {
-                const st = statusOf(s.id);
-                const absent = st === "unconfirmed" || st === "absent_with_reason";
-                return (
+              {(() => {
+                const classActive = shown.some((s) => Boolean(records[s.id]));
+                return shown.map((s) => {
+                  const d = displayStatus(records[s.id], classActive);
+                  const absent = d === "unconfirmed" || d === "absent_with_reason";
+                  return (
                   <div key={s.id} className="flex flex-col items-center gap-1">
                     <div className="relative">
                       <button
                         onClick={() => onTap(s.id)}
                         disabled={!canEdit}
-                        className={`relative z-[1] flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(st)}`}
+                        className={`relative z-[1] flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(d)}`}
                         style={{ borderRadius: "52% 48% 50% 50% / 56% 56% 44% 44%" }}
                       >
                         {s.name}
@@ -189,8 +193,9 @@ export function AttendanceBoard({
                       />
                     )}
                   </div>
-                );
-              })}
+                  );
+                });
+              })()}
               {shown.length === 0 && <p className="col-span-4 py-4 text-center text-sm text-ink">이 반에 학생이 없어요.</p>}
             </div>
           </div>
