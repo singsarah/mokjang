@@ -50,4 +50,22 @@ describe("RLS/RPC: promotion", () => {
     const { error: p2 } = await asMaster.rpc("promote_group", { p_group_id: group.id });
     expect(p2).not.toBeNull();
   });
+
+  it("blocks cross-tenant promotion: group A's master cannot promote group B", async () => {
+    const { master: masterA } = await makeGroupWithRoles("PROMO002");
+    const { group: groupB } = await makeGroupWithRoles("PROMO003");
+    const admin = adminClient();
+    await admin.from("students").insert([
+      { group_id: groupB.id, name: "B일학년", grade: 1 },
+    ]);
+
+    const asMasterA = anonClient(masterA.accessToken);
+    const { error } = await asMasterA.rpc("promote_group", { p_group_id: groupB.id });
+    expect(error).not.toBeNull();
+
+    const { data: rows } = await admin
+      .from("students").select("name, grade").eq("group_id", groupB.id);
+    const by = Object.fromEntries((rows ?? []).map((r) => [r.name, r]));
+    expect(by["B일학년"].grade).toBe(1);
+  });
 });
