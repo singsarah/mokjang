@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateClass, assignStudents, deleteClass } from "@/app/actions/classes";
-import type { RosterStudent } from "@/lib/students";
 
 type Member = { id: string; name: string };
 type Candidate = { id: string; name: string; currentClassName: string | null };
