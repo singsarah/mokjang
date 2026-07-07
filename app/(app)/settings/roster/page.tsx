@@ -4,6 +4,15 @@ import { requireCurrentMembership } from "@/lib/memberships";
 import { Icon } from "@/components/icon";
 import { PromoteButton } from "@/components/promote-button";
 
+// 성별 색점: 여=핑크, 남=하늘, 미입력=중립(테두리만). 배정 목록과 동일.
+function genderDot(gender: string | null): string {
+  return gender === "female"
+    ? "bg-pink-400"
+    : gender === "male"
+      ? "bg-sky-400"
+      : "bg-transparent border border-border";
+}
+
 export default async function RosterPage() {
   const { canEdit, classes, students } = await loadRoster();
   const m = await requireCurrentMembership();
@@ -97,12 +106,22 @@ export default async function RosterPage() {
                         🐑
                       </span>
                       <span className="min-w-0">
-                        <span className="flex items-center gap-1 font-medium text-ink">
+                        <span className="flex items-center gap-1.5 font-medium text-ink">
+                          <span
+                            className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(s.gender)}`}
+                          />
                           {s.name}
                           {s.birthdayMonth === currentMonth && (
                             <Icon name="star" size={14} alt="이번 달 생일" />
                           )}
                         </span>
+                        {(s.grade || s.school) && (
+                          <span className="block text-xs text-ink-muted">
+                            {[s.grade ? `${s.grade}학년` : null, s.school]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        )}
                         {s.phoneSelf && (
                           <span className="block text-xs text-ink-muted">
                             {s.phoneSelf}
