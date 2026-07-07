@@ -21,10 +21,13 @@ describe("RLS/RPC: promotion", () => {
   it("promote_group bumps grades, graduates 3, keeps null; blocks second run same year; master-only", async () => {
     const { group, master, editor } = await makeGroupWithRoles("PROMO001");
     const admin = adminClient();
+    // 삼학년은 반 배정 상태 → 졸업 시 class_id 비워지는지 확인용
+    const { data: cls } = await admin
+      .from("classes").insert({ group_id: group.id, name: "졸업반" }).select("id").single();
     await admin.from("students").insert([
       { group_id: group.id, name: "일학년", grade: 1 },
       { group_id: group.id, name: "이학년", grade: 2 },
-      { group_id: group.id, name: "삼학년", grade: 3 },
+      { group_id: group.id, name: "삼학년", grade: 3, class_id: cls!.id },
       { group_id: group.id, name: "무학년", grade: null },
     ]);
 
@@ -39,11 +42,12 @@ describe("RLS/RPC: promotion", () => {
     expect(pErr).toBeNull();
 
     const { data: rows } = await admin
-      .from("students").select("name, grade, graduated_at").eq("group_id", group.id);
+      .from("students").select("name, grade, graduated_at, class_id").eq("group_id", group.id);
     const by = Object.fromEntries((rows ?? []).map((r) => [r.name, r]));
     expect(by["일학년"].grade).toBe(2);
     expect(by["이학년"].grade).toBe(3);
     expect(by["삼학년"].graduated_at).not.toBeNull();
+    expect(by["삼학년"].class_id).toBeNull(); // 졸업 시 반 배정 해제
     expect(by["무학년"].grade).toBeNull();
 
     // 같은 해 재실행 차단
