@@ -26,6 +26,8 @@ export type RosterStudent = {
   phoneSelf: string | null;
   phoneGuardian: string | null;
   guardianRelation: string | null;
+  school: string | null;
+  gender: string | null;
 };
 
 export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
@@ -46,11 +48,13 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
 
   let q = supabase
     .from("students")
-    .select("id, name, grade, class_id, birthday_month, phone_self, phone_guardian, guardian_relation, deleted_at")
+    .select("id, name, grade, class_id, birthday_month, phone_self, phone_guardian, guardian_relation, school, gender, deleted_at, graduated_at")
     .eq("group_id", m.groupId)
     .order("grade", { ascending: true })
     .order("name", { ascending: true });
-  q = opts?.includeDeleted ? q.not("deleted_at", "is", null) : q.is("deleted_at", null);
+  q = opts?.includeDeleted
+    ? q.not("deleted_at", "is", null)
+    : q.is("deleted_at", null).is("graduated_at", null);
   const { data: studentRows } = await q;
 
   const mask = m.role === "viewer";
@@ -63,6 +67,8 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
     phoneSelf: mask ? maskPhone(s.phone_self) : s.phone_self,
     phoneGuardian: mask ? maskPhone(s.phone_guardian) : s.phone_guardian,
     guardianRelation: s.guardian_relation,
+    school: s.school,
+    gender: s.gender,
   }));
 
   return {
@@ -76,4 +82,31 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
     })),
     students,
   };
+}
+
+export async function loadGraduates(): Promise<{ canEdit: boolean; students: RosterStudent[] }> {
+  const m = await requireCurrentMembership();
+  const supabase = await createServerClient();
+  const canEdit = m.role === "master" || m.role === "editor";
+  const { data } = await supabase
+    .from("students")
+    .select("id, name, grade, class_id, birthday_month, phone_self, phone_guardian, guardian_relation, school, gender, deleted_at")
+    .eq("group_id", m.groupId)
+    .not("graduated_at", "is", null)
+    .is("deleted_at", null)
+    .order("name", { ascending: true });
+  const mask = m.role === "viewer";
+  const students: RosterStudent[] = (data ?? []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    grade: s.grade,
+    classId: s.class_id,
+    birthdayMonth: s.birthday_month,
+    phoneSelf: mask ? maskPhone(s.phone_self) : s.phone_self,
+    phoneGuardian: mask ? maskPhone(s.phone_guardian) : s.phone_guardian,
+    guardianRelation: s.guardian_relation,
+    school: s.school,
+    gender: s.gender,
+  }));
+  return { canEdit, students };
 }

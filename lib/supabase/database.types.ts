@@ -82,7 +82,9 @@ export type Database = {
           class_id: string | null
           created_at: string
           deleted_at: string | null
+          gender: string | null
           grade: number | null
+          graduated_at: string | null
           group_id: string
           guardian_relation: string | null
           guardian_relation_other: string | null
@@ -102,7 +104,9 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          gender?: string | null
           grade?: number | null
+          graduated_at?: string | null
           group_id: string
           guardian_relation?: string | null
           guardian_relation_other?: string | null
@@ -122,7 +126,9 @@ export type Database = {
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          gender?: string | null
           grade?: number | null
+          graduated_at?: string | null
           group_id?: string
           guardian_relation?: string | null
           guardian_relation_other?: string | null
@@ -267,6 +273,7 @@ export type Database = {
           created_by: string
           id: string
           join_code: string
+          last_promoted_year: number | null
           name: string
         }
         Insert: {
@@ -274,6 +281,7 @@ export type Database = {
           created_by: string
           id?: string
           join_code: string
+          last_promoted_year?: number | null
           name: string
         }
         Update: {
@@ -281,6 +289,7 @@ export type Database = {
           created_by?: string
           id?: string
           join_code?: string
+          last_promoted_year?: number | null
           name?: string
         }
         Relationships: []
@@ -373,6 +382,10 @@ export type Database = {
       find_group_by_code: {
         Args: { code_input: string }
         Returns: string
+      }
+      promote_group: {
+        Args: { p_group_id: string }
+        Returns: undefined
       }
     }
     Enums: {
