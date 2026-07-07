@@ -164,14 +164,21 @@ export function AttendanceBoard({
                 const absent = st === "unconfirmed" || st === "absent_with_reason";
                 return (
                   <div key={s.id} className="flex flex-col items-center gap-1">
-                    <button
-                      onClick={() => onTap(s.id)}
-                      disabled={!canEdit}
-                      className={`relative flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(st)}`}
-                      style={{ borderRadius: "52% 48% 50% 50% / 56% 56% 44% 44%" }}
-                    >
-                      {s.name}
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => onTap(s.id)}
+                        disabled={!canEdit}
+                        className={`relative z-[1] flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(st)}`}
+                        style={{ borderRadius: "52% 48% 50% 50% / 56% 56% 44% 44%" }}
+                      >
+                        {s.name}
+                      </button>
+                      {/* 양 다리 두 개 */}
+                      <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-1 flex justify-center gap-2.5">
+                        <span className="block h-2 w-[3px] rounded-b-full bg-[#6b4a34]" />
+                        <span className="block h-2 w-[3px] rounded-b-full bg-[#6b4a34]" />
+                      </span>
+                    </div>
                     {absent && (
                       <input
                         defaultValue={records[s.id]?.reason ?? ""}
