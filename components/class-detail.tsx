@@ -81,8 +81,6 @@ export function ClassDetail({
   const input = "mt-1 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink";
   const genderDot = (gender: string | null) =>
     gender === "female" ? "bg-pink-400" : gender === "male" ? "bg-sky-400" : "bg-transparent border border-border";
-  const genderLabel = (gender: string | null) =>
-    gender === "female" ? "여" : gender === "male" ? "남" : "";
   const meta = (grade: number | null, school: string | null) =>
     [grade ? `${grade}학년` : null, school].filter(Boolean).join(" · ");
   return (
@@ -116,7 +114,6 @@ export function ClassDetail({
               <li key={s.id} className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm">
                 <span className="flex items-center gap-2">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                  {genderLabel(s.gender) && <span className="text-xs text-ink-muted">{genderLabel(s.gender)}</span>}
                   <span className="text-ink">🐑 {s.name}
                     {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
                   </span>
@@ -143,7 +140,6 @@ export function ClassDetail({
                   <label className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm">
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                    {genderLabel(s.gender) && <span className="text-xs text-ink-muted">{genderLabel(s.gender)}</span>}
                     <span className="text-ink">{s.name}
                       {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
                     </span>
