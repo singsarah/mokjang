@@ -138,7 +138,7 @@ export function ClassDetail({
             <ul className="space-y-2">
               {candidates.map((s) => (
                 <li key={s.id}>
-                  <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-200" : "bg-white"}`}>
+                  <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-300" : "bg-white"}`}>
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
                     <span className="text-ink">{s.name}
