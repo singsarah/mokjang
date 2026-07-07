@@ -20,6 +20,7 @@ type Initial = {
   guardianRelationOther: string | null;
   school: string | null;
   note: string | null;
+  gender: string | null;
   photoPath: string | null;
 };
 
@@ -80,7 +81,7 @@ export function StudentForm({
     setError(undefined);
     const payload = {
       name: String(formData.get("name") ?? ""),
-      grade: initial?.grade ?? null, // 학년은 폼에서 받지 않음(반 중심). 기존 값 보존.
+      grade: formData.get("grade") ? Number(formData.get("grade")) : null,
       classId: (formData.get("classId") as string) || null,
       birthdayMonth: formData.get("birthdayMonth") ? Number(formData.get("birthdayMonth")) : null,
       birthdayDay: formData.get("birthdayDay") ? Number(formData.get("birthdayDay")) : null,
@@ -94,6 +95,7 @@ export function StudentForm({
           : null,
       school: (formData.get("school") as string) || null,
       note: (formData.get("note") as string) || null,
+      gender: (((formData.get("gender") as string) || null) as StudentInput["gender"]),
       photoPath,
     };
     startTransition(async () => {
@@ -152,6 +154,15 @@ export function StudentForm({
         <input name="name" required defaultValue={initial?.name} className={input} />
       </label>
       <label className="block">
+        <span className="text-sm">학년</span>
+        <select name="grade" defaultValue={initial?.grade ?? ""} className={input}>
+          <option value="">선택 안 함</option>
+          <option value="1">1학년</option>
+          <option value="2">2학년</option>
+          <option value="3">3학년</option>
+        </select>
+      </label>
+      <label className="block">
         <span className="text-sm">반</span>
         <select name="classId" defaultValue={initial?.classId ?? ""} className={input}>
           <option value="">반 없음</option>
@@ -170,6 +181,14 @@ export function StudentForm({
           placeholder="예: OO고등학교"
           className={input}
         />
+      </label>
+      <label className="block">
+        <span className="text-sm">성별</span>
+        <select name="gender" defaultValue={initial?.gender ?? ""} className={input}>
+          <option value="">선택 안 함</option>
+          <option value="male">남</option>
+          <option value="female">여</option>
+        </select>
       </label>
       <div className="flex gap-2">
         <label className="block flex-1">

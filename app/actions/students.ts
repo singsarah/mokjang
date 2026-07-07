@@ -25,6 +25,7 @@ function toRow(d: StudentInput) {
     guardian_relation_other: d.guardianRelationOther,
     school: d.school,
     note: d.note,
+    gender: d.gender,
     photo_path: d.photoPath,
   };
 }

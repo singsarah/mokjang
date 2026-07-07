@@ -23,6 +23,7 @@ export const studentSchema = z.object({
   guardianRelationOther: optionalText, // 관계가 '기타'일 때 상세
   school: optionalText, // 학교
   note: optionalText, // 선생님 자유 메모
+  gender: z.enum(["male", "female"]).nullish().transform((v) => v ?? null),
   photoPath: optionalText, // Storage 내 사진 경로 (<group_id>/<uuid>)
 });
 

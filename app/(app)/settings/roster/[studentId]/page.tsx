@@ -18,7 +18,7 @@ export default async function EditStudentPage({
   const supabase = await createServerClient();
   const { data: s } = await supabase
     .from("students")
-    .select("id, name, grade, class_id, birthday_month, birthday_day, birthday_year, phone_self, phone_guardian, guardian_relation, guardian_relation_other, school, note, photo_path")
+    .select("id, name, grade, class_id, birthday_month, birthday_day, birthday_year, phone_self, phone_guardian, guardian_relation, guardian_relation_other, school, note, gender, photo_path")
     .eq("id", studentId)
     .eq("group_id", m.groupId)
     .maybeSingle();
@@ -64,6 +64,7 @@ export default async function EditStudentPage({
             guardianRelationOther: s.guardian_relation_other,
             school: s.school,
             note: s.note,
+            gender: s.gender,
             photoPath: s.photo_path,
           }}
         />
