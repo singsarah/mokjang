@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { loadRoster } from "@/lib/students";
-import { createClass, deleteClass } from "@/app/actions/classes";
+import { createClass } from "@/app/actions/classes";
 
 export default async function ClassesPage() {
   const { canEdit, classes, students } = await loadRoster();
@@ -66,29 +66,20 @@ export default async function ClassesPage() {
           {classes.map((c) => {
             const n = countByClass.get(c.id) ?? 0;
             return (
-              <li
-                key={c.id}
-                className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm"
-              >
-                <span className="text-ink">
-                  {c.name}
-                  {c.teacherName && (
-                    <span className="text-sm text-ink-muted"> · {c.teacherName} 선생님</span>
-                  )}{" "}
-                  <span className="text-xs text-ink-muted">({n}명)</span>
-                </span>
-                {n === 0 && (
-                  <form
-                    action={async () => {
-                      "use server";
-                      await deleteClass({ id: c.id });
-                    }}
-                  >
-                    <button className="rounded-btn border border-danger px-3 py-1 text-xs text-danger transition hover:bg-unconfirmed-soft">
-                      삭제
-                    </button>
-                  </form>
-                )}
+              <li key={c.id}>
+                <Link
+                  href={`/settings/roster/classes/${c.id}`}
+                  className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
+                >
+                  <span className="text-ink">
+                    {c.name}
+                    {c.teacherName && (
+                      <span className="text-sm text-ink-muted"> · {c.teacherName} 선생님</span>
+                    )}{" "}
+                    <span className="text-xs text-ink-muted">({n}명)</span>
+                  </span>
+                  <span className="text-lg text-ink-muted">›</span>
+                </Link>
               </li>
             );
           })}
