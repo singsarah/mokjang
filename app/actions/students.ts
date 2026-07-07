@@ -94,3 +94,28 @@ export async function restoreStudent(input: { id: string }): Promise<{ error?: s
   revalidatePath("/settings/roster/hidden");
   return {};
 }
+
+export async function promoteGrades(): Promise<{ error?: string }> {
+  const m = await requireCurrentMembership();
+  if (m.role !== "master") return { error: "진급은 대표 교사만 할 수 있습니다" };
+  const supabase = await createServerClient();
+  const { error } = await supabase.rpc("promote_group", { p_group_id: m.groupId });
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/graduated");
+  return {};
+}
+
+export async function restoreGraduate(input: { id: string }): Promise<{ error?: string }> {
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("students")
+    .update({ graduated_at: null })
+    .eq("id", input.id)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/graduated");
+  return {};
+}

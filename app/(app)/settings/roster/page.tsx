@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { loadRoster } from "@/lib/students";
+import { requireCurrentMembership } from "@/lib/memberships";
 import { Icon } from "@/components/icon";
+import { PromoteButton } from "@/components/promote-button";
 
 export default async function RosterPage() {
   const { canEdit, classes, students } = await loadRoster();
+  const m = await requireCurrentMembership();
+  const isMaster = m.role === "master";
   const classMap = new Map(classes.map((c) => [c.id, c]));
   const currentMonth = new Date().getMonth() + 1; // 이번 달 생일 학생에 ⭐ 배지
 
@@ -37,12 +41,15 @@ export default async function RosterPage() {
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold text-ink">학적부</h1>
           {canEdit && (
-            <Link
-              href="/settings/roster/new"
-              className="rounded-btn bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
-            >
-              + 학생 추가
-            </Link>
+            <span className="flex items-center gap-2">
+              {isMaster && <PromoteButton />}
+              <Link
+                href="/settings/roster/new"
+                className="rounded-btn bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
+              >
+                + 학생 추가
+              </Link>
+            </span>
           )}
         </div>
 
@@ -60,6 +67,12 @@ export default async function RosterPage() {
             className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"
           >
             숨김 학생
+          </Link>
+          <Link
+            href="/settings/roster/graduated"
+            className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"
+          >
+            졸업생
           </Link>
         </div>
 
