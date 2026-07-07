@@ -137,10 +137,10 @@ export function ClassDetail({
             <ul className="space-y-2">
               {candidates.map((s) => (
                 <li key={s.id}>
-                  <label className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm">
+                  <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-100" : "bg-white"}`}>
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                    <span className="text-ink">{s.name}
+                    <span className={s.currentClassName ? "text-ink-muted" : "text-ink"}>{s.name}
                       {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
                     </span>
                     <span className="ml-auto text-xs text-ink-muted">
