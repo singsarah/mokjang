@@ -37,14 +37,26 @@ export async function createClass(input: {
   return { id: data.id };
 }
 
-export async function renameClass(input: { id: string; name: string }): Promise<{ error?: string }> {
-  const name = input.name?.trim();
-  if (!name) return { error: "반 이름을 입력해주세요" };
+export async function updateClass(input: {
+  id: string;
+  name: string;
+  teacherName?: string | null;
+}): Promise<{ error?: string }> {
+  const parsed = classSchema.safeParse({ name: input.name, teacherName: input.teacherName });
+  if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const m = await requireEditor();
   const supabase = await createServerClient();
-  const { error } = await supabase.from("classes").update({ name }).eq("id", input.id).eq("group_id", m.groupId);
-  if (error) return { error: error.message };
+  const { error } = await supabase
+    .from("classes")
+    .update({ name: parsed.data.name, teacher_name: parsed.data.teacherName })
+    .eq("id", input.id)
+    .eq("group_id", m.groupId);
+  if (error) {
+    if (error.code === "23505") return { error: "같은 이름의 반이 이미 있습니다" };
+    return { error: error.message };
+  }
   revalidatePath("/settings/roster/classes");
+  revalidatePath("/settings/roster");
   return {};
 }
 
@@ -75,6 +87,33 @@ export async function deleteClass(input: { id: string }): Promise<{ error?: stri
   if ((count ?? 0) > 0) return { error: "이 반에 학생이 있어 삭제할 수 없습니다. 학생을 먼저 이동하세요." };
   const { error } = await supabase.from("classes").delete().eq("id", input.id).eq("group_id", m.groupId);
   if (error) return { error: error.message };
+  revalidatePath("/settings/roster/classes");
+  return {};
+}
+
+// 선택한 학생들을 특정 반(classId)으로 이동, classId=null이면 미배정("빼기").
+export async function assignStudents(input: {
+  studentIds: string[];
+  classId: string | null;
+}): Promise<{ error?: string }> {
+  const m = await requireEditor();
+  if (!input.studentIds.length) return {};
+  const supabase = await createServerClient();
+
+  // 대상 반이 이 그룹 소속인지 존재 검증(타 그룹 class_id 방지)
+  if (input.classId !== null) {
+    const { data: cls } = await supabase
+      .from("classes").select("id").eq("id", input.classId).eq("group_id", m.groupId).maybeSingle();
+    if (!cls) return { error: "반을 찾을 수 없습니다" };
+  }
+
+  const { error } = await supabase
+    .from("students")
+    .update({ class_id: input.classId, updated_at: new Date().toISOString() })
+    .in("id", input.studentIds)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
   revalidatePath("/settings/roster/classes");
   return {};
 }
