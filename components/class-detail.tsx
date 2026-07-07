@@ -4,8 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateClass, assignStudents, deleteClass } from "@/app/actions/classes";
 
-type Member = { id: string; name: string };
-type Candidate = { id: string; name: string; currentClassName: string | null };
+type Member = { id: string; name: string; grade: number | null; school: string | null; gender: string | null };
+type Candidate = {
+  id: string;
+  name: string;
+  grade: number | null;
+  school: string | null;
+  gender: string | null;
+  currentClassName: string | null;
+};
 
 export function ClassDetail({
   classId,
@@ -72,6 +79,10 @@ export function ClassDetail({
   }
 
   const input = "mt-1 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink";
+  const genderDot = (gender: string | null) =>
+    gender === "female" ? "bg-pink-400" : gender === "male" ? "bg-sky-400" : "bg-transparent border border-border";
+  const meta = (grade: number | null, school: string | null) =>
+    [grade ? `${grade}학년` : null, school].filter(Boolean).join(" · ");
   return (
     <div className="space-y-8">
       {/* 반 정보 수정 */}
@@ -101,7 +112,12 @@ export function ClassDetail({
           <ul className="space-y-2">
             {members.map((s) => (
               <li key={s.id} className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm">
-                <span className="text-ink">🐑 {s.name}</span>
+                <span className="flex items-center gap-2">
+                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
+                  <span className="text-ink">🐑 {s.name}
+                    {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
+                  </span>
+                </span>
                 <button onClick={() => onRemove(s.id)} disabled={isPending} className="rounded-btn border border-border px-3 py-1 text-xs text-ink-muted transition hover:text-ink disabled:opacity-50">
                   빼기
                 </button>
@@ -123,7 +139,10 @@ export function ClassDetail({
                 <li key={s.id}>
                   <label className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm">
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
-                    <span className="text-ink">{s.name}</span>
+                    <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
+                    <span className="text-ink">{s.name}
+                      {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
+                    </span>
                     <span className="ml-auto text-xs text-ink-muted">
                       {s.currentClassName ? `현재: ${s.currentClassName}` : "미배정"}
                     </span>

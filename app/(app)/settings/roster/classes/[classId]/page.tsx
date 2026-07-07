@@ -18,12 +18,16 @@ export default async function ClassDetailPage({
   const classNameById = new Map(classes.map((c) => [c.id, c.name]));
   const members = students
     .filter((s) => s.classId === classId)
-    .map((s) => ({ id: s.id, name: s.name }));
+    .map((s) => ({ id: s.id, name: s.name, grade: s.grade, school: s.school, gender: s.gender }))
+    .sort((a, b) => a.name.localeCompare(b.name, "ko"));
   const candidates = students
     .filter((s) => s.classId !== classId)
     .map((s) => ({
       id: s.id,
       name: s.name,
+      grade: s.grade,
+      school: s.school,
+      gender: s.gender,
       currentClassName: s.classId ? classNameById.get(s.classId) ?? null : null,
     }))
     // 미배정을 위로, 그다음 이름순
