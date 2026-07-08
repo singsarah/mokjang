@@ -190,7 +190,8 @@ export function AttendanceBoard({
                         onBlur={(e) => onReason(s.id, e.target.value)}
                         placeholder="사유"
                         disabled={!canEdit}
-                        className="w-16 rounded-btn border border-border bg-white px-1 py-0.5 text-[10px] text-ink"
+                        // 이름 글씨와 같은 크기, 다리를 덮도록 위로 당김
+                        className="relative z-[2] -mt-2 w-full rounded-btn border border-border bg-white px-1.5 py-1 text-center text-[12.5px] text-ink"
                       />
                     )}
                   </div>

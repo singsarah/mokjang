@@ -9,6 +9,7 @@ import {
   denyMembership,
   removeMembership,
 } from "@/app/actions/memberships";
+import { loadTeachers } from "@/lib/teachers";
 
 export default async function TeachersPage() {
   const current = await requireCurrentMembership();
@@ -39,6 +40,7 @@ export default async function TeachersPage() {
 
   const pending = rows.filter((m) => m.status === "pending");
   const active = rows.filter((m) => m.status === "active");
+  const { teachers } = await loadTeachers();
 
   return (
     <main className="min-h-screen bg-[#E6EAE0] pb-24">
@@ -163,6 +165,52 @@ export default async function TeachersPage() {
               );
             })}
           </ul>
+        </section>
+
+        {/* 교사 명단 (인적사항 — 계정 유무와 무관) */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-ink-muted">교사 명단 ({teachers.length})</h2>
+            <span className="flex gap-2">
+              <Link
+                href="/settings/teachers/roster/import"
+                className="rounded-btn bg-sage-deep px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-sage"
+              >
+                엑셀 업로드
+              </Link>
+              <Link
+                href="/settings/teachers/roster/new"
+                className="rounded-btn bg-sage px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-sage-deep"
+              >
+                + 교사 추가
+              </Link>
+            </span>
+          </div>
+          {teachers.length === 0 ? (
+            <p className="mt-2 text-sm text-ink-muted">
+              아직 등록된 교사가 없어요. 엑셀 업로드로 한 번에 등록할 수 있어요.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {teachers.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={`/settings/teachers/roster/${t.id}`}
+                    className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
+                  >
+                    <span className="text-ink">
+                      {t.name}
+                      {t.duty && <span className="ml-2 text-xs text-ink-muted">{t.duty}</span>}
+                    </span>
+                    <span className="flex items-center gap-2 text-xs text-ink-muted">
+                      {t.phone && <span>{t.phone}</span>}
+                      <span className="text-lg">›</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       </div>
     </main>

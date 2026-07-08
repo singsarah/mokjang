@@ -188,6 +188,62 @@ export type Database = {
           },
         ]
       }
+      teachers: {
+        Row: {
+          birthday_day: number | null
+          birthday_month: number | null
+          birthday_year: number | null
+          created_at: string
+          duty: string | null
+          group_id: string
+          id: string
+          job_type: string | null
+          kakao_id: string | null
+          name: string
+          note: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
+          created_at?: string
+          duty?: string | null
+          group_id: string
+          id?: string
+          job_type?: string | null
+          kakao_id?: string | null
+          name: string
+          note?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birthday_day?: number | null
+          birthday_month?: number | null
+          birthday_year?: number | null
+          created_at?: string
+          duty?: string | null
+          group_id?: string
+          id?: string
+          job_type?: string | null
+          kakao_id?: string | null
+          name?: string
+          note?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teachers_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           group_id: string
