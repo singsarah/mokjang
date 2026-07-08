@@ -33,6 +33,7 @@ export function ClassDetail({
   const router = useRouter();
   const [error, setError] = useState<string>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [gradeFilter, setGradeFilter] = useState<number | null>(null); // null = 전체
   const [isPending, startTransition] = useTransition();
 
   function toggle(id: string) {
@@ -84,6 +85,7 @@ export function ClassDetail({
     gender === "female" ? "bg-pink-400" : gender === "male" ? "bg-sky-400" : "bg-transparent border border-border";
   const meta = (grade: number | null, school: string | null) =>
     [grade ? `${grade}학년` : null, school].filter(Boolean).join(" · ");
+  const shownCandidates = candidates.filter((s) => gradeFilter === null || s.grade === gradeFilter);
   return (
     <div className="space-y-8">
       {/* 반 정보 수정 */}
@@ -135,8 +137,28 @@ export function ClassDetail({
           <p className="text-sm text-ink-muted">추가할 학생이 없어요.</p>
         ) : (
           <>
+            {/* 학년 필터 */}
+            <div className="mb-3 flex gap-2">
+              {([null, 1, 2, 3] as const).map((g) => (
+                <button
+                  key={g ?? "all"}
+                  type="button"
+                  onClick={() => setGradeFilter(g)}
+                  className={`flex-1 rounded-btn px-3 py-1.5 text-sm transition ${
+                    gradeFilter === g
+                      ? "bg-sage-deep font-bold text-white"
+                      : "border border-border bg-white text-ink-muted hover:text-ink"
+                  }`}
+                >
+                  {g === null ? "전체" : `${g}학년`}
+                </button>
+              ))}
+            </div>
+            {shownCandidates.length === 0 && (
+              <p className="py-2 text-center text-sm text-ink-muted">이 학년에 추가할 학생이 없어요.</p>
+            )}
             <ul className="space-y-2">
-              {candidates.map((s) => (
+              {shownCandidates.map((s) => (
                 <li key={s.id}>
                   <label className={`flex items-center gap-3 rounded-card border border-border/60 p-3 shadow-sm ${s.currentClassName ? "bg-gray-300" : "bg-white"}`}>
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />

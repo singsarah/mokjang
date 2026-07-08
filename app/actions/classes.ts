@@ -117,3 +117,20 @@ export async function assignStudents(input: {
   revalidatePath("/settings/roster/classes");
   return {};
 }
+
+// 그룹 전체 반 배정 초기화 — 모든 학생을 미배정으로 (반 자체는 유지).
+export async function unassignAllStudents(): Promise<{ error?: string; cleared?: number }> {
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("students")
+    .update({ class_id: null, updated_at: new Date().toISOString() })
+    .eq("group_id", m.groupId)
+    .not("class_id", "is", null)
+    .select("id");
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/classes");
+  revalidatePath("/attendance");
+  return { cleared: data?.length ?? 0 };
+}

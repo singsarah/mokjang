@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { loadRoster } from "@/lib/students";
 import { createClass } from "@/app/actions/classes";
+import { UnassignAllButton } from "@/components/unassign-all-button";
 
 export default async function ClassesPage() {
   const { canEdit, classes, students } = await loadRoster();
@@ -84,6 +85,8 @@ export default async function ClassesPage() {
             );
           })}
         </ul>
+
+        {students.some((s) => s.classId) && <UnassignAllButton />}
       </div>
     </main>
   );
