@@ -96,7 +96,8 @@ export function AttendanceBoard({
     : "bg-[#FBEEE6] text-ink border-[rgba(58,50,46,.35)]"; // unchecked(흰)
 
   return (
-    <main className="min-h-screen bg-bg pb-24">
+    // 화면 전체가 푸른 풀밭 (크림색 바탕 없음)
+    <main className="min-h-screen pb-24" style={{ background: "linear-gradient(180deg,#5F9E93 0%,#7DA98A 42%,#98BE86 100%)" }}>
       {/* 손그림 러프 필터 (1회) */}
       <svg width="0" height="0" className="absolute">
         <filter id="rough">
@@ -109,9 +110,9 @@ export function AttendanceBoard({
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
-            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-ink-muted">◀</a>
-            <span className="font-bold text-ink">{date}</span>
-            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-ink-muted">▶</a>
+            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-[#F3E2CE]">◀</a>
+            <span className="font-bold text-[#FDF3E7]">{date}</span>
+            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-[#F3E2CE]">▶</a>
           </div>
           <span className="rounded-tag bg-gold-soft px-3 py-1 text-xs text-ink-muted">{note}</span>
         </div>
@@ -134,17 +135,17 @@ export function AttendanceBoard({
         </div>
 
         {/* 범례 */}
-        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-[11px] text-ink-muted">
+        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-[11px] text-[#FDF3E7]">
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full border border-[#b9a99a] bg-[#FBEEE6] align-middle" />미체크</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-sage-deep align-middle" />출석</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-gold align-middle" />사유결석</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-danger align-middle" />연락필요</span>
         </div>
 
-        {error && <p className="px-5 text-sm text-danger">{error}</p>}
+        {error && <p className="mx-5 rounded-btn bg-white px-3 py-1 text-sm text-danger">{error}</p>}
 
         {/* 목장 씬 */}
-        <div className="relative px-3 pb-6 pt-3" style={{ background: "linear-gradient(180deg,#5F9E93 0%,#7DA98A 42%,#98BE86 100%)" }}>
+        <div className="relative px-3 pb-6 pt-3">
           {/* 나무 팻말 */}
           {activeClass && (
             <div className="relative z-10 mx-auto w-52">
