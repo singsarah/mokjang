@@ -18,10 +18,10 @@ export default async function ClassesPage() {
     <main className="min-h-screen bg-card pb-24">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link
-          href="/settings/roster"
+          href="/settings"
           className="text-sm text-ink-muted hover:text-ink"
         >
-          ← 학적부
+          ← 설정
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold text-ink">반 관리</h1>
         <p className="mt-1 text-sm text-ink-muted">

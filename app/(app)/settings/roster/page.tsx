@@ -51,10 +51,10 @@ export default async function RosterPage() {
           <h1 className="font-display text-2xl font-bold text-ink">학적부</h1>
           {canEdit && (
             <span className="flex items-center gap-2">
-              {isMaster && <PromoteButton />}
+              {/* 엑셀 업로드·학생 추가: 대등한 주요 기능. 같은 크기·모양, 색만 살짝 다르게. */}
               <Link
                 href="/settings/roster/import"
-                className="rounded-btn border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition hover:bg-card"
+                className="rounded-btn bg-sage-deep px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
               >
                 엑셀 업로드
               </Link>
@@ -68,15 +68,9 @@ export default async function RosterPage() {
           )}
         </div>
 
-        <div className="mt-3 flex gap-2 text-xs">
-          {canEdit && (
-            <Link
-              href="/settings/roster/classes"
-              className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"
-            >
-              반 관리
-            </Link>
-          )}
+        {/* 하위 링크 줄: 학년 올리기(master 전용) · 숨김 학생 · 졸업생 */}
+        <div className="mt-3 flex items-center gap-2 text-xs">
+          {isMaster && <PromoteButton />}
           <Link
             href="/settings/roster/hidden"
             className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"

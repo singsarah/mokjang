@@ -17,6 +17,15 @@ export default async function SettingsPage() {
       show: true,
     },
     {
+      // 반 관리: 학적부와 동일 규칙(권한 없으면 페이지 자체가 리다이렉트). URL 유지.
+      href: "/settings/roster/classes",
+      icon: "🗂️",
+      label: "반 관리",
+      desc: "반 이름 · 담당 선생님",
+      chip: "bg-sky-soft",
+      show: true,
+    },
+    {
       href: "/settings/teachers",
       icon: "👥",
       label: "교사 관리",
