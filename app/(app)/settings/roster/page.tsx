@@ -53,6 +53,12 @@ export default async function RosterPage() {
             <span className="flex items-center gap-2">
               {isMaster && <PromoteButton />}
               <Link
+                href="/settings/roster/import"
+                className="rounded-btn border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition hover:bg-card"
+              >
+                엑셀 업로드
+              </Link>
+              <Link
                 href="/settings/roster/new"
                 className="rounded-btn bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
               >

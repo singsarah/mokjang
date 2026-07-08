@@ -19,8 +19,18 @@ type Initial = {
   phoneGuardian: string | null;
   guardianRelation: string | null;
   guardianRelationOther: string | null;
+  guardianName: string | null;
+  guardian2Relation: string | null;
+  guardian2Name: string | null;
+  guardian2Phone: string | null;
   school: string | null;
+  baptism: string | null;
+  kakaoId: string | null;
+  address: string | null;
+  familyNote: string | null;
   note: string | null;
+  parentChatInvited: boolean;
+  registrationSubmitted: boolean;
   gender: string | null;
   photoPath: string | null;
 };
@@ -54,6 +64,7 @@ export function StudentForm({
 
   // 보호자 관계: '기타' 선택 시 상세 입력칸을 보여주려 controlled 상태로.
   const [relation, setRelation] = useState(initial?.guardianRelation ?? "");
+  const [relation2, setRelation2] = useState(initial?.guardian2Relation ?? "");
 
   async function onPickPhoto(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -94,8 +105,18 @@ export function StudentForm({
         relation === "기타"
           ? (formData.get("guardianRelationOther") as string) || null
           : null,
+      guardianName: (formData.get("guardianName") as string) || null,
+      guardian2Relation: ((relation2 || null) as StudentInput["guardian2Relation"]),
+      guardian2Name: (formData.get("guardian2Name") as string) || null,
+      guardian2Phone: (formData.get("guardian2Phone") as string) || null,
       school: (formData.get("school") as string) || null,
+      baptism: (formData.get("baptism") as string) || null,
+      kakaoId: (formData.get("kakaoId") as string) || null,
+      address: (formData.get("address") as string) || null,
+      familyNote: (formData.get("familyNote") as string) || null,
       note: (formData.get("note") as string) || null,
+      parentChatInvited: formData.get("parentChatInvited") === "on",
+      registrationSubmitted: formData.get("registrationSubmitted") === "on",
       gender: (((formData.get("gender") as string) || null) as StudentInput["gender"]),
       photoPath,
     };
@@ -209,37 +230,98 @@ export function StudentForm({
         <span className="text-sm">본인 연락처</span>
         <input name="phoneSelf" defaultValue={initial?.phoneSelf ?? ""} className={input} />
       </label>
-      <label className="block">
-        <span className="text-sm">보호자 연락처</span>
-        <input name="phoneGuardian" defaultValue={initial?.phoneGuardian ?? ""} className={input} />
-      </label>
-      <label className="block">
-        <span className="text-sm">보호자 관계</span>
-        <select
-          name="guardianRelation"
-          value={relation}
-          onChange={(e) => setRelation(e.target.value)}
-          className={input}
-        >
-          <option value="">선택 안 함</option>
-          <option value="모">모</option>
-          <option value="부">부</option>
-          <option value="기타">기타</option>
-        </select>
-      </label>
-      {relation === "기타" && (
+
+      {/* ── 보호자 1 ── */}
+      <div className="space-y-3 rounded-card border border-border/60 bg-card/40 p-4">
+        <p className="text-sm font-medium text-ink">보호자 1</p>
         <label className="block">
-          <span className="text-sm">기타 관계 (직접 입력)</span>
-          <input
-            name="guardianRelationOther"
-            defaultValue={initial?.guardianRelationOther ?? ""}
-            placeholder="예: 조모, 삼촌, 위탁 등"
+          <span className="text-sm">관계</span>
+          <select
+            name="guardianRelation"
+            value={relation}
+            onChange={(e) => setRelation(e.target.value)}
             className={input}
-          />
+          >
+            <option value="">선택 안 함</option>
+            <option value="모">엄마</option>
+            <option value="부">아빠</option>
+            <option value="기타">기타</option>
+          </select>
         </label>
-      )}
+        {relation === "기타" && (
+          <label className="block">
+            <span className="text-sm">기타 관계 (직접 입력)</span>
+            <input
+              name="guardianRelationOther"
+              defaultValue={initial?.guardianRelationOther ?? ""}
+              placeholder="예: 조모, 삼촌, 위탁 등"
+              className={input}
+            />
+          </label>
+        )}
+        <label className="block">
+          <span className="text-sm">이름</span>
+          <input name="guardianName" defaultValue={initial?.guardianName ?? ""} className={input} />
+        </label>
+        <label className="block">
+          <span className="text-sm">연락처</span>
+          <input name="phoneGuardian" defaultValue={initial?.phoneGuardian ?? ""} className={input} />
+        </label>
+      </div>
+
+      {/* ── 보호자 2 ── */}
+      <div className="space-y-3 rounded-card border border-border/60 bg-card/40 p-4">
+        <p className="text-sm font-medium text-ink">보호자 2</p>
+        <label className="block">
+          <span className="text-sm">관계</span>
+          <select
+            name="guardian2Relation"
+            value={relation2}
+            onChange={(e) => setRelation2(e.target.value)}
+            className={input}
+          >
+            <option value="">선택 안 함</option>
+            <option value="모">엄마</option>
+            <option value="부">아빠</option>
+            <option value="기타">기타</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-sm">이름</span>
+          <input name="guardian2Name" defaultValue={initial?.guardian2Name ?? ""} className={input} />
+        </label>
+        <label className="block">
+          <span className="text-sm">연락처</span>
+          <input name="guardian2Phone" defaultValue={initial?.guardian2Phone ?? ""} className={input} />
+        </label>
+      </div>
+
+      {/* ── 신앙 ── */}
       <label className="block">
-        <span className="text-sm">기타 (선생님 메모)</span>
+        <span className="text-sm">세례/입교</span>
+        <input
+          name="baptism"
+          defaultValue={initial?.baptism ?? ""}
+          placeholder="예: 유아세례, 2023-04-09 입교 등"
+          className={input}
+        />
+      </label>
+
+      {/* ── 기타 정보 ── */}
+      <label className="block">
+        <span className="text-sm">카카오톡 ID</span>
+        <input name="kakaoId" defaultValue={initial?.kakaoId ?? ""} className={input} />
+      </label>
+      <label className="block">
+        <span className="text-sm">주소</span>
+        <input name="address" defaultValue={initial?.address ?? ""} className={input} />
+      </label>
+      <label className="block">
+        <span className="text-sm">가족</span>
+        <input name="familyNote" defaultValue={initial?.familyNote ?? ""} className={input} />
+      </label>
+      <label className="block">
+        <span className="text-sm">비고 (선생님 메모)</span>
         <textarea
           name="note"
           rows={3}
@@ -247,6 +329,24 @@ export function StudentForm({
           placeholder="학생에 대해 남길 메모를 자유롭게 적으세요"
           className={input}
         />
+      </label>
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="parentChatInvited"
+          defaultChecked={initial?.parentChatInvited ?? false}
+          className="h-4 w-4"
+        />
+        <span className="text-sm">학부모 단톡방 초대됨</span>
+      </label>
+      <label className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="registrationSubmitted"
+          defaultChecked={initial?.registrationSubmitted ?? false}
+          className="h-4 w-4"
+        />
+        <span className="text-sm">등록지원서 제출</span>
       </label>
       {error && <p className="text-sm text-danger">{error}</p>}
       <button

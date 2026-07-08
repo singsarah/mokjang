@@ -76,21 +76,31 @@ export type Database = {
       }
       students: {
         Row: {
+          address: string | null
+          baptism: string | null
           birthday_day: number | null
           birthday_month: number | null
           birthday_year: number | null
           class_id: string | null
           created_at: string
           deleted_at: string | null
+          family_note: string | null
           gender: string | null
           grade: number | null
           graduated_at: string | null
           group_id: string
+          guardian2_name: string | null
+          guardian2_phone: string | null
+          guardian2_relation: string | null
+          guardian_name: string | null
           guardian_relation: string | null
           guardian_relation_other: string | null
           id: string
+          kakao_id: string | null
           name: string
           note: string | null
+          parent_chat_invited: boolean
+          registration_submitted: boolean
           school: string | null
           photo_path: string | null
           phone_guardian: string | null
@@ -98,21 +108,31 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          baptism?: string | null
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          family_note?: string | null
           gender?: string | null
           grade?: number | null
           graduated_at?: string | null
           group_id: string
+          guardian2_name?: string | null
+          guardian2_phone?: string | null
+          guardian2_relation?: string | null
+          guardian_name?: string | null
           guardian_relation?: string | null
           guardian_relation_other?: string | null
           id?: string
+          kakao_id?: string | null
           name: string
           note?: string | null
+          parent_chat_invited?: boolean
+          registration_submitted?: boolean
           school?: string | null
           photo_path?: string | null
           phone_guardian?: string | null
@@ -120,21 +140,31 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          baptism?: string | null
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
           class_id?: string | null
           created_at?: string
           deleted_at?: string | null
+          family_note?: string | null
           gender?: string | null
           grade?: number | null
           graduated_at?: string | null
           group_id?: string
+          guardian2_name?: string | null
+          guardian2_phone?: string | null
+          guardian2_relation?: string | null
+          guardian_name?: string | null
           guardian_relation?: string | null
           guardian_relation_other?: string | null
           id?: string
+          kakao_id?: string | null
           name?: string
           note?: string | null
+          parent_chat_invited?: boolean
+          registration_submitted?: boolean
           school?: string | null
           photo_path?: string | null
           phone_guardian?: string | null
