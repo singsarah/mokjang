@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership, type CurrentMembership } from "@/lib/memberships";
 import { studentSchema, type StudentInput } from "@/lib/validation/student";
+import type { ExportStudent } from "@/lib/roster-export";
 import type { Database } from "@/lib/supabase/database.types";
 
 type StudentInsert = Database["public"]["Tables"]["students"]["Insert"];
@@ -132,6 +133,65 @@ export async function restoreGraduate(input: { id: string }): Promise<{ error?: 
   revalidatePath("/settings/roster");
   revalidatePath("/settings/roster/graduated");
   return {};
+}
+
+// ── 엑셀 전체 명단 다운로드 ────────────────────────────────────
+
+export type ExportStudentsResult = { rows?: ExportStudent[]; error?: string };
+
+// 재적 학생(숨김·졸업 제외) 전체를 모든 필드와 함께 내려받기용으로 반환.
+// viewer 는 UI에서 전화번호가 마스킹되어 보이므로, 마스킹 없는 전체 내보내기는 금지.
+export async function exportStudents(): Promise<ExportStudentsResult> {
+  const m = await requireCurrentMembership();
+  if (m.role === "viewer") {
+    return { error: "전체 명단 다운로드는 마스터/편집 교사만 할 수 있습니다" };
+  }
+  const supabase = await createServerClient();
+
+  const { data: classRows } = await supabase
+    .from("classes")
+    .select("id, name")
+    .eq("group_id", m.groupId);
+  const classNameById = new Map((classRows ?? []).map((c) => [c.id, c.name]));
+
+  const { data, error } = await supabase
+    .from("students")
+    .select(
+      "name, grade, gender, class_id, birthday_year, birthday_month, birthday_day, phone_self, kakao_id, school, address, guardian_relation, guardian_relation_other, guardian_name, phone_guardian, guardian2_relation, guardian2_name, guardian2_phone, baptism, family_note, note, parent_chat_invited, registration_submitted",
+    )
+    .eq("group_id", m.groupId)
+    .is("deleted_at", null)
+    .is("graduated_at", null)
+    .order("grade", { ascending: true })
+    .order("name", { ascending: true });
+  if (error) return { error: error.message };
+
+  const rows: ExportStudent[] = (data ?? []).map((s) => ({
+    name: s.name,
+    grade: s.grade,
+    gender: s.gender,
+    className: s.class_id ? (classNameById.get(s.class_id) ?? null) : null,
+    birthdayYear: s.birthday_year,
+    birthdayMonth: s.birthday_month,
+    birthdayDay: s.birthday_day,
+    phoneSelf: s.phone_self,
+    kakaoId: s.kakao_id,
+    school: s.school,
+    address: s.address,
+    guardianRelation: s.guardian_relation,
+    guardianRelationOther: s.guardian_relation_other,
+    guardianName: s.guardian_name,
+    phoneGuardian: s.phone_guardian,
+    guardian2Relation: s.guardian2_relation,
+    guardian2Name: s.guardian2_name,
+    guardian2Phone: s.guardian2_phone,
+    baptism: s.baptism,
+    familyNote: s.family_note,
+    note: s.note,
+    parentChatInvited: s.parent_chat_invited,
+    registrationSubmitted: s.registration_submitted,
+  }));
+  return { rows };
 }
 
 // ── 엑셀 대량 업로드 ──────────────────────────────────────────

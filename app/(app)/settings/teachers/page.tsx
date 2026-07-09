@@ -10,6 +10,7 @@ import {
   removeMembership,
 } from "@/app/actions/memberships";
 import { loadTeachers } from "@/lib/teachers";
+import { TeacherExportButton } from "@/components/teacher-export";
 
 export default async function TeachersPage() {
   const current = await requireCurrentMembership();
@@ -171,7 +172,7 @@ export default async function TeachersPage() {
         <section className="mt-10">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-ink-muted">교사 명단 ({teachers.length})</h2>
-            <span className="flex gap-2">
+            <span className="flex flex-wrap items-center justify-end gap-2">
               <Link
                 href="/settings/teachers/roster/import"
                 className="rounded-btn bg-sage-deep px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
@@ -184,6 +185,8 @@ export default async function TeachersPage() {
               >
                 + 교사 추가
               </Link>
+              {/* 전체 명단 내보내기: 이 섹션 전체가 master 전용(페이지 상단에서 redirect). */}
+              <TeacherExportButton />
             </span>
           </div>
           {teachers.length === 0 ? (

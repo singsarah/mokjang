@@ -3,6 +3,7 @@ import { loadRoster } from "@/lib/students";
 import { requireCurrentMembership } from "@/lib/memberships";
 import { Icon } from "@/components/icon";
 import { PromoteButton } from "@/components/promote-button";
+import { StudentExportButton } from "@/components/student-export";
 
 // 성별 색점: 여=핑크, 남=하늘, 미입력=중립(테두리만). 배정 목록과 동일.
 function genderDot(gender: string | null): string {
@@ -50,7 +51,7 @@ export default async function RosterPage() {
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold text-ink">학적부</h1>
           {canEdit && (
-            <span className="flex items-center gap-2">
+            <span className="flex flex-wrap items-center justify-end gap-2">
               {/* 엑셀 업로드·학생 추가: 대등한 주요 기능. 같은 크기·모양, 색만 살짝 다르게. */}
               <Link
                 href="/settings/roster/import"
@@ -64,6 +65,8 @@ export default async function RosterPage() {
               >
                 + 학생 추가
               </Link>
+              {/* 전체 명단 내보내기: 학생은 앱에서 계속 추가·수정되므로 항상 최신 상태로 내려받기. */}
+              <StudentExportButton />
             </span>
           )}
         </div>

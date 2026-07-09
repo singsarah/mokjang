@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership, type CurrentMembership } from "@/lib/memberships";
 import { teacherSchema, type TeacherInput } from "@/lib/validation/teacher";
+import type { ExportTeacher } from "@/lib/roster-export";
 import type { Database } from "@/lib/supabase/database.types";
 
 type TeacherInsert = Database["public"]["Tables"]["teachers"]["Insert"];
@@ -77,6 +78,38 @@ export async function deleteTeacher(input: { id: string }): Promise<{ error?: st
   if (error) return { error: error.message };
   revalidatePath("/settings/teachers");
   return {};
+}
+
+// ── 엑셀 전체 명단 다운로드 ────────────────────────────────────
+
+export type ExportTeachersResult = { rows?: ExportTeacher[]; error?: string };
+
+// 교사 명단 전체를 모든 필드와 함께 내려받기용으로 반환. 교사 관리는 master 전용.
+export async function exportTeachers(): Promise<ExportTeachersResult> {
+  const m = await requireCurrentMembership();
+  if (m.role !== "master") {
+    return { error: "교사 명단 다운로드는 대표 교사만 할 수 있습니다" };
+  }
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("teachers")
+    .select("name, birthday_year, birthday_month, birthday_day, phone, kakao_id, duty, job_type, note")
+    .eq("group_id", m.groupId)
+    .order("name", { ascending: true });
+  if (error) return { error: error.message };
+
+  const rows: ExportTeacher[] = (data ?? []).map((t) => ({
+    name: t.name,
+    birthdayYear: t.birthday_year,
+    birthdayMonth: t.birthday_month,
+    birthdayDay: t.birthday_day,
+    phone: t.phone,
+    kakaoId: t.kakao_id,
+    duty: t.duty,
+    jobType: t.job_type,
+    note: t.note,
+  }));
+  return { rows };
 }
 
 // ── 엑셀 대량 업로드 ──────────────────────────────────────────
