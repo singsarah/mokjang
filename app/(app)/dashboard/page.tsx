@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { loadDashboard } from "@/lib/dashboard";
 import { DashboardStats } from "@/components/dashboard-stats";
 import { DashboardContact } from "@/components/dashboard-contact";
+import { AttendanceTrend } from "@/components/attendance-trend";
+import { AttendanceExportButton } from "@/components/attendance-export-button";
 import { CakeIcon } from "@/components/flat-icons";
 
 // "YYYY-MM-DD" → "M/D"
@@ -14,25 +17,60 @@ const genderDot = (gender: string | null) =>
   gender === "female" ? "bg-pink-400" : gender === "male" ? "bg-sky-400" : "bg-transparent border border-border";
 
 const cardClass = "mx-auto max-w-md rounded-2xl border border-border bg-white p-6 shadow-sm";
+const navBtn =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-btn border border-border bg-white text-sm text-ink shadow-sm transition hover:bg-card";
+const navBtnDisabled =
+  "flex h-8 w-8 shrink-0 items-center justify-center rounded-btn border border-border bg-white text-sm text-ink-muted opacity-40";
 
-export default async function DashboardPage() {
-  const { summary, canCall, contact, birthdays } = await loadDashboard();
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>;
+}) {
+  const { date: dateParam } = await searchParams;
+  const selectedDate = dateParam && DATE_RE.test(dateParam) ? dateParam : undefined;
+
+  const { summary, canCall, contact, birthdays, trend } = await loadDashboard(selectedDate);
+
+  // 최신 세션을 보고 있는지 여부(다음 세션이 없으면 최신) — 제목/그래프 강조에 사용.
+  const isLatest = !summary || summary.nextDate === null;
+  const summaryTitle = isLatest ? "지난 예배 출석" : `${shortDate(summary!.date)} 예배 출석`;
 
   return (
     <main className="min-h-screen space-y-4 bg-bg px-6 py-8 pb-24">
       {/* 1. 요약 카드 (세션 없으면 빈 상태) */}
       {summary ? (
         <div className={cardClass}>
-          {/* 날짜 + note */}
-          <div className="flex items-baseline justify-between">
-            <h1 className="font-display text-lg font-bold text-ink">지난 예배 출석</h1>
-            <span className="text-sm text-ink-muted">
-              {shortDate(summary.date)}{summary.note ? ` · ${summary.note}` : ""}
-            </span>
+          {/* ◀ 제목/날짜 ▶ */}
+          <div className="flex items-center justify-between gap-2">
+            {summary.prevDate ? (
+              <Link href={`/dashboard?date=${summary.prevDate}`} aria-label="이전 예배" className={navBtn}>
+                ◀
+              </Link>
+            ) : (
+              <span aria-hidden="true" className={navBtnDisabled}>◀</span>
+            )}
+
+            <div className="min-w-0 flex-1 text-center">
+              <h1 className="font-display text-lg font-bold text-ink">{summaryTitle}</h1>
+              <p className="text-sm text-ink-muted">
+                {shortDate(summary.date)}{summary.note ? ` · ${summary.note}` : ""}
+              </p>
+            </div>
+
+            {summary.nextDate ? (
+              <Link href={`/dashboard?date=${summary.nextDate}`} aria-label="다음 예배" className={navBtn}>
+                ▶
+              </Link>
+            ) : (
+              <span aria-hidden="true" className={navBtnDisabled}>▶</span>
+            )}
           </div>
 
           {/* 큰 숫자 */}
-          <p className="mt-4 font-display text-4xl font-bold text-ink">
+          <p className="mt-4 text-center font-display text-4xl font-bold text-ink">
             출석 {summary.present}
             <span className="text-2xl text-ink-muted"> / {summary.total}</span>
           </p>
@@ -62,7 +100,16 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* 2. 연락필요 카드 */}
+      {/* 2. 출석 추이 카드 */}
+      <div className={cardClass}>
+        <div className="flex items-start justify-between gap-2">
+          <h2 className="font-display text-lg font-bold text-ink">출석 추이</h2>
+          {canCall && trend.length > 0 && <AttendanceExportButton />}
+        </div>
+        <AttendanceTrend points={trend} highlightDate={!isLatest ? summary?.date ?? null : null} />
+      </div>
+
+      {/* 3. 연락필요 카드 */}
       <div className={cardClass}>
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-lg font-bold text-ink">연락필요</h2>
@@ -75,7 +122,7 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* 3. 이번달 생일 카드 */}
+      {/* 4. 이번달 생일 카드 (학생 + 교사) */}
       <div className={cardClass}>
         <h2 className="flex items-center gap-1.5 font-display text-lg font-bold text-ink">
           이번달 생일 <CakeIcon className="inline-block h-[1.1em] w-[1.1em] text-gold-deep" />
@@ -87,7 +134,9 @@ export default async function DashboardPage() {
             {birthdays.map((b, i) => (
               <li key={i} className="flex items-center justify-between gap-2 py-2">
                 <span className="flex min-w-0 items-center gap-1.5">
-                  <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(b.gender)}`} />
+                  {b.who === "student" && (
+                    <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(b.gender)}`} />
+                  )}
                   <span className={`truncate text-sm text-ink ${b.isToday ? "font-bold" : ""}`}>
                     {b.name}
                   </span>
@@ -97,7 +146,7 @@ export default async function DashboardPage() {
                   </span>
                 </span>
                 <span className="shrink-0 text-sm text-ink-muted">
-                  {b.className ? `${b.grade}학년 · ${b.className}` : `${b.grade}학년`}
+                  {b.who === "teacher" ? "(교사)" : b.className ? `${b.grade}학년 · ${b.className}` : `${b.grade}학년`}
                 </span>
               </li>
             ))}

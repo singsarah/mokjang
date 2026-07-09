@@ -16,12 +16,13 @@ export type ContactEntry = {
   guardianRelation: string | null;
 };
 
-// 이번 달 생일자
+// 이번 달 생일자 (학생 + 교사)
 export type BirthdayEntry = {
+  who: "student" | "teacher";
   name: string;
-  gender: string | null;
-  grade: number;
-  className: string | null;
+  gender: string | null; // 교사는 항상 null
+  grade: number; // 교사는 0(미사용)
+  className: string | null; // 교사는 항상 null
   month: number;
   day: number;
   isToday: boolean;
@@ -38,33 +39,58 @@ export type DashboardSummary = {
   reasonList: DashboardStudentEntry[];
   unconfirmedList: DashboardStudentEntry[];
   classSummaries: { name: string; present: number; total: number }[];
+  // 세션 넘기기(◀ ▶)용 — 인접 세션 날짜. 없으면 그쪽 끝(최신/최초).
+  prevDate: string | null;
+  nextDate: string | null;
 };
+
+// 출석 추이 그래프용 세션별 데이터 (최근 최대 12개, 날짜 오름차순).
+export type TrendPoint = { date: string; present: number; total: number };
 
 export type DashboardData = {
   summary: DashboardSummary | null;
   canCall: boolean;
   contact: ContactEntry[];
   birthdays: BirthdayEntry[];
+  trend: TrendPoint[];
 };
 
-// 지난(최신) 예배 출석 요약 + 연락필요 + 이번달 생일. 세션이 없어도 생일은 반환(summary만 null).
-export async function loadDashboard(): Promise<DashboardData> {
+type SessionStats = {
+  present: number;
+  reason: number;
+  unconfirmed: number;
+  presentList: DashboardStudentEntry[];
+  reasonList: DashboardStudentEntry[];
+  unconfirmedList: DashboardStudentEntry[];
+  classSummaries: { name: string; present: number; total: number }[];
+  contact: ContactEntry[];
+};
+
+// 지난 예배 출석 요약(선택한 세션, 기본값 최신) + 연락필요(항상 최신 세션 기준) + 이번달 생일(학생+교사)
+// + 출석 추이(최근 12개 세션). 세션이 없어도 생일은 반환(summary/trend는 빈 값).
+export async function loadDashboard(selectedDate?: string): Promise<DashboardData> {
   const m = await requireCurrentMembership();
   const supabase = await createServerClient();
   const mask = m.role === "viewer";
   const canCall = m.role !== "viewer";
 
-  // 재적 학생 + 반 (생일/연락처에 항상 필요)
+  // 재적 학생 + 반 (생일/연락처/요약에 항상 필요)
   // deleted_at만 필터 → 출석판/기존 요약과 동일한 집합 유지. 졸업생은 생일 필터에서 제외.
-  const { data: studentRows } = await supabase
-    .from("students")
-    .select("id, name, class_id, gender, grade, phone_self, phone_guardian, guardian_relation, birthday_month, birthday_day, graduated_at")
-    .eq("group_id", m.groupId)
-    .is("deleted_at", null);
-
-  const { data: classRows } = await supabase
-    .from("classes").select("id, name, display_order")
-    .eq("group_id", m.groupId).order("display_order", { ascending: true });
+  const [{ data: studentRows }, { data: classRows }, { data: teacherRows }] = await Promise.all([
+    supabase
+      .from("students")
+      .select("id, name, class_id, gender, grade, phone_self, phone_guardian, guardian_relation, birthday_month, birthday_day, graduated_at")
+      .eq("group_id", m.groupId)
+      .is("deleted_at", null),
+    supabase
+      .from("classes").select("id, name, display_order")
+      .eq("group_id", m.groupId).order("display_order", { ascending: true }),
+    supabase
+      .from("teachers").select("name, birthday_month, birthday_day")
+      .eq("group_id", m.groupId)
+      .not("birthday_month", "is", null)
+      .not("birthday_day", "is", null),
+  ]);
 
   const classes = classRows ?? [];
   const classNameById = new Map<string, string>();
@@ -87,9 +113,10 @@ export async function loadDashboard(): Promise<DashboardData> {
   const todayMonth = Number(kMonthStr);
   const todayDay = Number(kDayStr);
 
-  const birthdays: BirthdayEntry[] = students
+  const studentBirthdays: BirthdayEntry[] = students
     .filter((s) => s.graduatedAt == null && s.birthdayMonth === todayMonth && s.birthdayDay != null)
     .map((s) => ({
+      who: "student" as const,
       name: s.name,
       gender: s.gender,
       grade: s.grade,
@@ -97,94 +124,153 @@ export async function loadDashboard(): Promise<DashboardData> {
       month: s.birthdayMonth!,
       day: s.birthdayDay!,
       isToday: s.birthdayMonth === todayMonth && s.birthdayDay === todayDay,
-    }))
-    .sort((a, b) => a.day - b.day || a.name.localeCompare(b.name, "ko"));
+    }));
 
-  // 최신 세션
-  const { data: session } = await supabase
+  const teacherBirthdays: BirthdayEntry[] = (teacherRows ?? [])
+    .filter((t) => t.birthday_month === todayMonth && t.birthday_day != null)
+    .map((t) => ({
+      who: "teacher" as const,
+      name: t.name,
+      gender: null,
+      grade: 0,
+      className: null,
+      month: t.birthday_month!,
+      day: t.birthday_day!,
+      isToday: t.birthday_month === todayMonth && t.birthday_day === todayDay,
+    }));
+
+  const birthdays: BirthdayEntry[] = [...studentBirthdays, ...teacherBirthdays].sort(
+    (a, b) => a.day - b.day || a.name.localeCompare(b.name, "ko"),
+  );
+
+  // 전체 세션 (오름차순) — 세션 넘기기(◀▶)와 출석 추이 그래프 양쪽에 사용.
+  const { data: sessionRows } = await supabase
     .from("attendance_sessions").select("id, session_date, note")
     .eq("group_id", m.groupId)
-    .order("session_date", { ascending: false })
-    .limit(1).maybeSingle();
+    .order("session_date", { ascending: true });
+  const sessions = sessionRows ?? [];
 
-  if (!session) {
-    return { summary: null, canCall, contact: [], birthdays };
+  if (sessions.length === 0) {
+    return { summary: null, canCall, contact: [], birthdays, trend: [] };
   }
 
-  // 해당 세션 레코드
-  const records: Record<string, BoardRecord> = {};
-  const { data: recRows } = await supabase
-    .from("attendance_records").select("student_id, status, reason")
-    .eq("session_id", session.id).eq("group_id", m.groupId);
-  for (const r of recRows ?? []) {
-    records[r.student_id] = { status: r.status as AttStatus, reason: r.reason };
-  }
+  const latestSession = sessions[sessions.length - 1]!;
+  const selectedIdx = selectedDate
+    ? sessions.findIndex((s) => s.session_date === selectedDate)
+    : -1;
+  const activeIdx = selectedIdx >= 0 ? selectedIdx : sessions.length - 1;
+  const session = sessions[activeIdx]!;
+  const prevDate = activeIdx > 0 ? sessions[activeIdx - 1]!.session_date : null;
+  const nextDate = activeIdx < sessions.length - 1 ? sessions[activeIdx + 1]!.session_date : null;
 
-  // classId별 그룹핑 (null = 미배정)
+  // classId별 그룹핑 (null = 미배정) — 세션 무관, 재사용.
   const byClass = new Map<string | null, Stud[]>();
   for (const s of students) {
     const key = s.classId ?? null;
     if (!byClass.has(key)) byClass.set(key, []);
     byClass.get(key)!.push(s);
   }
-
-  let present = 0, reason = 0, unconfirmed = 0;
-  const presentList: DashboardStudentEntry[] = [];
-  const reasonList: DashboardStudentEntry[] = [];
-  const unconfirmedList: DashboardStudentEntry[] = [];
-  const contact: ContactEntry[] = [];
-  const classSummaries: { name: string; present: number; total: number }[] = [];
-
   // display_order 순서 + 미배정 맨 뒤
   const order: { key: string | null; name: string }[] = classes.map((c) => ({ key: c.id, name: c.name }));
   order.push({ key: null, name: "미배정" });
 
-  for (const grp of order) {
-    const list = byClass.get(grp.key) ?? [];
-    if (list.length === 0) continue;
-    const classActive = list.some((s) => Boolean(records[s.id]));
-    const className = grp.key === null ? null : grp.name; // 미배정은 null
-    let gPresent = 0;
-    for (const s of list) {
-      const d = displayStatus(records[s.id], classActive);
-      const base = { name: s.name, gender: s.gender, grade: s.grade, className };
-      if (d === "present") { present++; gPresent++; presentList.push({ ...base, reason: null }); }
-      else if (d === "absent_with_reason") { reason++; reasonList.push({ ...base, reason: records[s.id]?.reason ?? null }); }
-      else if (d === "unconfirmed") {
-        unconfirmed++;
-        unconfirmedList.push({ ...base, reason: null });
-        contact.push({
-          name: s.name, gender: s.gender, grade: s.grade, className,
-          phoneSelf: mask ? maskPhone(s.phoneSelf) : s.phoneSelf,
-          phoneGuardian: mask ? maskPhone(s.phoneGuardian) : s.phoneGuardian,
-          guardianRelation: s.guardianRelation,
-        });
+  function buildStats(records: Record<string, BoardRecord>): SessionStats {
+    let present = 0, reason = 0, unconfirmed = 0;
+    const presentList: DashboardStudentEntry[] = [];
+    const reasonList: DashboardStudentEntry[] = [];
+    const unconfirmedList: DashboardStudentEntry[] = [];
+    const contact: ContactEntry[] = [];
+    const classSummaries: { name: string; present: number; total: number }[] = [];
+
+    for (const grp of order) {
+      const list = byClass.get(grp.key) ?? [];
+      if (list.length === 0) continue;
+      const classActive = list.some((s) => Boolean(records[s.id]));
+      const className = grp.key === null ? null : grp.name; // 미배정은 null
+      let gPresent = 0;
+      for (const s of list) {
+        const d = displayStatus(records[s.id], classActive);
+        const base = { name: s.name, gender: s.gender, grade: s.grade, className };
+        if (d === "present") { present++; gPresent++; presentList.push({ ...base, reason: null }); }
+        else if (d === "absent_with_reason") { reason++; reasonList.push({ ...base, reason: records[s.id]?.reason ?? null }); }
+        else if (d === "unconfirmed") {
+          unconfirmed++;
+          unconfirmedList.push({ ...base, reason: null });
+          contact.push({
+            name: s.name, gender: s.gender, grade: s.grade, className,
+            phoneSelf: mask ? maskPhone(s.phoneSelf) : s.phoneSelf,
+            phoneGuardian: mask ? maskPhone(s.phoneGuardian) : s.phoneGuardian,
+            guardianRelation: s.guardianRelation,
+          });
+        }
+        // unchecked는 미포함
       }
-      // unchecked는 미포함
+      if (classActive) {
+        classSummaries.push({ name: grp.name, present: gPresent, total: list.length });
+      }
     }
-    if (classActive) {
-      classSummaries.push({ name: grp.name, present: gPresent, total: list.length });
-    }
+
+    presentList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+    reasonList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+    unconfirmedList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+    contact.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+
+    return { present, reason, unconfirmed, presentList, reasonList, unconfirmedList, classSummaries, contact };
   }
 
-  // 가나다순 정렬
-  presentList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  reasonList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  unconfirmedList.sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  contact.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  async function fetchRecords(sessionId: string): Promise<Record<string, BoardRecord>> {
+    const records: Record<string, BoardRecord> = {};
+    const { data: recRows } = await supabase
+      .from("attendance_records").select("student_id, status, reason")
+      .eq("session_id", sessionId).eq("group_id", m.groupId);
+    for (const r of recRows ?? []) {
+      records[r.student_id] = { status: r.status as AttStatus, reason: r.reason };
+    }
+    return records;
+  }
+
+  const selectedRecords = await fetchRecords(session.id);
+  const selectedStats = buildStats(selectedRecords);
+
+  // 연락필요는 항상 최신 세션 기준(선택한 세션과 다르면 별도 조회).
+  const contact = session.id === latestSession.id
+    ? selectedStats.contact
+    : buildStats(await fetchRecords(latestSession.id)).contact;
 
   const summary: DashboardSummary = {
     date: session.session_date,
     note: session.note,
     total: students.length,
-    present,
-    reason,
-    unconfirmed,
-    presentList,
-    reasonList,
-    unconfirmedList,
-    classSummaries,
+    present: selectedStats.present,
+    reason: selectedStats.reason,
+    unconfirmed: selectedStats.unconfirmed,
+    presentList: selectedStats.presentList,
+    reasonList: selectedStats.reasonList,
+    unconfirmedList: selectedStats.unconfirmedList,
+    classSummaries: selectedStats.classSummaries,
+    prevDate,
+    nextDate,
   };
 
-  return { summary, canCall, contact, birthdays };
+  // 출석 추이: 최근 최대 12개 세션의 출석(present) 인원 수. 총원은 현재 재적 인원(조회 시점 고정)으로 통일.
+  const trendSessions = sessions.slice(-12);
+  const trend: TrendPoint[] = [];
+  if (trendSessions.length > 0) {
+    const trendIds = trendSessions.map((s) => s.id);
+    const { data: presentRows } = await supabase
+      .from("attendance_records")
+      .select("session_id")
+      .in("session_id", trendIds)
+      .eq("status", "present")
+      .eq("group_id", m.groupId);
+    const presentBySession = new Map<string, number>();
+    for (const r of presentRows ?? []) {
+      presentBySession.set(r.session_id, (presentBySession.get(r.session_id) ?? 0) + 1);
+    }
+    for (const s of trendSessions) {
+      trend.push({ date: s.session_date, present: presentBySession.get(s.id) ?? 0, total: students.length });
+    }
+  }
+
+  return { summary, canCall, contact, birthdays, trend };
 }
