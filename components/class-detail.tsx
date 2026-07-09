@@ -118,10 +118,10 @@ export function ClassDetail({
                 <span className="flex items-center gap-2">
                   <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
                   <span className="flex items-center gap-1 text-ink"><Icon name="sheep-face" size={16} alt="" />{s.name}
-                    {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
+                    {meta(s.grade, s.school) && <span className="ml-1 text-sm text-ink-muted">{meta(s.grade, s.school)}</span>}
                   </span>
                 </span>
-                <button onClick={() => onRemove(s.id)} disabled={isPending} className="rounded-btn border border-border px-3 py-1 text-xs text-ink-muted transition hover:text-ink disabled:opacity-50">
+                <button onClick={() => onRemove(s.id)} disabled={isPending} className="rounded-btn border border-border px-3 py-1 text-sm text-ink-muted transition hover:text-ink disabled:opacity-50">
                   빼기
                 </button>
               </li>
@@ -164,9 +164,9 @@ export function ClassDetail({
                     <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggle(s.id)} className="h-4 w-4" />
                     <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
                     <span className="text-ink">{s.name}
-                      {meta(s.grade, s.school) && <span className="ml-1 text-xs text-ink-muted">{meta(s.grade, s.school)}</span>}
+                      {meta(s.grade, s.school) && <span className="ml-1 text-sm text-ink-muted">{meta(s.grade, s.school)}</span>}
                     </span>
-                    <span className="ml-auto text-xs text-ink-muted">
+                    <span className="ml-auto text-sm text-ink-muted">
                       {s.currentClassName ? `현재: ${s.currentClassName}` : "미배정"}
                     </span>
                   </label>

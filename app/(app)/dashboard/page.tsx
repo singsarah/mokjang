@@ -1,6 +1,7 @@
 import { loadDashboard } from "@/lib/dashboard";
 import { DashboardStats } from "@/components/dashboard-stats";
 import { DashboardContact } from "@/components/dashboard-contact";
+import { CakeIcon } from "@/components/flat-icons";
 
 // "YYYY-MM-DD" → "M/D"
 function shortDate(iso: string): string {
@@ -65,7 +66,7 @@ export default async function DashboardPage() {
       <div className={cardClass}>
         <div className="flex items-baseline justify-between">
           <h2 className="font-display text-lg font-bold text-ink">연락필요</h2>
-          <span className="text-xs text-ink-muted">미확인 학생</span>
+          <span className="text-sm text-ink-muted">미확인 학생</span>
         </div>
         {contact.length === 0 ? (
           <p className="mt-3 text-sm text-ink-muted">연락할 학생이 없어요 🐑</p>
@@ -76,7 +77,9 @@ export default async function DashboardPage() {
 
       {/* 3. 이번달 생일 카드 */}
       <div className={cardClass}>
-        <h2 className="font-display text-lg font-bold text-ink">이번달 생일 🎂</h2>
+        <h2 className="flex items-center gap-1.5 font-display text-lg font-bold text-ink">
+          이번달 생일 <CakeIcon className="inline-block h-[1.1em] w-[1.1em] text-gold-deep" />
+        </h2>
         {birthdays.length === 0 ? (
           <p className="mt-3 text-sm text-ink-muted">이번 달 생일자가 없어요.</p>
         ) : (
@@ -93,7 +96,7 @@ export default async function DashboardPage() {
                     {b.isToday ? " 🎂" : ""}
                   </span>
                 </span>
-                <span className="shrink-0 text-xs text-ink-muted">
+                <span className="shrink-0 text-sm text-ink-muted">
                   {b.className ? `${b.grade}학년 · ${b.className}` : `${b.grade}학년`}
                 </span>
               </li>

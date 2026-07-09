@@ -35,7 +35,7 @@ export function DashboardStats({
           className={`rounded-btn bg-sage-soft py-3 ${sel === "present" ? "ring-2 ring-sage" : ""}`}
         >
           <p className="font-display text-2xl font-bold text-sage-deep">{present}</p>
-          <p className="text-xs text-ink-muted">출석</p>
+          <p className="text-sm text-ink-muted">출석</p>
         </button>
         <button
           type="button"
@@ -44,7 +44,7 @@ export function DashboardStats({
           className={`rounded-btn bg-gold-soft py-3 ${sel === "reason" ? "ring-2 ring-gold" : ""}`}
         >
           <p className="font-display text-2xl font-bold text-gold-deep">{reason}</p>
-          <p className="text-xs text-ink-muted">사유결석</p>
+          <p className="text-sm text-ink-muted">사유결석</p>
         </button>
         <button
           type="button"
@@ -53,7 +53,7 @@ export function DashboardStats({
           className={`rounded-btn bg-unconfirmed-soft py-3 ${sel === "unconfirmed" ? "ring-2 ring-unconfirmed" : ""}`}
         >
           <p className="font-display text-2xl font-bold text-unconfirmed">{unconfirmed}</p>
-          <p className="text-xs text-ink-muted">미확인</p>
+          <p className="text-sm text-ink-muted">미확인</p>
         </button>
       </div>
 
@@ -84,7 +84,7 @@ function NameList({ soft, entries }: { soft: string; entries: StudentEntry[] }) 
                   {e.reason ? `${e.name} — ${e.reason}` : e.name}
                 </span>
               </span>
-              <span className="shrink-0 text-xs text-ink-muted">
+              <span className="shrink-0 text-sm text-ink-muted">
                 {e.className ? `${e.grade}학년 · ${e.className}` : `${e.grade}학년`}
               </span>
             </li>

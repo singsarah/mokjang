@@ -26,7 +26,7 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
         <button
           type="button"
           onClick={() => copy(code, "code")}
-          className="rounded-btn border border-border px-2 py-1 text-xs text-ink-muted hover:bg-card"
+          className="rounded-btn border border-border px-2 py-1 text-sm text-ink-muted hover:bg-card"
         >
           {copied === "code" ? "복사됨 ✓" : "복사"}
         </button>
@@ -45,7 +45,7 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
             <button
               type="button"
               onClick={() => copy(url, "link")}
-              className="shrink-0 rounded-btn border border-border px-2 py-1 text-xs text-ink-muted hover:bg-card"
+              className="shrink-0 rounded-btn border border-border px-2 py-1 text-sm text-ink-muted hover:bg-card"
             >
               {copied === "link" ? "복사됨 ✓" : "복사"}
             </button>
@@ -53,7 +53,7 @@ export function JoinShare({ code, url }: { code: string; url: string }) {
         </>
       )}
 
-      <p className="mt-3 text-xs text-ink-muted">
+      <p className="mt-3 text-sm text-ink-muted">
         코드나 링크를 다른 교사에게 공유하세요. 링크를 열면 참여 화면에 코드가
         자동으로 입력됩니다.
       </p>

@@ -90,22 +90,14 @@ export function AttendanceBoard({
   }
 
   const sheepCls = (d: DisplayStatus) =>
-    d === "present" ? "bg-sage-deep text-white border-[#3c5238]"
-    : d === "absent_with_reason" ? "bg-gold border-gold-deep text-ink"
-    : d === "unconfirmed" ? "bg-danger text-white border-[#b64a45]"
-    : "bg-[#FBEEE6] text-ink border-[rgba(58,50,46,.35)]"; // unchecked(흰)
+    d === "present" ? "bg-sage-deep text-white"
+    : d === "absent_with_reason" ? "bg-gold text-ink"
+    : d === "unconfirmed" ? "bg-danger text-white"
+    : "bg-[#FBEEE6] text-ink"; // unchecked(흰)
 
   return (
     // 화면 전체가 푸른 풀밭 (크림색 바탕 없음)
-    <main className="min-h-screen pb-24" style={{ background: "linear-gradient(180deg,#5F9E93 0%,#7DA98A 42%,#98BE86 100%)" }}>
-      {/* 손그림 러프 필터 (1회) */}
-      <svg width="0" height="0" className="absolute">
-        <filter id="rough">
-          <feTurbulence type="fractalNoise" baseFrequency="0.018 0.03" numOctaves={2} seed={7} result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale={6} />
-        </filter>
-      </svg>
-
+    <main className="min-h-screen pb-24" style={{ background: "#85B287" }}>
       <div className="mx-auto max-w-md">
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">
@@ -114,7 +106,7 @@ export function AttendanceBoard({
             <span className="font-bold text-[#FDF3E7]">{date}</span>
             <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-[#F3E2CE]">▶</a>
           </div>
-          <span className="rounded-tag bg-gold-soft px-3 py-1 text-xs text-ink-muted">{note}</span>
+          <span className="rounded-tag bg-gold-soft px-3 py-1 text-sm text-ink-muted">{note}</span>
         </div>
 
         {/* 반 탭 */}
@@ -134,8 +126,8 @@ export function AttendanceBoard({
           ))}
         </div>
 
-        {/* 범례 */}
-        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-[11px] text-[#FDF3E7]">
+        {/* 범례 (최소 폰트 크기 예외: 12px 유지) */}
+        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-xs text-[#FDF3E7]">
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full border border-[#b9a99a] bg-[#FBEEE6] align-middle" />미체크</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-sage-deep align-middle" />출석</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-gold align-middle" />사유결석</span>
@@ -148,19 +140,16 @@ export function AttendanceBoard({
         <div className="relative px-3 pb-6 pt-3">
           {/* 나무 팻말 */}
           {activeClass && (
-            <div className="relative z-10 mx-auto w-52">
-              <div className="flex justify-between px-9"><span className="block h-3.5 w-0.5 bg-[#7d5537]" /><span className="block h-3.5 w-0.5 bg-[#7d5537]" /></div>
-              <div className="absolute inset-x-0 bottom-0 top-3.5 rounded-lg border-[3px] border-[#7d5537] bg-[#9a6a48]" style={{ filter: "url(#rough)" }} />
-              <div className="relative flex items-baseline justify-center gap-2 px-2 pb-2.5 pt-2 text-center">
+            <div className="relative z-10 mx-auto w-52 rounded-xl bg-[#8d6549] px-2 pb-2.5 pt-2">
+              <div className="flex items-baseline justify-center gap-2 text-center">
                 <span className="font-display text-2xl font-bold text-[#FDF3E7]">{activeClass.name}</span>
-                {activeClass.teacherName && <span className="text-xs text-[#F3E2CE]">{activeClass.teacherName} 선생님</span>}
+                {activeClass.teacherName && <span className="text-sm text-[#F3E2CE]">{activeClass.teacherName} 선생님</span>}
               </div>
             </div>
           )}
 
           {/* 울타리 우리 */}
-          <div className="relative z-[2] mt-3 rounded-2xl bg-[#A7C58C] px-3 py-5">
-            <div className="pointer-events-none absolute rounded-[20px] border-[5px] border-[#8f5c44]" style={{ inset: "-4px", filter: "url(#rough)" }} />
+          <div className="relative z-[2] mt-3 rounded-2xl border-[5px] border-[#8f5c44] bg-[#A7C58C] px-3 py-5">
             <div className="relative z-[1] grid grid-cols-4 gap-x-2 gap-y-4">
               {(() => {
                 const classActive = shown.some((s) => Boolean(records[s.id]));
@@ -169,29 +158,20 @@ export function AttendanceBoard({
                   const absent = d === "unconfirmed" || d === "absent_with_reason";
                   return (
                   <div key={s.id} className="flex flex-col items-center gap-1">
-                    <div className="relative">
-                      <button
-                        onClick={() => onTap(s.id)}
-                        disabled={!canEdit}
-                        className={`relative z-[1] flex h-14 w-14 items-center justify-center border-2 text-center text-[12.5px] font-bold leading-tight shadow-sm ${sheepCls(d)}`}
-                        style={{ borderRadius: "52% 48% 50% 50% / 56% 56% 44% 44%" }}
-                      >
-                        {s.name}
-                      </button>
-                      {/* 양 다리 두 개 */}
-                      <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-1 flex justify-center gap-2.5">
-                        <span className="block h-2 w-[3px] rounded-b-full bg-[#6b4a34]" />
-                        <span className="block h-2 w-[3px] rounded-b-full bg-[#6b4a34]" />
-                      </span>
-                    </div>
+                    <button
+                      onClick={() => onTap(s.id)}
+                      disabled={!canEdit}
+                      className={`flex h-14 w-14 items-center justify-center rounded-full text-center text-[14px] font-bold leading-tight ${sheepCls(d)}`}
+                    >
+                      {s.name}
+                    </button>
                     {absent && (
                       <input
                         defaultValue={records[s.id]?.reason ?? ""}
                         onBlur={(e) => onReason(s.id, e.target.value)}
                         placeholder="사유"
                         disabled={!canEdit}
-                        // 이름 글씨와 같은 크기, 다리를 덮도록 위로 당김
-                        className="relative z-[2] -mt-2 w-full rounded-btn border border-border bg-white px-1.5 py-1 text-center text-[12.5px] text-ink"
+                        className="-mt-1 w-full rounded-btn border border-border bg-white px-1.5 py-1 text-center text-[14px] text-ink"
                       />
                     )}
                   </div>

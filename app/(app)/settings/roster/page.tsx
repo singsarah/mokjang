@@ -69,7 +69,7 @@ export default async function RosterPage() {
         </div>
 
         {/* 하위 링크 줄: 학년 올리기(master 전용) · 숨김 학생 · 졸업생 */}
-        <div className="mt-3 flex items-center gap-2 text-xs">
+        <div className="mt-3 flex items-center gap-2 text-sm">
           {isMaster && <PromoteButton />}
           <Link
             href="/settings/roster/hidden"
@@ -121,7 +121,7 @@ export default async function RosterPage() {
                             )}
                           </span>
                           {meta && (
-                            <span className="truncate text-xs text-ink-muted">{meta}</span>
+                            <span className="truncate text-sm text-ink-muted">{meta}</span>
                           )}
                         </span>
                         <span className="shrink-0 text-lg text-ink-muted">›</span>

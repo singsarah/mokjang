@@ -4,12 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Icon, type IconName } from "@/components/icon";
+import { CalendarIcon, ChartIcon, GearIcon } from "@/components/flat-icons";
+import type { ComponentType } from "react";
 
-const TABS: { href: string; label: string; icon: string; img?: IconName }[] = [
-  { href: "/attendance", label: "출석", icon: "🐑", img: "sheep-face" },
-  { href: "/calendar", label: "일정", icon: "📅" },
-  { href: "/dashboard", label: "대시보드", icon: "📊" },
-  { href: "/settings", label: "설정", icon: "⚙️" },
+const TABS: {
+  href: string;
+  label: string;
+  img?: IconName;
+  FlatIcon?: ComponentType<{ className?: string }>;
+}[] = [
+  { href: "/attendance", label: "출석", img: "sheep-face" },
+  { href: "/calendar", label: "일정", FlatIcon: CalendarIcon },
+  { href: "/dashboard", label: "대시보드", FlatIcon: ChartIcon },
+  { href: "/settings", label: "설정", FlatIcon: GearIcon },
 ];
 
 export function TabBar() {
@@ -25,17 +32,17 @@ export function TabBar() {
               <Link
                 href={tab.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-3 text-xs",
+                  "flex flex-col items-center gap-1 py-3 text-sm",
                   active
                     ? "font-semibold text-sage-deep"
-                    : "text-ink-muted hover:text-ink",
+                    : "font-normal text-ink-muted hover:text-ink",
                 )}
               >
                 {tab.img ? (
                   <Icon name={tab.img} size={26} />
-                ) : (
-                  <span className="text-xl">{tab.icon}</span>
-                )}
+                ) : tab.FlatIcon ? (
+                  <tab.FlatIcon className="h-[22px] w-[22px]" />
+                ) : null}
                 <span>{tab.label}</span>
               </Link>
             </li>

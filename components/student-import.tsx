@@ -398,7 +398,7 @@ export function StudentImport() {
           </p>
 
           <div className="overflow-x-auto rounded-card border border-border/60 bg-white shadow-sm">
-            <table className="min-w-full text-xs">
+            <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-border/60 bg-card text-ink-muted">
                   <th className="px-2 py-1.5 text-left font-medium">이름</th>

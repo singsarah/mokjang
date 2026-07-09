@@ -163,10 +163,10 @@ export function StudentForm({
             />
           </label>
           {uploading && (
-            <p className="mt-1 text-xs text-ink-muted">업로드 중...</p>
+            <p className="mt-1 text-sm text-ink-muted">업로드 중...</p>
           )}
           {photoError && (
-            <p className="mt-1 text-xs text-danger">{photoError}</p>
+            <p className="mt-1 text-sm text-danger">{photoError}</p>
           )}
         </div>
       </div>

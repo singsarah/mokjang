@@ -72,7 +72,7 @@ export default async function TeachersPage() {
                       <div className="font-medium text-ink">
                         {profile?.display_name ?? "(이름 없음)"}
                       </div>
-                      <div className="text-xs text-ink-muted">{profile?.email}</div>
+                      <div className="text-sm text-ink-muted">{profile?.email}</div>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <form
@@ -128,11 +128,11 @@ export default async function TeachersPage() {
                   <div className="mb-3">
                     <div className="font-medium text-ink">
                       {profile?.display_name ?? "(이름 없음)"}{" "}
-                      <span className="ml-2 rounded-tag bg-sky-soft px-2 py-0.5 text-xs text-ink-muted">
+                      <span className="ml-2 rounded-tag bg-sky-soft px-2 py-0.5 text-sm text-ink-muted">
                         {ROLE_LABELS_KO[m.role]}
                       </span>
                     </div>
-                    <div className="text-xs text-ink-muted">{profile?.email}</div>
+                    <div className="text-sm text-ink-muted">{profile?.email}</div>
                   </div>
                   {m.role !== "master" && (
                     <div className="flex gap-2">
@@ -145,7 +145,7 @@ export default async function TeachersPage() {
                           });
                         }}
                       >
-                        <button className="rounded-btn border border-border px-3 py-1 text-xs text-ink transition hover:bg-card">
+                        <button className="rounded-btn border border-border px-3 py-1 text-sm text-ink transition hover:bg-card">
                           {m.role === "editor" ? "→ 조회로" : "→ 편집으로"}
                         </button>
                       </form>
@@ -155,7 +155,7 @@ export default async function TeachersPage() {
                           await removeMembership({ id: m.id });
                         }}
                       >
-                        <button className="rounded-btn border border-danger px-3 py-1 text-xs text-danger transition hover:bg-unconfirmed-soft">
+                        <button className="rounded-btn border border-danger px-3 py-1 text-sm text-danger transition hover:bg-unconfirmed-soft">
                           내보내기
                         </button>
                       </form>
@@ -174,13 +174,13 @@ export default async function TeachersPage() {
             <span className="flex gap-2">
               <Link
                 href="/settings/teachers/roster/import"
-                className="rounded-btn bg-sage-deep px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-sage"
+                className="rounded-btn bg-sage-deep px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
               >
                 엑셀 업로드
               </Link>
               <Link
                 href="/settings/teachers/roster/new"
-                className="rounded-btn bg-sage px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-sage-deep"
+                className="rounded-btn bg-sage px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
               >
                 + 교사 추가
               </Link>
@@ -200,9 +200,9 @@ export default async function TeachersPage() {
                   >
                     <span className="text-ink">
                       {t.name}
-                      {t.duty && <span className="ml-2 text-xs text-ink-muted">{t.duty}</span>}
+                      {t.duty && <span className="ml-2 text-sm text-ink-muted">{t.duty}</span>}
                     </span>
-                    <span className="flex items-center gap-2 text-xs text-ink-muted">
+                    <span className="flex items-center gap-2 text-sm text-ink-muted">
                       {t.phone && <span>{t.phone}</span>}
                       <span className="text-lg">›</span>
                     </span>

@@ -23,7 +23,7 @@ export default async function GraduatedPage() {
                 <span className="text-ink">🎓 {s.name}</span>
                 {canEdit && (
                   <form action={async () => { "use server"; await restoreGraduate({ id: s.id }); }}>
-                    <button className="rounded-btn border border-border px-3 py-1 text-xs text-ink-muted transition hover:text-ink">
+                    <button className="rounded-btn border border-border px-3 py-1 text-sm text-ink-muted transition hover:text-ink">
                       복원
                     </button>
                   </form>

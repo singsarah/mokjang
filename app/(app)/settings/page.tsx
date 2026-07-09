@@ -73,7 +73,7 @@ export default async function SettingsPage() {
             </span>
             <span className="min-w-0">
               <span className="block font-bold text-ink">{it.label}</span>
-              <span className="block text-xs text-ink-muted">{it.desc}</span>
+              <span className="block text-sm text-ink-muted">{it.desc}</span>
             </span>
             <span className="ml-auto text-lg text-ink-muted">›</span>
           </Link>

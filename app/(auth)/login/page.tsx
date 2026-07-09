@@ -41,7 +41,7 @@ function LoginForm() {
         </button>
       </form>
 
-      <div className="mb-4 flex items-center gap-3 text-xs text-ink-muted">
+      <div className="mb-4 flex items-center gap-3 text-sm text-ink-muted">
         <div className="h-px flex-1 bg-border" />
         <span>또는</span>
         <div className="h-px flex-1 bg-border" />

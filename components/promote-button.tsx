@@ -27,11 +27,11 @@ export function PromoteButton() {
       <button
         onClick={onClick}
         disabled={isPending}
-        className="rounded-tag border border-sage bg-white px-3 py-1 text-xs text-sage-deep shadow-sm transition hover:bg-sage-soft disabled:opacity-50"
+        className="rounded-tag border border-sage bg-white px-3 py-1 text-sm text-sage-deep shadow-sm transition hover:bg-sage-soft disabled:opacity-50"
       >
         {isPending ? "진급 중..." : "학년 올리기"}
       </button>
-      {error && <span className="mt-1 text-xs text-danger">{error}</span>}
+      {error && <span className="mt-1 text-sm text-danger">{error}</span>}
     </span>
   );
 }

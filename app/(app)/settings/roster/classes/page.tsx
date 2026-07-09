@@ -77,7 +77,7 @@ export default async function ClassesPage() {
                     {c.teacherName && (
                       <span className="text-sm text-ink-muted"> · {c.teacherName} 선생님</span>
                     )}{" "}
-                    <span className="text-xs text-ink-muted">({n}명)</span>
+                    <span className="text-sm text-ink-muted">({n}명)</span>
                   </span>
                   <span className="text-lg text-ink-muted">›</span>
                 </Link>

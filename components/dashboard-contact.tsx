@@ -47,7 +47,7 @@ export function DashboardContact({ canCall, contact }: { canCall: boolean; conta
                 <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(e.gender)}`} />
                 <span className="truncate text-sm text-ink">{e.name}</span>
               </span>
-              <span className="shrink-0 text-xs text-ink-muted">
+              <span className="shrink-0 text-sm text-ink-muted">
                 {e.className ? `${e.grade}학년 · ${e.className}` : `${e.grade}학년`}
               </span>
             </button>

@@ -32,7 +32,7 @@ export default async function HiddenStudentsPage() {
                 <span className="text-ink">
                   {s.name}
                   {s.grade != null && (
-                    <span className="text-xs text-ink-muted"> {s.grade}학년</span>
+                    <span className="text-sm text-ink-muted"> {s.grade}학년</span>
                   )}
                 </span>
                 <form action={async () => { "use server"; await restoreStudent({ id: s.id }); }}>
