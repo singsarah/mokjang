@@ -52,27 +52,28 @@ export default async function RosterPage() {
           <h1 className="font-display text-2xl font-bold text-ink">학적부</h1>
           {canEdit && (
             <span className="flex flex-wrap items-center justify-end gap-2">
-              {/* 엑셀 업로드·학생 추가: 대등한 주요 기능. 같은 크기·모양, 색만 살짝 다르게. */}
+              {/* 헤더에는 엑셀 업로드·다운로드만. 학생 추가는 아래 줄로. */}
               <Link
                 href="/settings/roster/import"
                 className="rounded-btn bg-sage-deep px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
               >
-                엑셀 업로드
+                업로드
               </Link>
-              <Link
-                href="/settings/roster/new"
-                className="rounded-btn bg-sage px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
-              >
-                + 학생 추가
-              </Link>
-              {/* 전체 명단 내보내기: 학생은 앱에서 계속 추가·수정되므로 항상 최신 상태로 내려받기. */}
               <StudentExportButton />
             </span>
           )}
         </div>
 
-        {/* 하위 링크 줄: 학년 올리기(master 전용) · 숨김 학생 · 졸업생 */}
-        <div className="mt-3 flex items-center gap-2 text-sm">
+        {/* 하위 링크 줄: 학생 추가 · 학년 올리기(master 전용) · 숨김 학생 · 졸업생 */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          {canEdit && (
+            <Link
+              href="/settings/roster/new"
+              className="rounded-tag bg-sage px-3 py-1 font-medium text-white shadow-sm transition hover:bg-sage-deep"
+            >
+              + 학생 추가
+            </Link>
+          )}
           {isMaster && <PromoteButton />}
           <Link
             href="/settings/roster/hidden"

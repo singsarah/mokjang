@@ -38,7 +38,7 @@ export function StudentExportButton() {
         disabled={isPending}
         className="rounded-btn border border-border bg-white px-4 py-2 text-sm text-ink shadow-sm transition hover:bg-card disabled:opacity-50"
       >
-        {isPending ? "내려받는 중…" : "엑셀 다운로드"}
+        {isPending ? "내려받는 중…" : "다운로드"}
       </button>
       {error && <p className="mt-1 text-xs text-danger">{error}</p>}
     </span>
