@@ -41,7 +41,15 @@ export default async function TeachersPage() {
 
   const pending = rows.filter((m) => m.status === "pending");
   const active = rows.filter((m) => m.status === "active");
+  // 마스터가 1명뿐이면 그 마스터의 강등 버튼을 숨긴다 (그룹에 마스터가 최소 1명은 있어야 함).
+  const masterCount = active.filter((m) => m.role === "master").length;
   const { teachers } = await loadTeachers();
+
+  const ROLE_BUTTON_LABELS: Record<string, string> = {
+    master: "→ 마스터로",
+    editor: "→ 편집으로",
+    viewer: "→ 조회로",
+  };
 
   return (
     <main className="min-h-screen bg-[#E6EAE0] pb-24">
@@ -135,31 +143,35 @@ export default async function TeachersPage() {
                     </div>
                     <div className="text-sm text-ink-muted">{profile?.email}</div>
                   </div>
-                  {m.role !== "master" && (
-                    <div className="flex gap-2">
-                      <form
-                        action={async () => {
-                          "use server";
-                          await changeRole({
-                            id: m.id,
-                            role: m.role === "editor" ? "viewer" : "editor",
-                          });
-                        }}
-                      >
-                        <button className="rounded-btn border border-border px-3 py-1 text-sm text-ink transition hover:bg-card">
-                          {m.role === "editor" ? "→ 조회로" : "→ 편집으로"}
-                        </button>
-                      </form>
-                      <form
-                        action={async () => {
-                          "use server";
-                          await removeMembership({ id: m.id });
-                        }}
-                      >
-                        <button className="rounded-btn border border-danger px-3 py-1 text-sm text-danger transition hover:bg-unconfirmed-soft">
-                          내보내기
-                        </button>
-                      </form>
+                  {(m.role !== "master" || masterCount > 1) && (
+                    <div className="flex flex-wrap gap-2">
+                      {(["master", "editor", "viewer"] as const)
+                        .filter((r) => r !== m.role)
+                        .map((r) => (
+                          <form
+                            key={r}
+                            action={async () => {
+                              "use server";
+                              await changeRole({ id: m.id, role: r });
+                            }}
+                          >
+                            <button className="rounded-btn border border-border px-3 py-1 text-sm text-ink transition hover:bg-card">
+                              {ROLE_BUTTON_LABELS[r]}
+                            </button>
+                          </form>
+                        ))}
+                      {m.role !== "master" && (
+                        <form
+                          action={async () => {
+                            "use server";
+                            await removeMembership({ id: m.id });
+                          }}
+                        >
+                          <button className="rounded-btn border border-danger px-3 py-1 text-sm text-danger transition hover:bg-unconfirmed-soft">
+                            내보내기
+                          </button>
+                        </form>
+                      )}
                     </div>
                   )}
                 </li>

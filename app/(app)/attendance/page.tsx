@@ -20,6 +20,8 @@ export default async function AttendancePage({
       date={board.date}
       note={board.note}
       canEdit={board.canEdit}
+      isMaster={board.isMaster}
+      initialClosed={board.closedAt != null}
       classes={board.classes}
       students={board.students}
       initialRecords={board.records}

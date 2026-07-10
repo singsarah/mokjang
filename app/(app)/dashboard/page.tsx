@@ -32,7 +32,7 @@ export default async function DashboardPage({
   const { date: dateParam } = await searchParams;
   const selectedDate = dateParam && DATE_RE.test(dateParam) ? dateParam : undefined;
 
-  const { summary, canCall, contact, birthdays, trend } = await loadDashboard(selectedDate);
+  const { summary, canCall, contact, birthdays, trend, unclosedDates } = await loadDashboard(selectedDate);
 
   // 최신 세션을 보고 있는지 여부(다음 세션이 없으면 최신) — 제목/그래프 강조에 사용.
   const isLatest = !summary || summary.nextDate === null;
@@ -40,6 +40,25 @@ export default async function DashboardPage({
 
   return (
     <main className="min-h-screen space-y-4 bg-bg px-6 py-8 pb-24">
+      {/* 0. 미마감 알림 — 지난 날짜인데 마감하지 않은 출석 (마감해야 통계·엑셀에 반영) */}
+      {unclosedDates.length > 0 && (
+        <div className="mx-auto max-w-md rounded-2xl border border-gold bg-gold-soft p-4">
+          <p className="text-sm font-bold text-ink">아직 마감하지 않은 출석이 있어요</p>
+          <p className="mt-1 text-sm text-ink-muted">마감해야 통계와 엑셀에 반영돼요.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {unclosedDates.map((d) => (
+              <Link
+                key={d}
+                href={`/attendance?date=${d}`}
+                className="rounded-btn border border-gold bg-white px-3 py-1 text-sm font-medium text-ink"
+              >
+                {shortDate(d)} 마감하러 가기 →
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 1. 요약 카드 (세션 없으면 빈 상태) */}
       {summary ? (
         <div className={cardClass}>
@@ -54,7 +73,14 @@ export default async function DashboardPage({
             )}
 
             <div className="min-w-0 flex-1 text-center">
-              <h1 className="font-display text-lg font-bold text-ink">{summaryTitle}</h1>
+              <h1 className="font-display text-lg font-bold text-ink">
+                {summaryTitle}
+                {!summary.closed && (
+                  <span className="ml-2 rounded-tag bg-gold-soft px-2 py-0.5 align-middle text-sm font-medium text-gold-deep">
+                    미마감
+                  </span>
+                )}
+              </h1>
               <p className="text-sm text-ink-muted">
                 {shortDate(summary.date)}{summary.note ? ` · ${summary.note}` : ""}
               </p>

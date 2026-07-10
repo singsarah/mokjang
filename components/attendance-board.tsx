@@ -10,7 +10,13 @@ import {
   type BoardStudent,
   type DisplayStatus,
 } from "@/lib/attendance-cycle";
-import { setAttendance, clearAttendance } from "@/app/actions/attendance";
+import {
+  setAttendance,
+  clearAttendance,
+  closeSession,
+  reopenSession,
+  deleteDraftSession,
+} from "@/app/actions/attendance";
 
 function shiftDate(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -26,6 +32,8 @@ export function AttendanceBoard({
   date,
   note,
   canEdit,
+  isMaster,
+  initialClosed,
   classes,
   students,
   initialRecords,
@@ -33,12 +41,17 @@ export function AttendanceBoard({
   date: string;
   note: string;
   canEdit: boolean;
+  isMaster: boolean;
+  initialClosed: boolean;
   classes: BoardClass[];
   students: BoardStudent[];
   initialRecords: RecMap;
 }) {
   const [records, setRecords] = useState<RecMap>(initialRecords);
+  const [closed, setClosed] = useState(initialClosed);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const editable = canEdit && !closed;
 
   // 탭: 반 목록 + "반 없음"(미배정 학생 있을 때)
   const tabs = useMemo(() => {
@@ -65,7 +78,7 @@ export function AttendanceBoard({
   }
 
   function onTap(studentId: string) {
-    if (!canEdit) return;
+    if (!editable) return;
     if (tapAction(records[studentId]) === "clear") {
       const nr = { ...records };
       delete nr[studentId];
@@ -77,7 +90,7 @@ export function AttendanceBoard({
   }
 
   function onReason(studentId: string, reason: string) {
-    if (!canEdit) return;
+    if (!editable) return;
     const a = reasonAction(reason);
     if (a.kind === "clear") {
       const nr = { ...records };
@@ -87,6 +100,42 @@ export function AttendanceBoard({
       const nr = { ...records, [studentId]: { status: "absent_with_reason" as const, reason: a.reason } };
       void apply(studentId, nr, setAttendance({ dateISO: date, studentId, status: "absent_with_reason", reason: a.reason }));
     }
+  }
+
+  const hasAnyRecord = Object.keys(records).length > 0;
+
+  async function onCloseSession() {
+    const unchecked = students.filter((s) => !records[s.id]).length;
+    const msg =
+      unchecked > 0
+        ? `아직 체크하지 않은 학생이 ${unchecked}명 있어요.\n마감하면 기록이 잠기고 통계·엑셀에 반영돼요. 마감할까요?`
+        : "마감하면 기록이 잠기고 통계·엑셀에 반영돼요. 마감할까요?";
+    if (!window.confirm(msg)) return;
+    setBusy(true);
+    setError(undefined);
+    const r = await closeSession({ dateISO: date });
+    setBusy(false);
+    if (r?.error) setError(r.error);
+    else setClosed(true);
+  }
+
+  async function onReopenSession() {
+    setBusy(true);
+    setError(undefined);
+    const r = await reopenSession({ dateISO: date });
+    setBusy(false);
+    if (r?.error) setError(r.error);
+    else setClosed(false);
+  }
+
+  async function onDeleteAll() {
+    if (!window.confirm(`${date}의 출석 기록을 모두 삭제할까요?\n삭제하면 되돌릴 수 없어요.`)) return;
+    setBusy(true);
+    setError(undefined);
+    const r = await deleteDraftSession({ dateISO: date });
+    setBusy(false);
+    if (r?.error) setError(r.error);
+    else setRecords({});
   }
 
   const sheepCls = (d: DisplayStatus) =>
@@ -106,7 +155,12 @@ export function AttendanceBoard({
             <span className="font-bold text-[#FDF3E7]">{date}</span>
             <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-[#F3E2CE]">▶</a>
           </div>
-          <span className="rounded-tag bg-gold-soft px-3 py-1 text-sm text-ink-muted">{note}</span>
+          <span className="flex items-center gap-1.5">
+            {closed && (
+              <span className="rounded-tag bg-[#8d6549] px-3 py-1 text-sm font-bold text-[#FDF3E7]">마감됨</span>
+            )}
+            <span className="rounded-tag bg-gold-soft px-3 py-1 text-sm text-ink-muted">{note}</span>
+          </span>
         </div>
 
         {/* 반 탭 */}
@@ -160,7 +214,7 @@ export function AttendanceBoard({
                   <div key={s.id} className="flex flex-col items-center gap-1">
                     <button
                       onClick={() => onTap(s.id)}
-                      disabled={!canEdit}
+                      disabled={!editable}
                       className={`flex h-14 w-14 items-center justify-center rounded-full text-center text-[14px] font-bold leading-tight ${sheepCls(d)}`}
                     >
                       {s.name}
@@ -170,7 +224,7 @@ export function AttendanceBoard({
                         defaultValue={records[s.id]?.reason ?? ""}
                         onBlur={(e) => onReason(s.id, e.target.value)}
                         placeholder="사유"
-                        disabled={!canEdit}
+                        disabled={!editable}
                         className="-mt-1 w-full rounded-btn border border-border bg-white px-1.5 py-1 text-center text-[14px] text-ink"
                       />
                     )}
@@ -181,6 +235,49 @@ export function AttendanceBoard({
               {shown.length === 0 && <p className="col-span-4 py-4 text-center text-sm text-ink">이 반에 학생이 없어요.</p>}
             </div>
           </div>
+
+          {/* 마감 액션 — 임시(미마감) 기록이 있으면 마감하기/전체 삭제, 마감 후엔 해제(마스터). */}
+          {canEdit && (
+            <div className="mt-4 space-y-2 px-2 text-center">
+              {closed ? (
+                <>
+                  <p className="text-sm text-[#FDF3E7]">
+                    마감된 출석이에요. 통계와 엑셀에 반영됐어요.
+                    {!isMaster && " 수정하려면 마스터에게 마감 해제를 요청하세요."}
+                  </p>
+                  {isMaster && (
+                    <button
+                      onClick={onReopenSession}
+                      disabled={busy}
+                      className="rounded-btn border border-[#F3E2CE] px-4 py-2 text-sm font-medium text-[#FDF3E7] disabled:opacity-50"
+                    >
+                      마감 해제
+                    </button>
+                  )}
+                </>
+              ) : hasAnyRecord ? (
+                <>
+                  <button
+                    onClick={onCloseSession}
+                    disabled={busy}
+                    className="w-full rounded-btn bg-[#8d6549] px-4 py-3 font-bold text-[#FDF3E7] shadow-sm disabled:opacity-50"
+                  >
+                    출석 마감하기
+                  </button>
+                  <p className="text-sm text-[#F3E2CE]">마감해야 통계와 엑셀에 반영돼요.</p>
+                  <button
+                    onClick={onDeleteAll}
+                    disabled={busy}
+                    className="text-sm text-[#FDF3E7] underline underline-offset-2 disabled:opacity-50"
+                  >
+                    이 날 기록 전체 삭제
+                  </button>
+                </>
+              ) : (
+                <p className="text-sm text-[#F3E2CE]">학생을 탭해 출석을 시작하세요. 다 체크한 뒤 마감하면 통계에 반영돼요.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </main>

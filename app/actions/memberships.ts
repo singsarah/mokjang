@@ -88,24 +88,45 @@ export async function denyMembership(input: { id: string }) {
   return {};
 }
 
+// 마스터 임명 포함 — 임원 교사 1~2명에게 마스터를 줄 수 있다.
+// 단, 그룹에 마스터가 최소 1명은 남아야 하므로 마지막 마스터의 강등은 막는다.
 export async function changeRole(input: {
   id: string;
-  role: "editor" | "viewer";
+  role: "master" | "editor" | "viewer";
 }) {
   const parsed = z
-    .object({ id: z.string().uuid(), role: roleEnum })
+    .object({ id: z.string().uuid(), role: z.enum(["master", "editor", "viewer"]) })
     .safeParse(input);
   if (!parsed.success) return { error: "잘못된 입력" };
   const master = await requireMaster();
   const supabase = await createServerClient();
+
+  const { data: target } = await supabase
+    .from("memberships")
+    .select("id, role, status")
+    .eq("id", parsed.data.id)
+    .eq("group_id", master.groupId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (!target) return { error: "대상을 찾을 수 없어요" };
+  if (target.role === parsed.data.role) return {};
+
+  if (target.role === "master") {
+    const { count } = await supabase
+      .from("memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("group_id", master.groupId)
+      .eq("role", "master")
+      .eq("status", "active");
+    if ((count ?? 0) <= 1) return { error: "마지막 마스터의 권한은 변경할 수 없어요" };
+  }
 
   const { error } = await supabase
     .from("memberships")
     .update({ role: parsed.data.role })
     .eq("id", parsed.data.id)
     .eq("group_id", master.groupId)
-    .eq("status", "active")
-    .neq("role", "master");
+    .eq("status", "active");
   if (error) return { error: error.message };
 
   await logAudit(master.groupId, master.userId, "role_changed", parsed.data.id, {

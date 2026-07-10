@@ -7,8 +7,10 @@ export * from "@/lib/attendance-cycle";
 
 export async function loadBoard(dateISO: string): Promise<{
   canEdit: boolean;
+  isMaster: boolean;
   date: string;
   note: string;
+  closedAt: string | null;
   classes: BoardClass[];
   students: BoardStudent[];
   records: Record<string, BoardRecord>;
@@ -16,6 +18,7 @@ export async function loadBoard(dateISO: string): Promise<{
   const m = await requireCurrentMembership();
   const supabase = await createServerClient();
   const canEdit = m.role === "master" || m.role === "editor";
+  const isMaster = m.role === "master";
 
   const { data: classRows } = await supabase
     .from("classes").select("id, name, teacher_name, display_order")
@@ -27,7 +30,7 @@ export async function loadBoard(dateISO: string): Promise<{
 
   // 해당 날짜 세션 + 레코드
   const { data: session } = await supabase
-    .from("attendance_sessions").select("id, note")
+    .from("attendance_sessions").select("id, note, closed_at")
     .eq("group_id", m.groupId).eq("session_date", dateISO).maybeSingle();
 
   const records: Record<string, BoardRecord> = {};
@@ -43,8 +46,10 @@ export async function loadBoard(dateISO: string): Promise<{
 
   return {
     canEdit,
+    isMaster,
     date: dateISO,
     note: session?.note ?? "주일예배",
+    closedAt: session?.closed_at ?? null,
     classes: (classRows ?? []).map((c) => ({ id: c.id, name: c.name, teacherName: c.teacher_name })),
     students: (studentRows ?? []).map((s) => ({ id: s.id, name: s.name, classId: s.class_id })),
     records,

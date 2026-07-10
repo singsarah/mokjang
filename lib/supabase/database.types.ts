@@ -334,6 +334,8 @@ export type Database = {
       }
       attendance_sessions: {
         Row: {
+          closed_at: string | null
+          closed_by: string | null
           created_at: string
           created_by: string | null
           group_id: string
@@ -342,6 +344,8 @@ export type Database = {
           session_date: string
         }
         Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
           created_at?: string
           created_by?: string | null
           group_id: string
@@ -350,6 +354,8 @@ export type Database = {
           session_date: string
         }
         Update: {
+          closed_at?: string | null
+          closed_by?: string | null
           created_at?: string
           created_by?: string | null
           group_id?: string

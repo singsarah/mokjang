@@ -31,6 +31,8 @@ export type BirthdayEntry = {
 export type DashboardSummary = {
   date: string;
   note: string | null;
+  closed: boolean; // 미마감(임시) 세션이면 false — 배지로 표시
+
   total: number;
   present: number;
   reason: number;
@@ -53,6 +55,8 @@ export type DashboardData = {
   contact: ContactEntry[];
   birthdays: BirthdayEntry[];
   trend: TrendPoint[];
+  // 지난 날짜인데 아직 마감하지 않은 세션 — 대시보드 상단 알림용 (오늘 진행 중인 건 제외).
+  unclosedDates: string[];
 };
 
 type SessionStats = {
@@ -144,14 +148,20 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
   );
 
   // 전체 세션 (오름차순) — 세션 넘기기(◀▶)와 출석 추이 그래프 양쪽에 사용.
+  // 미마감(임시) 세션도 넘겨보고 요약은 볼 수 있게 포함하되, 추이 그래프는 마감된 세션만.
   const { data: sessionRows } = await supabase
-    .from("attendance_sessions").select("id, session_date, note")
+    .from("attendance_sessions").select("id, session_date, note, closed_at")
     .eq("group_id", m.groupId)
     .order("session_date", { ascending: true });
   const sessions = sessionRows ?? [];
 
+  // 지난 날짜인데 미마감인 세션 (오늘 진행 중인 체크는 알림 대상 아님)
+  const unclosedDates = sessions
+    .filter((s) => s.closed_at == null && s.session_date < kst)
+    .map((s) => s.session_date);
+
   if (sessions.length === 0) {
-    return { summary: null, canCall, contact: [], birthdays, trend: [] };
+    return { summary: null, canCall, contact: [], birthdays, trend: [], unclosedDates };
   }
 
   const latestSession = sessions[sessions.length - 1]!;
@@ -240,6 +250,7 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
   const summary: DashboardSummary = {
     date: session.session_date,
     note: session.note,
+    closed: session.closed_at != null,
     total: students.length,
     present: selectedStats.present,
     reason: selectedStats.reason,
@@ -252,8 +263,9 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
     nextDate,
   };
 
-  // 출석 추이: 최근 최대 12개 세션의 출석(present) 인원 수. 총원은 현재 재적 인원(조회 시점 고정)으로 통일.
-  const trendSessions = sessions.slice(-12);
+  // 출석 추이: 최근 최대 12개 "마감된" 세션의 출석(present) 인원 수. 미마감은 아직 확정 전이라 제외.
+  // 총원은 현재 재적 인원(조회 시점 고정)으로 통일.
+  const trendSessions = sessions.filter((s) => s.closed_at != null).slice(-12);
   const trend: TrendPoint[] = [];
   if (trendSessions.length > 0) {
     const trendIds = trendSessions.map((s) => s.id);
@@ -272,5 +284,5 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
     }
   }
 
-  return { summary, canCall, contact, birthdays, trend };
+  return { summary, canCall, contact, birthdays, trend, unclosedDates };
 }
