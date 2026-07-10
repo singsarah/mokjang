@@ -250,6 +250,7 @@ export type Database = {
           note: string | null
           phone: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           birthday_day?: number | null
@@ -265,6 +266,7 @@ export type Database = {
           note?: string | null
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           birthday_day?: number | null
@@ -280,6 +282,7 @@ export type Database = {
           note?: string | null
           phone?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {

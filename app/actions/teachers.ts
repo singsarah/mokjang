@@ -80,6 +80,61 @@ export async function deleteTeacher(input: { id: string }): Promise<{ error?: st
   return {};
 }
 
+// ── 명단 ↔ 가입 계정 연결 ─────────────────────────────────────
+// 명단(teachers)은 계정 없이도 존재하므로, 가입한 교사를 명단의 어느 행인지
+// 마스터가 지정해 연결한다. 한 계정은 한 행에만(UNIQUE user_id).
+
+export async function linkTeacherAccount(input: {
+  teacherId: string;
+  userId: string;
+}): Promise<{ error?: string }> {
+  const parsed = z
+    .object({ teacherId: z.string().uuid(), userId: z.string().uuid() })
+    .safeParse(input);
+  if (!parsed.success) return { error: "잘못된 요청" };
+  const m = await requireMaster();
+  const supabase = await createServerClient();
+
+  // 연결 대상 계정이 이 그룹의 멤버인지 확인 (임의 uuid 연결 방지)
+  const { data: membership } = await supabase
+    .from("memberships")
+    .select("id")
+    .eq("group_id", m.groupId)
+    .eq("user_id", parsed.data.userId)
+    .in("status", ["pending", "active"])
+    .maybeSingle();
+  if (!membership) return { error: "이 그룹의 교사 계정이 아니에요" };
+
+  const { data: updated, error } = await supabase
+    .from("teachers")
+    .update({ user_id: parsed.data.userId, updated_at: new Date().toISOString() })
+    .eq("id", parsed.data.teacherId)
+    .eq("group_id", m.groupId)
+    .is("user_id", null)
+    .select("id")
+    .maybeSingle();
+  if (error) {
+    if (error.code === "23505") return { error: "이 계정은 이미 다른 명단에 연결돼 있어요" };
+    return { error: error.message };
+  }
+  if (!updated) return { error: "이미 다른 계정과 연결된 명단이에요" };
+  revalidatePath("/settings/teachers");
+  return {};
+}
+
+export async function unlinkTeacherAccount(input: { teacherId: string }): Promise<{ error?: string }> {
+  const m = await requireMaster();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("teachers")
+    .update({ user_id: null, updated_at: new Date().toISOString() })
+    .eq("id", input.teacherId)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/teachers");
+  return {};
+}
+
 // ── 엑셀 전체 명단 다운로드 ────────────────────────────────────
 
 export type ExportTeachersResult = { rows?: ExportTeacher[]; error?: string };

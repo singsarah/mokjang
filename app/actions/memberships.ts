@@ -38,9 +38,15 @@ async function logAudit(
 export async function approveMembership(input: {
   id: string;
   role: "editor" | "viewer";
+  // 교사 명단(teachers)의 어느 행인지 — 승인하면서 계정을 명단에 연결(선택).
+  teacherId?: string | null;
 }) {
   const parsed = z
-    .object({ id: z.string().uuid(), role: roleEnum })
+    .object({
+      id: z.string().uuid(),
+      role: roleEnum,
+      teacherId: z.string().uuid().nullish(),
+    })
     .safeParse(input);
   if (!parsed.success) return { error: "잘못된 입력" };
 
@@ -58,12 +64,23 @@ export async function approveMembership(input: {
     .eq("id", parsed.data.id)
     .eq("group_id", master.groupId)
     .eq("status", "pending")
-    .select("id")
+    .select("id, user_id")
     .single();
   if (error || !updated) return { error: error?.message ?? "승인 실패" };
 
+  // 명단 연결은 부가 작업 — 실패해도 승인 자체는 유지한다 (교사 관리에서 나중에 연결 가능).
+  if (parsed.data.teacherId) {
+    await supabase
+      .from("teachers")
+      .update({ user_id: updated.user_id, updated_at: new Date().toISOString() })
+      .eq("id", parsed.data.teacherId)
+      .eq("group_id", master.groupId)
+      .is("user_id", null);
+  }
+
   await logAudit(master.groupId, master.userId, "member_approved", updated.id, {
     role: parsed.data.role,
+    teacher_id: parsed.data.teacherId ?? null,
   });
   revalidatePath("/settings/teachers");
   return {};

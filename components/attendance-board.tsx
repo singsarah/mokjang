@@ -129,7 +129,7 @@ export function AttendanceBoard({
   }
 
   async function onDeleteAll() {
-    if (!window.confirm(`${date}의 출석 기록을 모두 삭제할까요?\n삭제하면 되돌릴 수 없어요.`)) return;
+    if (!window.confirm(`${date}에 기록한 모든 반의 출석을 전부 삭제할까요?\n삭제하면 되돌릴 수 없어요.`)) return;
     setBusy(true);
     setError(undefined);
     const r = await deleteDraftSession({ dateISO: date });
@@ -270,7 +270,7 @@ export function AttendanceBoard({
                     disabled={busy}
                     className="text-sm text-[#FDF3E7] underline underline-offset-2 disabled:opacity-50"
                   >
-                    이 날 기록 전체 삭제
+                    이 날 모든 반 기록 삭제
                   </button>
                 </>
               ) : (

@@ -12,10 +12,11 @@ export type TeacherRow = {
   duty: string | null;
   jobType: string | null;
   note: string | null;
+  userId: string | null; // 연결된 가입 계정 (없으면 null)
 };
 
 const TEACHER_SELECT =
-  "id, name, birthday_month, birthday_day, birthday_year, phone, kakao_id, duty, job_type, note";
+  "id, name, birthday_month, birthday_day, birthday_year, phone, kakao_id, duty, job_type, note, user_id";
 
 type DbTeacher = {
   id: string;
@@ -28,6 +29,7 @@ type DbTeacher = {
   duty: string | null;
   job_type: string | null;
   note: string | null;
+  user_id: string | null;
 };
 
 function toTeacher(t: DbTeacher): TeacherRow {
@@ -42,6 +44,7 @@ function toTeacher(t: DbTeacher): TeacherRow {
     duty: t.duty,
     jobType: t.job_type,
     note: t.note,
+    userId: t.user_id,
   };
 }
 
