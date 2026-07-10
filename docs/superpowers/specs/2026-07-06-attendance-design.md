@@ -48,7 +48,8 @@
   - **나무 팻말**: 반 이름(**교보손글씨**) + 옆에 작은 **선생님 이름**(기본폰트). `classes.teacher_name` 사용(Plan 2에서 추가됨).
   - **나무 울타리 우리(pen)**: 진한 브라운 단색 테두리(얇게), 손그림 느낌(SVG 러프 필터), 안쪽 잔디 초록.
   - **양떼 카드**: 흰색 양 동그라미(organic 모양 + 작은 다리), 4열 그리드. 상태별 색. 사유결석/연락필요 양 아래 작은 캡션(사유 텍스트 / "연락필요").
-- 실제 앱 색은 design-guide 팔레트: present `#4E6A47`(sage-deep) · excused `#F0C86E`(gold) · unconfirmed `#D9645F`(danger) · 미체크 흰색 `#FBEEE6` · 잔디 `#A7C58C` · 울타리/팻말 브라운.
+- ~~실제 앱 색은 design-guide 팔레트: present `#4E6A47`(sage-deep) · excused `#F0C86E`(gold) · unconfirmed `#D9645F`(danger) · 미체크 흰색 `#FBEEE6` · 잔디 `#A7C58C` · 울타리/팻말 브라운.~~
+- **2026-07-10 팔레트 전면 교체(사용자 확정, 앱 전체 기본 팔레트 — `tailwind.config.ts`/`globals.css`가 진실의 원천):** Warm Cream `#FAF8F2` 바탕 · 미체크 Lavender `#B9B3D8`(옅은 배경+테두리) · 출석 Sage `#A8C5A1` · 사유결석 Golden Wheat `#F3C86B` · 연락필요 Blush `#F6C7CF`(글씨 `#8E3A44`) · 팻말 Sage+흰 점선+기존 양 얼굴 SVG · 우리 Ivory `#F9F7F2` · 마감 버튼 Forest `#4F6A52` · 텍스트 Charcoal `#374151` · 하단 라벤더 산/더스티블루 능선/세이지 초원 SVG 풍경(양 장식 없음). 폰트는 기존(교보손글씨 display) 유지. danger는 팔레트에 빨강이 없어 로즈 `#C2606C`.
 - 확정 목업: `.superpowers/brainstorm/.../attendance-pasture-v8.html` (참고용, git 미포함).
 
 ## 4. 날짜 / 세션

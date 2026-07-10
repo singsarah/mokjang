@@ -10,6 +10,7 @@ import {
   type BoardStudent,
   type DisplayStatus,
 } from "@/lib/attendance-cycle";
+import { Icon } from "@/components/icon";
 import {
   setAttendance,
   clearAttendance,
@@ -138,28 +139,31 @@ export function AttendanceBoard({
     else setRecords({});
   }
 
+  // 상태색 (디자인 기본 팔레트): 미체크=Lavender · 출석=Sage · 사유결석=Wheat · 연락필요=Blush
   const sheepCls = (d: DisplayStatus) =>
-    d === "present" ? "bg-sage-deep text-white"
+    d === "present" ? "bg-sage text-white"
     : d === "absent_with_reason" ? "bg-gold text-ink"
-    : d === "unconfirmed" ? "bg-danger text-white"
-    : "bg-[#FBEEE6] text-ink"; // unchecked(흰)
+    : d === "unconfirmed" ? "bg-blush text-blush-deep"
+    : "bg-lavender-soft text-ink ring-2 ring-inset ring-lavender"; // unchecked
 
   return (
-    // 화면 전체가 푸른 풀밭 (크림색 바탕 없음)
-    <main className="min-h-screen pb-24" style={{ background: "#85B287" }}>
-      <div className="mx-auto max-w-md">
+    // Warm Cream 바탕 + 하단 파스텔 언덕 풍경
+    <main className="flex min-h-screen flex-col bg-bg pb-20">
+      <div className="mx-auto w-full max-w-md">
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
-            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-[#F3E2CE]">◀</a>
-            <span className="font-bold text-[#FDF3E7]">{date}</span>
-            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-[#F3E2CE]">▶</a>
+            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-sky-deep">◀</a>
+            <span className="text-lg font-bold tabular-nums text-ink">{date}</span>
+            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-sky-deep">▶</a>
           </div>
           <span className="flex items-center gap-1.5">
             {closed && (
-              <span className="rounded-tag bg-[#8d6549] px-3 py-1 text-sm font-bold text-[#FDF3E7]">마감됨</span>
+              <span className="rounded-full bg-sage-deep px-3 py-1 text-sm font-bold text-white">마감됨</span>
             )}
-            <span className="rounded-tag bg-gold-soft px-3 py-1 text-sm text-ink-muted">{note}</span>
+            <span className="flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-sm font-medium text-ink shadow-sm">
+              <span className="text-sky-deep">✝</span> {note}
+            </span>
           </span>
         </div>
 
@@ -169,9 +173,9 @@ export function AttendanceBoard({
             <button
               key={t.id ?? "none"}
               onClick={() => setActiveTab(t.id)}
-              className={`shrink-0 rounded-btn px-3 py-1.5 text-sm ${
+              className={`shrink-0 rounded-full px-4 py-1.5 text-sm shadow-sm ${
                 (t.id ?? null) === (activeTab ?? null)
-                  ? "bg-sage-deep font-bold text-white"
+                  ? "bg-sage font-bold text-white"
                   : "border border-border bg-white text-ink-muted"
               }`}
             >
@@ -181,29 +185,33 @@ export function AttendanceBoard({
         </div>
 
         {/* 범례 (최소 폰트 크기 예외: 12px 유지) */}
-        <div className="flex flex-wrap justify-center gap-3 px-5 pb-2 text-xs text-[#FDF3E7]">
-          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full border border-[#b9a99a] bg-[#FBEEE6] align-middle" />미체크</span>
-          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-sage-deep align-middle" />출석</span>
+        <div className="flex flex-wrap justify-center gap-3 px-5 py-2 text-xs text-ink-muted">
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-lavender align-middle" />미체크</span>
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-sage align-middle" />출석</span>
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-gold align-middle" />사유결석</span>
-          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-danger align-middle" />연락필요</span>
+          <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-blush align-middle" />연락필요</span>
         </div>
 
         {error && <p className="mx-5 rounded-btn bg-white px-3 py-1 text-sm text-danger">{error}</p>}
 
         {/* 목장 씬 */}
         <div className="relative px-3 pb-6 pt-3">
-          {/* 나무 팻말 */}
+          {/* 반 팻말: Sage + 흰 점선 테두리 + 양 얼굴 */}
           {activeClass && (
-            <div className="relative z-10 mx-auto w-52 rounded-xl bg-[#8d6549] px-2 pb-2.5 pt-2">
+            <div className="relative z-10 mx-auto w-60 rounded-2xl bg-sage px-3 pb-3 pt-2.5 shadow-md">
+              <div className="pointer-events-none absolute inset-[5px] rounded-xl border-[1.5px] border-dashed border-white/75" />
+              <div className="absolute -left-4 -top-4">
+                <Icon name="sheep-face" size={40} alt="" />
+              </div>
               <div className="flex items-baseline justify-center gap-2 text-center">
-                <span className="font-display text-2xl font-bold text-[#FDF3E7]">{activeClass.name}</span>
-                {activeClass.teacherName && <span className="text-sm text-[#F3E2CE]">{activeClass.teacherName} 선생님</span>}
+                <span className="font-display text-2xl font-bold text-white">{activeClass.name}</span>
+                {activeClass.teacherName && <span className="text-sm text-white/90">{activeClass.teacherName} 선생님</span>}
               </div>
             </div>
           )}
 
-          {/* 울타리 우리 */}
-          <div className="relative z-[2] mt-3 rounded-2xl border-[5px] border-[#8f5c44] bg-[#A7C58C] px-3 py-5">
+          {/* 우리(pen): Ivory 카드 + 연세이지 테두리 */}
+          <div className="relative z-[2] mt-3 rounded-3xl border-2 border-[#CBDCC6] bg-ivory px-3 py-5 shadow-sm">
             <div className="relative z-[1] grid grid-cols-4 gap-x-2 gap-y-4">
               {(() => {
                 const classActive = shown.some((s) => Boolean(records[s.id]));
@@ -241,7 +249,7 @@ export function AttendanceBoard({
             <div className="mt-4 space-y-2 px-2 text-center">
               {closed ? (
                 <>
-                  <p className="text-sm text-[#FDF3E7]">
+                  <p className="text-sm text-ink-muted">
                     마감된 출석이에요. 통계와 엑셀에 반영됐어요.
                     {!isMaster && " 수정하려면 마스터에게 마감 해제를 요청하세요."}
                   </p>
@@ -249,7 +257,7 @@ export function AttendanceBoard({
                     <button
                       onClick={onReopenSession}
                       disabled={busy}
-                      className="rounded-btn border border-[#F3E2CE] px-4 py-2 text-sm font-medium text-[#FDF3E7] disabled:opacity-50"
+                      className="rounded-btn border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm disabled:opacity-50"
                     >
                       마감 해제
                     </button>
@@ -260,26 +268,48 @@ export function AttendanceBoard({
                   <button
                     onClick={onCloseSession}
                     disabled={busy}
-                    className="w-full rounded-btn bg-[#8d6549] px-4 py-3 font-bold text-[#FDF3E7] shadow-sm disabled:opacity-50"
+                    className="w-full rounded-2xl bg-sage-deep px-4 py-3.5 text-[17px] font-bold tracking-wide text-ivory shadow-md disabled:opacity-50"
                   >
                     출석 마감하기
                   </button>
-                  <p className="text-sm text-[#F3E2CE]">마감해야 통계와 엑셀에 반영돼요.</p>
+                  <p className="text-sm text-ink-muted">마감해야 통계와 엑셀에 반영돼요.</p>
                   <button
                     onClick={onDeleteAll}
                     disabled={busy}
-                    className="text-sm text-[#FDF3E7] underline underline-offset-2 disabled:opacity-50"
+                    className="text-sm text-sky-deep underline underline-offset-4 disabled:opacity-50"
                   >
                     이 날 모든 반 기록 삭제
                   </button>
                 </>
               ) : (
-                <p className="text-sm text-[#F3E2CE]">학생을 탭해 출석을 시작하세요. 다 체크한 뒤 마감하면 통계에 반영돼요.</p>
+                <p className="text-sm text-ink-muted">학생을 탭해 출석을 시작하세요. 다 체크한 뒤 마감하면 통계에 반영돼요.</p>
               )}
             </div>
           )}
         </div>
       </div>
+
+      {/* 하단 풍경: 라벤더 산 → 더스티블루 능선 → 세이지 초원 (장식) */}
+      <svg
+        viewBox="0 0 420 132"
+        preserveAspectRatio="none"
+        className="mt-auto h-28 w-full"
+        aria-hidden="true"
+      >
+        <ellipse cx="90" cy="150" rx="190" ry="96" fill="#B9B3D8" opacity=".55" />
+        <ellipse cx="330" cy="158" rx="210" ry="104" fill="#B9B3D8" opacity=".75" />
+        <ellipse cx="60" cy="176" rx="230" ry="96" fill="#7E9CA2" opacity=".7" />
+        <ellipse cx="340" cy="184" rx="240" ry="98" fill="#7E9CA2" opacity=".55" />
+        <ellipse cx="120" cy="208" rx="280" ry="104" fill="#A8C5A1" />
+        <ellipse cx="360" cy="216" rx="260" ry="100" fill="#A8C5A1" />
+        <g fill="#F3C86B">
+          <circle cx="40" cy="122" r="2" /><circle cx="150" cy="118" r="2" />
+          <circle cx="260" cy="126" r="2" /><circle cx="390" cy="120" r="2" />
+        </g>
+        <g fill="#F6C7CF">
+          <circle cx="105" cy="126" r="2" /><circle cx="300" cy="128" r="2" /><circle cx="365" cy="112" r="2" />
+        </g>
+      </svg>
     </main>
   );
 }

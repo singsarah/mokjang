@@ -15,20 +15,25 @@ const config: Config = {
         pretendard: ['"Pretendard Variable"', "Pretendard", "system-ui", "sans-serif"],
       },
       colors: {
-        // === 디자인 가이드 팔레트 (양떼 · 크리스천 파스텔) ===
-        bg: "#FBF6EC", // 크림 배경
-        card: "#F4ECDC", // 카드 베이지
-        border: "#E4E1D3",
-        ink: { DEFAULT: "#2C382F", muted: "#6E7C6C" },
-        sage: { DEFAULT: "#90B484", deep: "#4E6A47", soft: "#DCE7D3" },
-        sky: { DEFAULT: "#9FCDEC", deep: "#5B93C4", soft: "#E4F0FA" },
-        gold: { DEFAULT: "#F0C86E", deep: "#C9A24C", soft: "#FBEDC9" },
-        present: { DEFAULT: "#90B484", soft: "#DCE7D3" },
-        excused: { DEFAULT: "#F0C86E", soft: "#FBEDC9" },
-        unconfirmed: { DEFAULT: "#D9645F", soft: "#F6D8D6" },
-        coin: "#F2B33D",
-        star: "#F0C86E",
-        danger: "#D9645F",
+        // === 디자인 기본 팔레트 (2026-07-10 사용자 확정 — 파스텔 목장) ===
+        // Warm Cream 바탕 · Sage 주색 · Dusty Blue 보조 · Lavender 미체크
+        // Golden Wheat 사유결석 · Blush 연락필요 · Forest 강조 · Charcoal 텍스트
+        bg: "#FAF8F2", // Warm Cream
+        card: "#F1EDE2", // 크림 카드(바탕보다 한 톤 깊게)
+        border: "#E7E1D3",
+        ivory: "#F9F7F2", // Sheep Wool
+        ink: { DEFAULT: "#374151", muted: "#6B7280" }, // Charcoal
+        sage: { DEFAULT: "#A8C5A1", deep: "#4F6A52", soft: "#E2ECDF" }, // Primary / Forest
+        sky: { DEFAULT: "#7E9CA2", deep: "#5F7F86", soft: "#E3EBEC" }, // Dusty Blue
+        gold: { DEFAULT: "#F3C86B", deep: "#A97A1F", soft: "#FBEBC9" }, // Golden Wheat
+        lavender: { DEFAULT: "#B9B3D8", soft: "#E6E3F2" }, // Soft Lavender (미체크)
+        blush: { DEFAULT: "#F6C7CF", deep: "#8E3A44", soft: "#FBE4E8" }, // Pink Ear (연락필요)
+        present: { DEFAULT: "#A8C5A1", soft: "#E2ECDF" },
+        excused: { DEFAULT: "#F3C86B", soft: "#FBEBC9" },
+        unconfirmed: { DEFAULT: "#C2606C", soft: "#FBE4E8" },
+        coin: "#F3C86B",
+        star: "#F3C86B",
+        danger: "#C2606C", // blush 계열의 짙은 로즈 (팔레트에 순수 빨강 없음)
 
         // === 기존 파스텔 팔레트 (미전환 화면 호환용, 점진 교체) ===
         pasture: {

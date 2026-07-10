@@ -27,7 +27,7 @@ export default async function GroupSettingsPage() {
       : "";
 
   return (
-    <main className="min-h-screen bg-[#E6EAE0] pb-24">
+    <main className="min-h-screen bg-card pb-24">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link
           href="/settings"

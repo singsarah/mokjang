@@ -12,37 +12,47 @@
 }
 
 :root {
+  /* === 디자인 기본 팔레트 (2026-07-10 사용자 확정 — 파스텔 목장) ===
+     Warm Cream #FAF8F2 · Sage #A8C5A1 · Dusty Blue #7E9CA2 · Lavender #B9B3D8
+     Golden Wheat #F3C86B · Forest #4F6A52 · Charcoal #374151 · Ivory #F9F7F2 · Blush #F6C7CF */
+
   /* base */
-  --bg: #fbf6ec;
-  --card: #f4ecdc;
+  --bg: #faf8f2;
+  --card: #f1ede2;
   --white: #ffffff;
-  --text: #2c382f;
-  --text-muted: #6e7c6c;
-  --border: #e4e1d3;
+  --ivory: #f9f7f2;
+  --text: #374151;
+  --text-muted: #6b7280;
+  --border: #e7e1d3;
 
   /* theme */
-  --sage: #90b484;
-  --sage-deep: #4e6a47;
-  --sage-soft: #dce7d3;
-  --sky: #9fcdec;
-  --sky-deep: #5b93c4;
-  --sky-soft: #e4f0fa;
-  --gold: #f0c86e;
-  --gold-deep: #c9a24c;
-  --gold-soft: #fbedc9;
+  --sage: #a8c5a1;
+  --sage-deep: #4f6a52;
+  --sage-soft: #e2ecdf;
+  --sky: #7e9ca2;
+  --sky-deep: #5f7f86;
+  --sky-soft: #e3ebec;
+  --gold: #f3c86b;
+  --gold-deep: #a97a1f;
+  --gold-soft: #fbebc9;
+  --lavender: #b9b3d8;
+  --lavender-soft: #e6e3f2;
+  --blush: #f6c7cf;
+  --blush-deep: #8e3a44;
+  --blush-soft: #fbe4e8;
 
-  /* status (출석 3단계) */
-  --present: #90b484;
-  --present-soft: #dce7d3;
-  --excused: #f0c86e;
-  --excused-soft: #fbedc9;
-  --unconfirmed: #d9645f;
-  --unconfirmed-soft: #f6d8d6;
+  /* status (출석: 미체크=lavender · 출석=sage · 사유=gold · 연락필요=blush) */
+  --present: #a8c5a1;
+  --present-soft: #e2ecdf;
+  --excused: #f3c86b;
+  --excused-soft: #fbebc9;
+  --unconfirmed: #c2606c;
+  --unconfirmed-soft: #fbe4e8;
 
   /* accent */
-  --coin: #f2b33d;
-  --star: #f0c86e;
-  --danger: #d9645f;
+  --coin: #f3c86b;
+  --star: #f3c86b;
+  --danger: #c2606c;
 
   /* radius */
   --radius-card: 18px;
