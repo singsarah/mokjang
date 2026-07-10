@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership, type CurrentMembership } from "@/lib/memberships";
 import { parseEventTemplate, type ExtractedEvent } from "@/lib/parse-event-template";
+import { isDemoEmail } from "@/lib/demo";
 import type { Database } from "@/lib/supabase/database.types";
 
 export type { ExtractedEvent } from "@/lib/parse-event-template";
@@ -162,6 +163,16 @@ export async function extractEventsFromFile(
     return { error: "지원하지 않는 파일 형식입니다 (이미지 JPG/PNG/WebP, PDF, 엑셀만 가능)" };
   }
 
+  // 체험 모드는 AI 추출(유료 API) 차단 — 템플릿 엑셀 경로는 아래에서 그대로 동작.
+  const supabaseForUser = await createServerClient();
+  const {
+    data: { user },
+  } = await supabaseForUser.auth.getUser();
+  const demo = isDemoEmail(user?.email);
+  const DEMO_AI_MSG =
+    "체험 모드에서는 AI 추출을 쓸 수 없어요. 템플릿 엑셀(날짜/제목 열)은 바로 등록할 수 있어요.";
+  if (demo && kind !== "excel") return { error: DEMO_AI_MSG };
+
   const buffer = Buffer.from(await file.arrayBuffer());
   const today = kstToday();
 
@@ -188,6 +199,7 @@ export async function extractEventsFromFile(
     }
 
     // 2) 템플릿이 아니면 자유 형식 → AI 추출 (여기서부터만 키 필요).
+    if (demo) return { error: DEMO_AI_MSG };
     if (!process.env.ANTHROPIC_API_KEY) {
       return {
         error:

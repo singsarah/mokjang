@@ -23,11 +23,11 @@ export function PromoteButton() {
   }
 
   return (
-    <span className="inline-flex flex-col items-end">
+    <span className="flex w-full flex-col">
       <button
         onClick={onClick}
         disabled={isPending}
-        className="rounded-tag border border-sage bg-white px-3 py-1 text-sm text-sage-deep shadow-sm transition hover:bg-sage-soft disabled:opacity-50"
+        className="w-full rounded-tag border border-sage bg-white px-2 py-1.5 text-center text-sm text-sage-deep shadow-sm transition hover:bg-sage-soft disabled:opacity-50"
       >
         {isPending ? "진급 중..." : "학년 올리기"}
       </button>

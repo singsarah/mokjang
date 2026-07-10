@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { exportAttendance } from "@/app/actions/attendance";
-import { attendanceExportHeader, attendanceExportRow } from "@/lib/attendance-export";
+import {
+  attendanceExportHeader,
+  attendanceExportRow,
+  attendanceExportSummaryRows,
+} from "@/lib/attendance-export";
 
 // 다운로드 파일명용 KST 날짜(YYYY-MM-DD).
 function kstDateStr(): string {
@@ -25,6 +29,8 @@ export function AttendanceExportButton() {
       const aoa = [
         attendanceExportHeader(res.sessions),
         ...res.students.map((s) => attendanceExportRow(s, res.sessions!)),
+        // 맨 아래 요약: 출석/사유결석/미확인 합계 + 학년별·반별 출석(n/재적)
+        ...attendanceExportSummaryRows(res.students, res.sessions),
       ];
       const ws = XLSX.utils.aoa_to_sheet(aoa);
       const wb = XLSX.utils.book_new();

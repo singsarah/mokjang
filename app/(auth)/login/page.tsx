@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useTransition } from "react";
 import { signInEmailPassword, signInWithGoogle } from "@/app/actions/auth";
+import { DemoStartButton } from "@/components/demo-start-button";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -82,6 +83,9 @@ function LoginForm() {
           가입하기
         </Link>
       </p>
+
+      {/* 체험 모드 — 가입 없이 더미 데이터가 담긴 1회용 공간을 만들어 둘러보기 */}
+      <DemoStartButton className="mt-6 border-t border-border pt-5" />
     </div>
   );
 }

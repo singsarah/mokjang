@@ -32,12 +32,12 @@ export function TeacherExportButton() {
   }
 
   return (
-    <span className="inline-flex flex-col items-end">
+    <span className="flex w-full flex-col">
       <button
         type="button"
         onClick={onClick}
         disabled={isPending}
-        className="rounded-btn border border-border bg-white px-3 py-1.5 text-sm text-ink shadow-sm transition hover:bg-card disabled:opacity-50"
+        className="w-full rounded-btn border border-border bg-white px-2 py-2 text-center text-sm text-ink shadow-sm transition hover:bg-card disabled:opacity-50"
       >
         {isPending ? "내려받는 중…" : "엑셀 다운로드"}
       </button>

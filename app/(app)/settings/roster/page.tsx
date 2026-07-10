@@ -48,28 +48,32 @@ export default async function RosterPage() {
   return (
     <main className="min-h-screen bg-card pb-24">
       <div className="mx-auto max-w-md px-6 py-8">
-        <div className="flex items-center justify-between">
-          <h1 className="font-display text-2xl font-bold text-ink">학적부</h1>
+        {/* 헤더도 아래 줄과 같은 4칸 그리드 — 업로드/다운로드가 숨김 학생/졸업생과 세로줄이 맞는다. */}
+        <div className="grid grid-cols-4 items-center gap-2">
+          <h1 className="col-span-2 font-display text-2xl font-bold text-ink">학적부</h1>
           {canEdit && (
-            <span className="flex flex-wrap items-center justify-end gap-2">
-              {/* 헤더에는 엑셀 업로드·다운로드만. 학생 추가는 아래 줄로. */}
+            <>
               <Link
                 href="/settings/roster/import"
-                className="rounded-btn bg-sage-deep px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
+                className="rounded-btn border border-transparent bg-sage-deep px-2 py-2 text-center text-sm font-medium text-white shadow-sm transition hover:bg-sage"
               >
                 업로드
               </Link>
               <StudentExportButton />
-            </span>
+            </>
           )}
         </div>
 
-        {/* 하위 링크 줄: 학생 추가 · 학년 올리기(master 전용) · 숨김 학생 · 졸업생 */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+        {/* 하위 줄: 학생 추가 · 학년 올리기(master 전용) · 숨김 학생 · 졸업생 — 전부 동일 크기 */}
+        <div
+          className={`mt-3 grid gap-2 text-sm ${
+            canEdit && isMaster ? "grid-cols-4" : canEdit ? "grid-cols-3" : "grid-cols-2"
+          }`}
+        >
           {canEdit && (
             <Link
               href="/settings/roster/new"
-              className="rounded-tag bg-sage px-3 py-1 font-medium text-white shadow-sm transition hover:bg-sage-deep"
+              className="rounded-tag border border-transparent bg-sage px-2 py-1.5 text-center font-medium text-white shadow-sm transition hover:bg-sage-deep"
             >
               + 학생 추가
             </Link>
@@ -77,13 +81,13 @@ export default async function RosterPage() {
           {isMaster && <PromoteButton />}
           <Link
             href="/settings/roster/hidden"
-            className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"
+            className="rounded-tag border border-transparent bg-white px-2 py-1.5 text-center text-ink-muted shadow-sm hover:text-ink"
           >
             숨김 학생
           </Link>
           <Link
             href="/settings/roster/graduated"
-            className="rounded-tag bg-white px-3 py-1 text-ink-muted shadow-sm hover:text-ink"
+            className="rounded-tag border border-transparent bg-white px-2 py-1.5 text-center text-ink-muted shadow-sm hover:text-ink"
           >
             졸업생
           </Link>

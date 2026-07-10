@@ -75,7 +75,7 @@ export default async function TeachersPage() {
         <h1 className="mt-2 font-display text-2xl font-bold text-ink">교사 관리</h1>
 
         <section className="mt-8">
-          <h2 className="text-sm font-bold text-ink-muted">
+          <h2 className="text-base font-bold text-ink">
             승인 대기 ({pending.length})
           </h2>
           {pending.length === 0 ? (
@@ -151,7 +151,7 @@ export default async function TeachersPage() {
         </section>
 
         <section className="mt-10">
-          <h2 className="text-sm font-bold text-ink-muted">
+          <h2 className="text-base font-bold text-ink">
             활성 교사 ({active.length})
           </h2>
           <ul className="mt-3 space-y-3">
@@ -255,24 +255,23 @@ export default async function TeachersPage() {
 
         {/* 교사 명단 (인적사항 — 계정 유무와 무관) */}
         <section className="mt-10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-ink-muted">교사 명단 ({teachers.length})</h2>
-            <span className="flex flex-wrap items-center justify-end gap-2">
-              <Link
-                href="/settings/teachers/roster/import"
-                className="rounded-btn bg-sage-deep px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sage"
-              >
-                엑셀 업로드
-              </Link>
-              <Link
-                href="/settings/teachers/roster/new"
-                className="rounded-btn bg-sage px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
-              >
-                + 교사 추가
-              </Link>
-              {/* 전체 명단 내보내기: 이 섹션 전체가 master 전용(페이지 상단에서 redirect). */}
-              <TeacherExportButton />
-            </span>
+          <h2 className="text-base font-bold text-ink">교사 명단 ({teachers.length})</h2>
+          {/* 버튼 3개 동일 크기·좌우 정렬 (섹션 폭을 3등분) */}
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <Link
+              href="/settings/teachers/roster/import"
+              className="rounded-btn border border-transparent bg-sage-deep px-2 py-2 text-center text-sm font-medium text-white shadow-sm transition hover:bg-sage"
+            >
+              엑셀 업로드
+            </Link>
+            <Link
+              href="/settings/teachers/roster/new"
+              className="rounded-btn border border-transparent bg-sage px-2 py-2 text-center text-sm font-medium text-white shadow-sm transition hover:bg-sage-deep"
+            >
+              + 교사 추가
+            </Link>
+            {/* 전체 명단 내보내기: 이 섹션 전체가 master 전용(페이지 상단에서 redirect). */}
+            <TeacherExportButton />
           </div>
           {teachers.length === 0 ? (
             <p className="mt-2 text-sm text-ink-muted">
