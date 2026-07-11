@@ -298,12 +298,12 @@ export function AttendanceBoard({
         className="pointer-events-none fixed inset-x-0 bottom-[72px] z-40 h-28 w-full"
         aria-hidden="true"
       >
-        <ellipse cx="90" cy="150" rx="190" ry="96" fill="#B9B3D8" opacity=".55" />
-        <ellipse cx="330" cy="158" rx="210" ry="104" fill="#B9B3D8" opacity=".75" />
+        <ellipse cx="90" cy="160" rx="190" ry="96" fill="#B9B3D8" opacity=".55" />
+        <ellipse cx="330" cy="168" rx="210" ry="104" fill="#B9B3D8" opacity=".75" />
         <ellipse cx="60" cy="176" rx="230" ry="96" fill="#7E9CA2" opacity=".7" />
         <ellipse cx="340" cy="184" rx="240" ry="98" fill="#7E9CA2" opacity=".55" />
-        <ellipse cx="120" cy="208" rx="280" ry="104" fill="#A8C5A1" />
-        <ellipse cx="360" cy="216" rx="260" ry="100" fill="#A8C5A1" />
+        <ellipse cx="120" cy="200" rx="280" ry="104" fill="#A8C5A1" />
+        <ellipse cx="360" cy="208" rx="260" ry="100" fill="#A8C5A1" />
         <g fill="#F3C86B">
           <circle cx="40" cy="122" r="2" /><circle cx="150" cy="118" r="2" />
           <circle cx="260" cy="126" r="2" /><circle cx="390" cy="120" r="2" />
