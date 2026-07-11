@@ -119,16 +119,23 @@ export function ClassDetail({
           <p className="text-sm text-ink-muted">아직 이 반에 학생이 없어요.</p>
         ) : (
           <ul className="space-y-2">
+            {/* 이름·학교가 길어도 항상 한 줄 — 넘치면 …으로 자른다 */}
             {members.map((s) => (
-              <li key={s.id} className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm">
-                <span className="flex items-center gap-2">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-full ${genderDot(s.gender)}`} />
-                  <span className="flex items-center gap-1 text-ink"><Icon name="sheep-face" size={16} alt="" />{s.name}
-                    {meta(s.grade, s.school) && <span className="ml-1 text-sm text-ink-muted">{meta(s.grade, s.school)}</span>}
-                  </span>
+              <li key={s.id} className="flex items-center gap-2 rounded-card border border-border/60 bg-white p-3 shadow-sm">
+                <span className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(s.gender)}`} />
+                <span className="shrink-0"><Icon name="sheep-face" size={16} alt="" /></span>
+                <span className="min-w-0 flex-1 truncate text-ink">
+                  {s.name}
+                  {meta(s.grade, s.school) && <span className="ml-1 text-sm text-ink-muted">{meta(s.grade, s.school)}</span>}
                 </span>
-                <button onClick={() => onRemove(s.id)} disabled={isPending} className="rounded-btn border border-border px-3 py-1 text-sm text-ink-muted transition hover:text-ink disabled:opacity-50">
-                  빼기
+                <button
+                  onClick={() => onRemove(s.id)}
+                  disabled={isPending}
+                  title="빼기"
+                  aria-label={`${s.name} 빼기`}
+                  className="shrink-0 rounded-btn bg-blush-soft px-3 py-1 text-sm font-bold text-blush-deep transition hover:bg-blush disabled:opacity-50"
+                >
+                  −
                 </button>
               </li>
             ))}
