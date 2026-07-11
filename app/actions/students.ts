@@ -96,6 +96,46 @@ export async function softDeleteStudent(input: { id: string }): Promise<{ error?
   return {};
 }
 
+// 체크박스로 선택한 학생들 일괄 숨김 처리.
+export async function bulkHideStudents(input: { ids: string[] }): Promise<{ error?: string; count?: number }> {
+  if (!Array.isArray(input.ids) || input.ids.length === 0) return { error: "선택된 학생이 없습니다" };
+  if (input.ids.length > 500) return { error: "한 번에 최대 500명까지 처리할 수 있습니다" };
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("students")
+    .update({ deleted_at: new Date().toISOString() })
+    .in("id", input.ids)
+    .eq("group_id", m.groupId)
+    .is("deleted_at", null)
+    .select("id");
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/hidden");
+  revalidatePath("/attendance");
+  return { count: data?.length ?? 0 };
+}
+
+// 체크박스로 선택한 학생들 일괄 졸업 처리 — 진급과 동일하게 반 배정도 해제.
+export async function bulkGraduateStudents(input: { ids: string[] }): Promise<{ error?: string; count?: number }> {
+  if (!Array.isArray(input.ids) || input.ids.length === 0) return { error: "선택된 학생이 없습니다" };
+  if (input.ids.length > 500) return { error: "한 번에 최대 500명까지 처리할 수 있습니다" };
+  const m = await requireEditor();
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("students")
+    .update({ graduated_at: new Date().toISOString(), class_id: null, updated_at: new Date().toISOString() })
+    .in("id", input.ids)
+    .eq("group_id", m.groupId)
+    .is("graduated_at", null)
+    .select("id");
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/graduated");
+  revalidatePath("/attendance");
+  return { count: data?.length ?? 0 };
+}
+
 export async function restoreStudent(input: { id: string }): Promise<{ error?: string }> {
   const m = await requireEditor();
   const supabase = await createServerClient();

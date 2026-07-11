@@ -4,15 +4,7 @@ import { requireCurrentMembership } from "@/lib/memberships";
 import { Icon } from "@/components/icon";
 import { PromoteButton } from "@/components/promote-button";
 import { StudentExportButton } from "@/components/student-export";
-
-// 성별 색점: 여=핑크, 남=하늘, 미입력=중립(테두리만). 배정 목록과 동일.
-function genderDot(gender: string | null): string {
-  return gender === "female"
-    ? "bg-pink-400"
-    : gender === "male"
-      ? "bg-sky-400"
-      : "bg-transparent border border-border";
-}
+import { RosterList, type RosterListSection } from "@/components/roster-list";
 
 export default async function RosterPage() {
   const { canEdit, classes, students } = await loadRoster();
@@ -99,47 +91,23 @@ export default async function RosterPage() {
             <Icon name="sheep-face" size={18} alt="" />
           </p>
         ) : (
-          sections.map((sec) => (
-            <section key={sec.label} className="mt-7">
-              <h2 className="mb-2 text-sm font-bold text-ink-muted">
-                {sec.label} ({sec.items.length})
-              </h2>
-              <ul className="space-y-2">
-                {sec.items.map((s) => {
-                  const meta = [s.grade ? `${s.grade}학년` : null, s.school, s.phoneSelf]
+          <RosterList
+            canEdit={canEdit}
+            sections={sections.map(
+              (sec): RosterListSection => ({
+                label: `${sec.label} (${sec.items.length})`,
+                items: sec.items.map((s) => ({
+                  id: s.id,
+                  name: s.name,
+                  gender: s.gender,
+                  meta: [s.grade ? `${s.grade}학년` : null, s.school, s.phoneSelf]
                     .filter(Boolean)
-                    .join(" · ");
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={`/settings/roster/${s.id}`}
-                        className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-sky-soft">
-                          <Icon name="sheep-face" size={30} alt="양" />
-                        </span>
-                        <span className="flex min-w-0 flex-1 items-center gap-2">
-                          <span className="flex shrink-0 items-center gap-1.5 font-medium text-ink">
-                            <span
-                              className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${genderDot(s.gender)}`}
-                            />
-                            {s.name}
-                            {s.birthdayMonth === currentMonth && (
-                              <Icon name="star" size={14} alt="이번 달 생일" />
-                            )}
-                          </span>
-                          {meta && (
-                            <span className="truncate text-sm text-ink-muted">{meta}</span>
-                          )}
-                        </span>
-                        <span className="shrink-0 text-lg text-ink-muted">›</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))
+                    .join(" · "),
+                  isBirthdayMonth: s.birthdayMonth === currentMonth,
+                })),
+              }),
+            )}
+          />
         )}
       </div>
     </main>
