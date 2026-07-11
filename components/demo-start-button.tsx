@@ -25,7 +25,16 @@ export function DemoStartButton({ className }: { className?: string }) {
         disabled={isPending}
         className="w-full rounded-btn border border-sage bg-sage-soft px-8 py-3 font-medium text-sage-deep transition hover:bg-sage hover:text-white disabled:opacity-60"
       >
-        {isPending ? "체험 공간 준비 중… (몇 초 걸려요)" : "🐑 가입 없이 체험해 보기"}
+        {isPending ? (
+          // 좁은 화면에서 단어 중간이 꺾이지 않게 의미 단위로 줄을 나눈다.
+          <>
+            체험 공간 준비 중…
+            <br />
+            <span className="text-sm">(몇 초 걸려요)</span>
+          </>
+        ) : (
+          "🐑 가입 없이 체험해 보기"
+        )}
       </button>
       <p className="mt-2 text-center text-sm text-ink-muted">
         Dummy 멤버를 통해 전체 기능을
