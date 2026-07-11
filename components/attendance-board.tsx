@@ -147,8 +147,8 @@ export function AttendanceBoard({
     : "bg-lavender-soft text-ink ring-2 ring-inset ring-lavender"; // unchecked
 
   return (
-    // Warm Cream 바탕 + 하단 파스텔 언덕 풍경
-    <main className="flex min-h-screen flex-col bg-bg pb-20">
+    // Warm Cream 바탕 + 하단 파스텔 언덕 풍경(탭바 위 고정) — pb는 고정된 언덕 높이만큼 확보
+    <main className="min-h-screen bg-bg pb-28">
       <div className="mx-auto w-full max-w-md">
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">
@@ -289,11 +289,12 @@ export function AttendanceBoard({
         </div>
       </div>
 
-      {/* 하단 풍경: 라벤더 산 → 더스티블루 능선 → 세이지 초원 (장식) */}
+      {/* 하단 풍경: 라벤더 산 → 더스티블루 능선 → 세이지 초원 (장식).
+          탭바(z-50) 바로 위에 항상 고정 — 아랫단을 탭바 뒤로 살짝 겹쳐 틈이 안 생기게. */}
       <svg
         viewBox="0 0 420 132"
         preserveAspectRatio="none"
-        className="mt-auto h-28 w-full"
+        className="pointer-events-none fixed inset-x-0 bottom-14 z-40 h-28 w-full"
         aria-hidden="true"
       >
         <ellipse cx="90" cy="150" rx="190" ry="96" fill="#B9B3D8" opacity=".55" />
