@@ -11,6 +11,9 @@ export default async function RosterPage() {
   const m = await requireCurrentMembership();
   const isMaster = m.role === "master";
   const classMap = new Map(classes.map((c) => [c.id, c]));
+  // classes는 이미 display_order → created_at 순으로 정렬돼 있음.
+  // displayOrder 값 자체는 동률(구데이터 전부 0)일 수 있어 배열 순번을 정렬키로 쓴다.
+  const classOrder = new Map(classes.map((c, i) => [c.id, i]));
   const currentMonth = new Date().getMonth() + 1; // 이번 달 생일 학생에 ⭐ 배지
 
   const groups = new Map<string, { label: string; sort: number; items: typeof students }>();
@@ -22,7 +25,7 @@ export default async function RosterPage() {
     if (cls) {
       key = `c:${cls.id}`;
       label = cls.name;
-      sort = cls.displayOrder;
+      sort = classOrder.get(cls.id)!;
     } else if (s.grade != null) {
       key = `g:${s.grade}`;
       label = `${s.grade}학년 (반 없음)`;
