@@ -36,7 +36,7 @@ function LoginForm() {
       <form action={signInWithGoogle}>
         <button
           type="submit"
-          className="mb-6 flex w-full items-center justify-center gap-2 rounded-btn border border-border py-3 text-ink transition hover:bg-card"
+          className="mb-6 flex w-full items-center justify-center gap-2 rounded-btn border border-lavender bg-lavender-soft py-3 font-medium text-ink shadow-sm transition hover:bg-lavender"
         >
           <span>🇬</span> 구글로 시작하기
         </button>
