@@ -109,7 +109,8 @@ export async function loadRoster(opts?: { includeDeleted?: boolean }): Promise<{
     .from("classes")
     .select("id, name, teacher_name, display_order")
     .eq("group_id", m.groupId)
-    .order("display_order", { ascending: true });
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true }); // display_order가 같으면(구버전 데이터 전부 0) 만든 순서
 
   let q = supabase
     .from("students")

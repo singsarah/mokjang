@@ -22,7 +22,8 @@ export async function loadBoard(dateISO: string): Promise<{
 
   const { data: classRows } = await supabase
     .from("classes").select("id, name, teacher_name, display_order")
-    .eq("group_id", m.groupId).order("display_order", { ascending: true });
+    .eq("group_id", m.groupId).order("display_order", { ascending: true })
+    .order("created_at", { ascending: true }); // display_order 동률(구데이터 0)이면 만든 순서
 
   const { data: studentRows } = await supabase
     .from("students").select("id, name, class_id")

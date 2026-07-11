@@ -88,7 +88,8 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
       .is("deleted_at", null),
     supabase
       .from("classes").select("id, name, display_order")
-      .eq("group_id", m.groupId).order("display_order", { ascending: true }),
+      .eq("group_id", m.groupId).order("display_order", { ascending: true })
+      .order("created_at", { ascending: true }), // display_order 동률(구데이터 0)이면 만든 순서
     supabase
       .from("teachers").select("name, birthday_month, birthday_day")
       .eq("group_id", m.groupId)

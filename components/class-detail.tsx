@@ -34,6 +34,7 @@ export function ClassDetail({
   const [error, setError] = useState<string>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [gradeFilter, setGradeFilter] = useState<number | null>(null); // null = 전체
+  const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
 
   function toggle(id: string) {
@@ -85,7 +86,12 @@ export function ClassDetail({
     gender === "female" ? "bg-pink-400" : gender === "male" ? "bg-sky-400" : "bg-transparent border border-border";
   const meta = (grade: number | null, school: string | null) =>
     [grade ? `${grade}학년` : null, school].filter(Boolean).join(" · ");
-  const shownCandidates = candidates.filter((s) => gradeFilter === null || s.grade === gradeFilter);
+  const query = search.trim();
+  const shownCandidates = candidates.filter(
+    (s) =>
+      (gradeFilter === null || s.grade === gradeFilter) &&
+      (query === "" || s.name.includes(query)),
+  );
   return (
     <div className="space-y-8">
       {/* 반 정보 수정 */}
@@ -137,6 +143,15 @@ export function ClassDetail({
           <p className="text-sm text-ink-muted">추가할 학생이 없어요.</p>
         ) : (
           <>
+            {/* 이름 검색 — 학생이 많을 때 스크롤 대신 바로 찾기 */}
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="이름 검색"
+              aria-label="학생 이름 검색"
+              className="mb-2 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink"
+            />
             {/* 학년 필터 */}
             <div className="mb-3 flex gap-2">
               {([null, 1, 2, 3] as const).map((g) => (
@@ -155,7 +170,7 @@ export function ClassDetail({
               ))}
             </div>
             {shownCandidates.length === 0 && (
-              <p className="py-2 text-center text-sm text-ink-muted">이 학년에 추가할 학생이 없어요.</p>
+              <p className="py-2 text-center text-sm text-ink-muted">조건에 맞는 학생이 없어요.</p>
             )}
             <ul className="space-y-2">
               {shownCandidates.map((s) => (

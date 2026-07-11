@@ -38,21 +38,20 @@ export default async function ClassesPage() {
           }}
           className="mt-6 space-y-2"
         >
-          <div className="flex gap-2">
-            <input
-              name="name"
-              placeholder="반 이름"
-              required
-              className="flex-1 rounded-btn border border-border bg-white px-3 py-2 text-ink"
-              aria-label="반 이름"
-            />
-            <input
-              name="teacherName"
-              placeholder="선생님 이름 (선택)"
-              className="flex-1 rounded-btn border border-border bg-white px-3 py-2 text-ink"
-              aria-label="선생님 이름"
-            />
-          </div>
+          {/* 좁은 폰에서 가로 배치가 화면 밖으로 밀려 두 줄로 쌓는다 */}
+          <input
+            name="name"
+            placeholder="반 이름"
+            required
+            className="w-full rounded-btn border border-border bg-white px-3 py-2 text-ink"
+            aria-label="반 이름"
+          />
+          <input
+            name="teacherName"
+            placeholder="선생님 이름 (선택)"
+            className="w-full rounded-btn border border-border bg-white px-3 py-2 text-ink"
+            aria-label="선생님 이름"
+          />
           <button className="w-full rounded-btn bg-sage px-4 py-2 font-medium text-white shadow-sm transition hover:bg-sage-deep">
             추가
           </button>

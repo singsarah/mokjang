@@ -19,12 +19,21 @@ export async function createClass(input: {
   if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const m = await requireEditor();
   const supabase = await createServerClient();
+  // display_order를 안 주면 전부 0이라 목록 순서가 뒤죽박죽 → 항상 맨 뒤 번호로 추가.
+  const { data: last } = await supabase
+    .from("classes")
+    .select("display_order")
+    .eq("group_id", m.groupId)
+    .order("display_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
   const { data, error } = await supabase
     .from("classes")
     .insert({
       group_id: m.groupId,
       name: parsed.data.name,
       teacher_name: parsed.data.teacherName,
+      display_order: (last?.display_order ?? 0) + 1,
     })
     .select("id")
     .single();

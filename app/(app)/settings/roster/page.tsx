@@ -64,7 +64,7 @@ export default async function RosterPage() {
           )}
         </div>
 
-        {/* 하위 줄: 학생 추가 · 학년 올리기(master 전용) · 숨김 학생 · 졸업생 — 전부 동일 크기 */}
+        {/* 하위 줄: + 추가 · ⬆️ 진급(master 전용) · 숨김 · 졸업생 — 네 개가 한 줄에 들어가게 짧은 라벨, 전부 동일 크기 */}
         <div
           className={`mt-3 grid gap-2 text-sm ${
             canEdit && isMaster ? "grid-cols-4" : canEdit ? "grid-cols-3" : "grid-cols-2"
@@ -75,7 +75,7 @@ export default async function RosterPage() {
               href="/settings/roster/new"
               className="rounded-tag border border-transparent bg-sage px-2 py-1.5 text-center font-medium text-white shadow-sm transition hover:bg-sage-deep"
             >
-              + 학생 추가
+              + 추가
             </Link>
           )}
           {isMaster && <PromoteButton />}
@@ -83,7 +83,7 @@ export default async function RosterPage() {
             href="/settings/roster/hidden"
             className="rounded-tag border border-transparent bg-white px-2 py-1.5 text-center text-ink-muted shadow-sm hover:text-ink"
           >
-            숨김 학생
+            숨김
           </Link>
           <Link
             href="/settings/roster/graduated"
