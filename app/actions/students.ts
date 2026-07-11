@@ -58,7 +58,8 @@ export async function createStudent(
     .select("id")
     .single();
   if (error) return { error: error.message };
-  revalidatePath("/settings/roster");
+  // "layout": 반 상세(/classes/[id]) 등 하위 경로까지 갱신 — 반 상세에서 바로 생성하는 흐름 지원.
+  revalidatePath("/settings/roster", "layout");
   return { id: data.id };
 }
 

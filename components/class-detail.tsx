@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateClass, assignStudents, deleteClass } from "@/app/actions/classes";
@@ -145,7 +146,16 @@ export function ClassDetail({
 
       {/* 학생 추가 */}
       <section>
-        <h2 className="mb-2 font-bold text-ink">➕ 학생 추가</h2>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-bold text-ink">➕ 학생 추가</h2>
+          {/* 명단에 아직 없는 학생은 여기서 바로 생성 — 반이 미리 선택된 학생 추가 폼으로 */}
+          <Link
+            href={`/settings/roster/new?classId=${classId}`}
+            className="rounded-tag border border-sage bg-white px-2.5 py-1 text-sm text-sage-deep shadow-sm transition hover:bg-sage-soft"
+          >
+            + 새 학생 만들기
+          </Link>
+        </div>
         {candidates.length === 0 ? (
           <p className="text-sm text-ink-muted">추가할 학생이 없어요.</p>
         ) : (

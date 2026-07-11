@@ -41,12 +41,16 @@ export function StudentForm({
   initial,
   initialPhotoUrl,
   studentId,
+  defaultClassId,
+  returnTo,
 }: {
   classes: RosterClass[];
   groupId: string;
   initial?: Initial;
   initialPhotoUrl?: string;
   studentId?: string;
+  defaultClassId?: string; // 반 상세에서 진입 시 해당 반 미리 선택
+  returnTo?: string; // 저장 후 이동할 경로 (기본: 학적부)
 }) {
   const router = useRouter();
   const [error, setError] = useState<string>();
@@ -128,7 +132,7 @@ export function StudentForm({
         setError(result.error);
         return;
       }
-      router.push("/settings/roster");
+      router.push(returnTo ?? "/settings/roster");
     });
   }
 
@@ -186,7 +190,7 @@ export function StudentForm({
       </label>
       <label className="block">
         <span className="text-sm">반</span>
-        <select name="classId" defaultValue={initial?.classId ?? ""} className={input}>
+        <select name="classId" defaultValue={initial?.classId ?? defaultClassId ?? ""} className={input}>
           <option value="">반 없음</option>
           {classes.map((c) => (
             <option key={c.id} value={c.id}>
