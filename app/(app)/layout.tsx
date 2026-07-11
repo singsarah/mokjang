@@ -1,5 +1,4 @@
 import { requireCurrentMembership } from "@/lib/memberships";
-import { createServerClient } from "@/lib/supabase/server";
 import { isDemoEmail } from "@/lib/demo";
 import { PrivacyGate } from "@/components/privacy-gate";
 import { DemoTour } from "@/components/demo-tour";
@@ -10,14 +9,10 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  await requireCurrentMembership(); // redirects if not active member
+  const membership = await requireCurrentMembership(); // redirects if not active member
 
   // 체험 계정이면 단계 안내 카드를 띄운다.
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const demo = isDemoEmail(user?.email);
+  const demo = isDemoEmail(membership.email);
 
   return (
     <PrivacyGate>
