@@ -19,21 +19,35 @@ export async function createClass(input: {
   if (!parsed.success) return { error: parsed.error.issues[0]!.message };
   const m = await requireEditor();
   const supabase = await createServerClient();
-  // display_order를 안 주면 전부 0이라 목록 순서가 뒤죽박죽 → 항상 맨 뒤 번호로 추가.
-  const { data: last } = await supabase
+  // 새 반은 이름의 자연 순서(1-2반은 1-1반과 1-3반 사이) 자리에 끼워 넣는다.
+  // 기존 반은 현재 표시 순서를 유지한 채 번호만 다시 매긴다(구데이터의 0 동률도 이때 정리됨).
+  const { data: existingRows, error: listErr } = await supabase
     .from("classes")
-    .select("display_order")
+    .select("id, name")
     .eq("group_id", m.groupId)
-    .order("display_order", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .order("display_order", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (listErr) return { error: listErr.message };
+  const existing = existingRows ?? [];
+  const naturalCompare = (a: string, b: string) =>
+    a.localeCompare(b, "ko", { numeric: true });
+  let pos = existing.findIndex((c) => naturalCompare(c.name, parsed.data.name) > 0);
+  if (pos === -1) pos = existing.length;
+  for (let i = 0; i < existing.length; i++) {
+    const { error: orderErr } = await supabase
+      .from("classes")
+      .update({ display_order: i < pos ? i : i + 1 })
+      .eq("id", existing[i]!.id)
+      .eq("group_id", m.groupId);
+    if (orderErr) return { error: orderErr.message };
+  }
   const { data, error } = await supabase
     .from("classes")
     .insert({
       group_id: m.groupId,
       name: parsed.data.name,
       teacher_name: parsed.data.teacherName,
-      display_order: (last?.display_order ?? 0) + 1,
+      display_order: pos,
     })
     .select("id")
     .single();
