@@ -79,13 +79,14 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
   const canCall = m.role !== "viewer";
 
   // 재적 학생 + 반 (생일/연락처/요약에 항상 필요)
-  // deleted_at만 필터 → 출석판/기존 요약과 동일한 집합 유지. 졸업생은 생일 필터에서 제외.
+  // 숨김(deleted_at)·졸업생(graduated_at) 제외 → 출석판과 동일한 집합 유지.
   const [{ data: studentRows }, { data: classRows }, { data: teacherRows }] = await Promise.all([
     supabase
       .from("students")
-      .select("id, name, class_id, gender, grade, phone_self, phone_guardian, guardian_relation, birthday_month, birthday_day, graduated_at")
+      .select("id, name, class_id, gender, grade, phone_self, phone_guardian, guardian_relation, birthday_month, birthday_day")
       .eq("group_id", m.groupId)
-      .is("deleted_at", null),
+      .is("deleted_at", null)
+      .is("graduated_at", null),
     supabase
       .from("classes").select("id, name, display_order")
       .eq("group_id", m.groupId).order("display_order", { ascending: true })
@@ -104,12 +105,12 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
   type Stud = {
     id: string; name: string; classId: string | null; gender: string | null; grade: number;
     phoneSelf: string | null; phoneGuardian: string | null; guardianRelation: string | null;
-    birthdayMonth: number | null; birthdayDay: number | null; graduatedAt: string | null;
+    birthdayMonth: number | null; birthdayDay: number | null;
   };
   const students: Stud[] = (studentRows ?? []).map((s) => ({
     id: s.id, name: s.name, classId: s.class_id, gender: s.gender, grade: s.grade ?? 0,
     phoneSelf: s.phone_self, phoneGuardian: s.phone_guardian, guardianRelation: s.guardian_relation,
-    birthdayMonth: s.birthday_month, birthdayDay: s.birthday_day, graduatedAt: s.graduated_at,
+    birthdayMonth: s.birthday_month, birthdayDay: s.birthday_day,
   }));
 
   // 이번 달/오늘 (KST 기준) — 서버에서만 계산해 hydration 불일치 방지
@@ -119,7 +120,7 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
   const todayDay = Number(kDayStr);
 
   const studentBirthdays: BirthdayEntry[] = students
-    .filter((s) => s.graduatedAt == null && s.birthdayMonth === todayMonth && s.birthdayDay != null)
+    .filter((s) => s.birthdayMonth === todayMonth && s.birthdayDay != null)
     .map((s) => ({
       who: "student" as const,
       name: s.name,

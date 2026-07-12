@@ -25,9 +25,11 @@ export async function loadBoard(dateISO: string): Promise<{
     .eq("group_id", m.groupId).order("display_order", { ascending: true })
     .order("created_at", { ascending: true }); // display_order 동률(구데이터 0)이면 만든 순서
 
+  // 숨김(deleted_at)과 졸업생(graduated_at)은 출석판에 안 보인다.
   const { data: studentRows } = await supabase
     .from("students").select("id, name, class_id")
-    .eq("group_id", m.groupId).is("deleted_at", null).order("name", { ascending: true });
+    .eq("group_id", m.groupId).is("deleted_at", null).is("graduated_at", null)
+    .order("name", { ascending: true });
 
   // 해당 날짜 세션 + 레코드
   const { data: session } = await supabase
