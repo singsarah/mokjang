@@ -428,8 +428,9 @@ export function CalendarMonthView({
     <>
       {/* 달력 그리드 */}
       <div className="mt-4 overflow-hidden rounded-card border border-border/60 bg-white shadow-sm">
-        {/* 주일에 일정이 몰리므로 일요일 칸만 2배 폭 (헤더·본문 동일 템플릿) */}
-        <div className="grid grid-cols-[2fr_repeat(6,1fr)] border-b border-border/60">
+        {/* 주일에 일정이 몰리므로 일요일 칸만 3배 폭 (헤더·본문 동일 템플릿).
+            minmax(0,·)로 긴 일정 제목이 칸을 억지로 늘리지 못하게 고정. */}
+        <div className="grid grid-cols-[minmax(0,3fr)_repeat(6,minmax(0,1fr))] border-b border-border/60">
           {WEEKDAYS_KO.map((w, i) => (
             <div
               key={w}
@@ -445,7 +446,7 @@ export function CalendarMonthView({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-[2fr_repeat(6,1fr)]">
+        <div className="grid grid-cols-[minmax(0,3fr)_repeat(6,minmax(0,1fr))]">
           {cells.map((day, i) => {
             const rightEdge = i % 7 === 6;
             const isSunday = i % 7 === 0;
@@ -467,7 +468,8 @@ export function CalendarMonthView({
                 type="button"
                 onClick={() => onCellClick(day)}
                 aria-label={`${monthNum}월 ${day}일 선택`}
-                className={`${cellBorder} block w-full text-left transition ${
+                // 버튼 기본 세로 가운데 정렬을 끄고 숫자를 항상 칸 맨 위에 고정
+                className={`${cellBorder} flex w-full flex-col justify-start text-left transition ${
                   isSelected
                     ? "bg-sage-soft ring-1 ring-inset ring-sage"
                     : "hover:bg-card"
