@@ -85,6 +85,13 @@ export default async function SettingsPage() {
           로그아웃
         </button>
       </form>
+
+      <Link
+        href="/settings/delete-account"
+        className="mt-3 block text-center text-sm text-danger underline underline-offset-2 hover:opacity-80"
+      >
+        계정 삭제
+      </Link>
       </div>
     </main>
   );

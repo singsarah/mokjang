@@ -7,7 +7,7 @@ export default function PrivacyPage() {
         ← 홈
       </Link>
       <h1 className="mt-4 font-display text-2xl font-bold text-ink">개인정보 처리 방침</h1>
-      <p className="mt-2 text-sm text-ink-muted">최종 개정일: 2026-07-03</p>
+      <p className="mt-2 text-sm text-ink-muted">최종 개정일: 2026-07-12</p>
 
       <section className="mt-8 space-y-6 text-ink">
         <div>
@@ -34,7 +34,20 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold">4. 접근 통제</h2>
+          <h2 className="text-lg font-semibold">4. 계정 삭제</h2>
+          <p>
+            설정 &gt; 계정 삭제에서 언제든 계정을 삭제할 수 있습니다. 계정을
+            삭제하면 계정 정보(이름 · 이메일 · 프로필)가 즉시 완전히 삭제되며,
+            되돌릴 수 없습니다. 본인 혼자 사용 중인 그룹은 그룹에 기록된 모든
+            정보(학생 명단 · 출석 기록 · 일정 · 회의록 · 교사 명단)가 함께
+            영구 삭제됩니다. 다른 교사와 함께 사용하는 그룹의 기록은 남은
+            구성원을 위해 유지되며, 해당 기록과 삭제된 계정의 연결 정보는 모두
+            익명화됩니다.
+          </p>
+        </div>
+
+        <div>
+          <h2 className="text-lg font-semibold">5. 접근 통제</h2>
           <p>
             연락처 등 민감 정보는 편집 권한 교사에게만 완전 노출되며, 조회 권한
             교사에게는 마스킹 처리됩니다. 다른 그룹의 데이터는 원천 차단됩니다.
@@ -42,7 +55,7 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold">5. 미성년자 정보</h2>
+          <h2 className="text-lg font-semibold">6. 미성년자 정보</h2>
           <p>
             학생 개인정보 등록 시 보호자 동의를 반드시 확인해주세요. 앱은 최소
             수집 원칙에 따라 기능에 필요한 필드만 저장합니다.
@@ -50,7 +63,7 @@ export default function PrivacyPage() {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold">6. 문의</h2>
+          <h2 className="text-lg font-semibold">7. 문의</h2>
           <p>syoon5501@gmail.com</p>
         </div>
       </section>
