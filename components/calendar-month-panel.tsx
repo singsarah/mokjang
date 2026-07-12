@@ -428,7 +428,8 @@ export function CalendarMonthView({
     <>
       {/* 달력 그리드 */}
       <div className="mt-4 overflow-hidden rounded-card border border-border/60 bg-white shadow-sm">
-        <div className="grid grid-cols-7 border-b border-border/60">
+        {/* 주일에 일정이 몰리므로 일요일 칸만 2배 폭 (헤더·본문 동일 템플릿) */}
+        <div className="grid grid-cols-[2fr_repeat(6,1fr)] border-b border-border/60">
           {WEEKDAYS_KO.map((w, i) => (
             <div
               key={w}
@@ -444,9 +445,10 @@ export function CalendarMonthView({
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-[2fr_repeat(6,1fr)]">
           {cells.map((day, i) => {
             const rightEdge = i % 7 === 6;
+            const isSunday = i % 7 === 0;
             const cellBorder = `min-h-16 border-b border-border/30 p-0.5 ${
               rightEdge ? "" : "border-r"
             }`;
@@ -454,7 +456,8 @@ export function CalendarMonthView({
               return <div key={`empty-${i}`} className={cellBorder} />;
             }
             const markers = markersByDay.get(day) ?? [];
-            const shown = markers.slice(0, 1);
+            // 넓은 일요일 칸은 마커 3개까지, 좁은 평일 칸은 1개(생일 정도)만.
+            const shown = markers.slice(0, isSunday ? 3 : 1);
             const overflow = markers.length - shown.length;
             const isToday = day === todayDay;
             const isSelected = day === selectedDay;
