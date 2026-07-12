@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { loadRoster } from "@/lib/students";
 import { createClass } from "@/app/actions/classes";
 import { UnassignAllButton } from "@/components/unassign-all-button";
+import { ClassList } from "@/components/class-list";
 
 export default async function ClassesPage() {
   const { canEdit, classes, students } = await loadRoster();
@@ -57,33 +58,14 @@ export default async function ClassesPage() {
           </button>
         </form>
 
-        <ul className="mt-8 space-y-2">
-          {classes.length === 0 && (
-            <p className="text-center text-ink-muted">
-              아직 반이 없어요. (반 없이도 사용 가능)
-            </p>
-          )}
-          {classes.map((c) => {
-            const n = countByClass.get(c.id) ?? 0;
-            return (
-              <li key={c.id}>
-                <Link
-                  href={`/settings/roster/classes/${c.id}`}
-                  className="flex items-center justify-between rounded-card border border-border/60 bg-white p-3 shadow-sm transition hover:shadow-md"
-                >
-                  <span className="text-ink">
-                    {c.name}
-                    {c.teacherName && (
-                      <span className="text-sm text-ink-muted"> · {c.teacherName} 선생님</span>
-                    )}{" "}
-                    <span className="text-sm text-ink-muted">({n}명)</span>
-                  </span>
-                  <span className="text-lg text-ink-muted">›</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <ClassList
+          classes={classes.map((c) => ({
+            id: c.id,
+            name: c.name,
+            teacherName: c.teacherName,
+            count: countByClass.get(c.id) ?? 0,
+          }))}
+        />
 
         {students.some((s) => s.classId) && <UnassignAllButton />}
       </div>

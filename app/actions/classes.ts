@@ -114,6 +114,32 @@ export async function deleteClass(input: { id: string }): Promise<{ error?: stri
   return {};
 }
 
+// 선택한 반들을 한 번에 삭제 — 반에 있던 학생은 미배정으로 이동(학생 자체는 유지).
+export async function bulkDeleteClasses(input: {
+  ids: string[];
+}): Promise<{ error?: string; unassigned?: number }> {
+  const m = await requireEditor();
+  if (!input.ids.length) return {};
+  const supabase = await createServerClient();
+  const { data: moved, error: unassignErr } = await supabase
+    .from("students")
+    .update({ class_id: null, updated_at: new Date().toISOString() })
+    .in("class_id", input.ids)
+    .eq("group_id", m.groupId)
+    .select("id");
+  if (unassignErr) return { error: unassignErr.message };
+  const { error } = await supabase
+    .from("classes")
+    .delete()
+    .in("id", input.ids)
+    .eq("group_id", m.groupId);
+  if (error) return { error: error.message };
+  revalidatePath("/settings/roster");
+  revalidatePath("/settings/roster/classes");
+  revalidatePath("/attendance");
+  return { unassigned: moved?.length ?? 0 };
+}
+
 // 선택한 학생들을 특정 반(classId)으로 이동, classId=null이면 미배정("빼기").
 export async function assignStudents(input: {
   studentIds: string[];
