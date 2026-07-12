@@ -98,7 +98,7 @@ export default async function RosterPage() {
             canEdit={canEdit}
             sections={sections.map(
               (sec): RosterListSection => ({
-                label: `${sec.label} (${sec.items.length})`,
+                label: sec.label,
                 items: sec.items.map((s) => ({
                   id: s.id,
                   name: s.name,

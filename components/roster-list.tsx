@@ -33,8 +33,17 @@ export function RosterList({
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
+
+  // 이름 검색 — 일치하는 학생만 남기고 빈 섹션은 숨긴다.
+  const query = search.trim();
+  const visibleSections = query
+    ? sections
+        .map((sec) => ({ ...sec, items: sec.items.filter((s) => s.name.includes(query)) }))
+        .filter((sec) => sec.items.length > 0)
+    : sections;
 
   function toggle(id: string) {
     setSelected((prev) => {
@@ -69,11 +78,29 @@ export function RosterList({
 
   return (
     <>
+      {/* 이름 검색 — 학생이 많을 때 스크롤 대신 바로 찾기 (반 상세와 같은 패턴) */}
+      <input
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="학생 이름 검색"
+        aria-label="학생 이름 검색"
+        className="mt-5 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink"
+      />
+
       {error && <p className="mt-4 text-sm text-danger">{error}</p>}
 
-      {sections.map((sec) => (
+      {query && visibleSections.length === 0 && (
+        <p className="mt-8 text-center text-ink-muted">
+          &lsquo;{query}&rsquo;에 해당하는 학생이 없어요.
+        </p>
+      )}
+
+      {visibleSections.map((sec) => (
         <section key={sec.label} className="mt-7">
-          <h2 className="mb-2 text-sm font-bold text-ink-muted">{sec.label}</h2>
+          <h2 className="mb-2 text-sm font-bold text-ink-muted">
+            {sec.label} ({sec.items.length})
+          </h2>
           <ul className="space-y-2">
             {sec.items.map((s) => (
               <li key={s.id} className="flex items-center gap-2">
