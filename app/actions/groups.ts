@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { generateJoinCode } from "@/lib/join-code";
+import { isDemoEmail } from "@/lib/demo";
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "그룹 이름을 입력해주세요").max(100),
@@ -79,6 +80,15 @@ export async function joinGroup(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "로그인이 필요합니다" };
+
+  // 체험 계정은 48시간 뒤 삭제되는 일회용이라 실제 그룹 참여를 막는다.
+  // (승인돼도 본인이 다시 로그인할 수 없는 유령 교사가 됨)
+  if (isDemoEmail(user.email)) {
+    return {
+      error:
+        "체험 계정으로는 그룹에 참여할 수 없어요. 로그아웃 후 실제 계정으로 가입하고 초대 링크를 다시 열어주세요.",
+    };
+  }
 
   // Look up the group by code (RLS: no policy for anonymous select — we allow
   // matching a code only via the RPC below, which runs as SECURITY DEFINER).
