@@ -3,6 +3,7 @@ import { isDemoEmail } from "@/lib/demo";
 import { PrivacyGate } from "@/components/privacy-gate";
 import { DemoTour } from "@/components/demo-tour";
 import { TabBar } from "@/components/tab-bar";
+import { SiteFooter } from "@/components/site-footer";
 
 export default async function AppLayout({
   children,
@@ -16,7 +17,10 @@ export default async function AppLayout({
 
   return (
     <PrivacyGate>
-      <div className="min-h-screen bg-bg pb-20">{children}</div>
+      <div className="min-h-screen bg-bg pb-20">
+        {children}
+        <SiteFooter />
+      </div>
       {demo && <DemoTour />}
       <TabBar />
     </PrivacyGate>

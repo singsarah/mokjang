@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function PrivacyPage() {
   return (
@@ -67,6 +68,7 @@ export default function PrivacyPage() {
           <p>syoon5501@gmail.com</p>
         </div>
       </section>
+      <SiteFooter />
     </main>
   );
 }

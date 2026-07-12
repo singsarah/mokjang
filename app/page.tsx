@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase/server";
 import { Icon } from "@/components/icon";
 import { DemoStartButton } from "@/components/demo-start-button";
+import { SiteFooter } from "@/components/site-footer";
 
 export default async function LandingPage() {
   const supabase = await createServerClient();
@@ -47,6 +48,7 @@ export default async function LandingPage() {
         </Link>
       </div>
       <DemoStartButton className="w-full max-w-xs" />
+      <SiteFooter className="pt-2" />
     </main>
   );
 }

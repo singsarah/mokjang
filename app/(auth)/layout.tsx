@@ -1,4 +1,5 @@
 import { Icon } from "@/components/icon";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function AuthLayout({
   children,
@@ -14,6 +15,7 @@ export default function AuthLayout({
           <h1 className="mt-2 font-display text-2xl font-bold text-sage-deep">목장 관리</h1>
         </div>
         {children}
+        <SiteFooter />
       </div>
     </div>
   );
