@@ -86,6 +86,47 @@ export type Database = {
           },
         ]
       }
+      meeting_minutes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          group_id: string
+          id: string
+          meeting_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          group_id: string
+          id?: string
+          meeting_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          group_id?: string
+          id?: string
+          meeting_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_minutes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       classes: {
         Row: {
           created_at: string
