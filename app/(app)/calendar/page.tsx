@@ -137,7 +137,7 @@ export default async function CalendarPage({
     "flex h-9 w-9 items-center justify-center rounded-btn border border-border bg-white text-sm text-ink shadow-sm transition hover:bg-card";
 
   return (
-    <main className="min-h-screen bg-sky-soft pb-24">
+    <main className="min-h-screen bg-sky-soft pb-36">
       <div className="mx-auto max-w-md px-4 py-8">
         {/* 월 헤더 + 이동 */}
         <div className="flex items-center justify-between">

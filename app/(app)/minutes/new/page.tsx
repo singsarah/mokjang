@@ -11,7 +11,7 @@ export default async function NewMinutePage() {
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
 
   return (
-    <main className="min-h-screen bg-blush-soft pb-24">
+    <main className="min-h-screen bg-blush-soft pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link href="/minutes" className="text-sm text-ink-muted hover:text-ink">
           ← 회의록

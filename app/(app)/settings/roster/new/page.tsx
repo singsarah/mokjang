@@ -20,7 +20,7 @@ export default async function NewStudentPage({
     : "/settings/roster";
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link href={backHref} className="text-sm text-ink-muted hover:text-ink">
           {fromClass ? `← ${fromClass.name}` : "← 학적부"}

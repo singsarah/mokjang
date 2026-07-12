@@ -27,7 +27,7 @@ export default async function MinutesPage() {
 
   return (
     // 회의록 탭 배경 = 연한 핑크(blush-soft) — 탭마다 다른 배경색으로 구분
-    <main className="min-h-screen bg-blush-soft pb-24">
+    <main className="min-h-screen bg-blush-soft pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-2xl font-bold text-ink">회의록</h1>

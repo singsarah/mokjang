@@ -39,7 +39,7 @@ export default async function DashboardPage({
   const summaryTitle = isLatest ? "지난 예배 출석" : `${shortDate(summary!.date)} 예배 출석`;
 
   return (
-    <main className="min-h-screen space-y-4 bg-lavender-soft px-6 py-8 pb-24">
+    <main className="min-h-screen space-y-4 bg-lavender-soft px-6 py-8 pb-36">
       {/* 0. 미마감 알림 — 지난 날짜인데 마감하지 않은 출석 (마감해야 통계·엑셀에 반영) */}
       {unclosedDates.length > 0 && (
         <div className="mx-auto max-w-md rounded-2xl border border-gold bg-gold-soft p-4">

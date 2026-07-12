@@ -148,7 +148,7 @@ export function AttendanceBoard({
 
   return (
     // Warm Cream 바탕 + 하단 파스텔 언덕 풍경(탭바 위 고정) — pb는 고정된 언덕 높이만큼 확보
-    <main className="min-h-screen bg-bg pb-28">
+    <main className="min-h-screen bg-bg pb-36">
       <div className="mx-auto w-full max-w-md">
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-4">

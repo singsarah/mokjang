@@ -41,7 +41,7 @@ export default async function RosterPage() {
   const sections = [...groups.values()].sort((a, b) => a.sort - b.sort);
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         {/* 헤더도 아래 줄과 같은 4칸 그리드 — 업로드/다운로드가 숨김 학생/졸업생과 세로줄이 맞는다. */}
         <div className="grid grid-cols-4 items-center gap-2">

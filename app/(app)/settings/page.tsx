@@ -52,7 +52,7 @@ export default async function SettingsPage() {
   ].filter((it) => it.show);
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
       <h1 className="font-display font-bold text-3xl text-ink">설정</h1>
       <p className="mt-1 text-sm text-ink-muted">

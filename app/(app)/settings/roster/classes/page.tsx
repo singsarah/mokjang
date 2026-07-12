@@ -16,7 +16,7 @@ export default async function ClassesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link
           href="/settings"

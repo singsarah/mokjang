@@ -38,7 +38,7 @@ export default async function ClassDetailPage({
     });
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link href="/settings/roster/classes" className="text-sm text-ink-muted hover:text-ink">
           ← 반 관리

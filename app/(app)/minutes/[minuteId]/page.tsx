@@ -27,7 +27,7 @@ export default async function MinuteDetailPage({
   const dateLabel = `${y}년 ${Number(mo)}월 ${Number(d)}일`;
 
   return (
-    <main className="min-h-screen bg-blush-soft pb-24">
+    <main className="min-h-screen bg-blush-soft pb-36">
       <div className="mx-auto max-w-md px-6 py-8">
         <Link href="/minutes" className="text-sm text-ink-muted hover:text-ink">
           ← 회의록

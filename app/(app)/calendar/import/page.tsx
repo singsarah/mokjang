@@ -8,7 +8,7 @@ export default async function ImportEventsPage() {
   if (m.role === "viewer") redirect("/calendar");
 
   return (
-    <main className="min-h-screen bg-card pb-24">
+    <main className="min-h-screen bg-card pb-36">
       <div className="mx-auto max-w-2xl px-6 py-8">
         <Link href="/calendar" className="text-sm text-ink-muted hover:text-ink">
           ← 일정
