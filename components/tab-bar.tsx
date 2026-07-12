@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Icon, type IconName } from "@/components/icon";
-import { CalendarIcon, ChartIcon, GearIcon } from "@/components/flat-icons";
+import { CalendarIcon, ChartIcon, GearIcon, NotebookIcon } from "@/components/flat-icons";
 import type { ComponentType } from "react";
 
 const TABS: {
@@ -15,6 +15,7 @@ const TABS: {
 }[] = [
   { href: "/attendance", label: "출석", img: "sheep-face" },
   { href: "/calendar", label: "일정", FlatIcon: CalendarIcon },
+  { href: "/minutes", label: "회의록", FlatIcon: NotebookIcon },
   { href: "/dashboard", label: "대시보드", FlatIcon: ChartIcon },
   { href: "/settings", label: "설정", FlatIcon: GearIcon },
 ];

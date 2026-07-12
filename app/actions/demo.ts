@@ -167,6 +167,27 @@ async function seedDemoData(admin: Admin, groupId: string, userId: string) {
   );
   if (eventErr) throw eventErr;
 
+  // 회의록 샘플 (회의록 탭 체험용)
+  const { error: minuteErr } = await admin.from("meeting_minutes").insert([
+    {
+      group_id: groupId,
+      title: "교사 월례회의",
+      meeting_date: shiftISO(today, -4),
+      content:
+        "참석: 김은혜, 이믿음, 박소망, 정사랑\n\n1. 수련회 준비\n- 장소: 은혜수양관 (1박 2일)\n- 조 편성은 반별로, 담임이 조장\n\n2. 결석 학생 심방\n- 서도윤: 이번 주 이믿음 선생님이 연락하기로\n\n다음 회의: 다음 달 첫째 주",
+      created_by: userId,
+    },
+    {
+      group_id: groupId,
+      title: "여름 행사 기획 회의",
+      meeting_date: shiftISO(today, -18),
+      content:
+        "참석: 김은혜, 최기쁨, 한평안\n\n- 여름 특별 찬양의 밤 일정 논의\n- 예산은 회계(한평안)가 다음 회의까지 정리\n- 홍보물은 최기쁨 담당",
+      created_by: userId,
+    },
+  ]);
+  if (minuteErr) throw minuteErr;
+
   // 지난 3주 주일 출석 (전부 마감 상태 → 통계·추이 그래프·엑셀에 바로 보임)
   const lastSun = lastSundayBefore(today);
   const sundays = [shiftISO(lastSun, -14), shiftISO(lastSun, -7), lastSun];

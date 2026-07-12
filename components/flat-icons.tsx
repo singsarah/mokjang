@@ -39,6 +39,15 @@ export function GearIcon(props: FlatIconProps) {
   );
 }
 
+export function NotebookIcon(props: FlatIconProps) {
+  return (
+    <svg {...base(props)}>
+      {/* 회의록: 스프링 노트 — 왼쪽에 링 구멍 2개, 안에 글줄 3개 */}
+      <path d="M7 2h11a2.5 2.5 0 0 1 2.5 2.5v15A2.5 2.5 0 0 1 18 22H7a2.5 2.5 0 0 1-2.5-2.5V18H3a1 1 0 1 1 0-2h1.5v-3H3a1 1 0 1 1 0-2h1.5V8H3a1 1 0 0 1 0-2h1.5V4.5A2.5 2.5 0 0 1 7 2Zm2.5 5.5a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-6Zm0 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-6Zm0 4a1 1 0 1 0 0 2h3.5a1 1 0 1 0 0-2H9.5Z" />
+    </svg>
+  );
+}
+
 export function PhoneIcon(props: FlatIconProps) {
   return (
     <svg {...base(props)}>
