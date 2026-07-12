@@ -17,6 +17,7 @@ export default async function AttendancePage({
   const board = await loadBoard(iso);
   return (
     <AttendanceBoard
+      groupName={board.groupName}
       date={board.date}
       note={board.note}
       canEdit={board.canEdit}

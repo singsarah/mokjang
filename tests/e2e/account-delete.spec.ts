@@ -10,8 +10,8 @@ test.describe.serial("Account deletion", () => {
     await signUp(page, email, password, "김탈퇴");
 
     await page.goto("/new-group");
-    await page.getByLabel(/그룹 이름/).fill("고등부");
-    await submitUntilUrl(page, "그룹 만들기", /\/settings\/group/);
+    await page.getByLabel(/조직 이름/).fill("고등부");
+    await submitUntilUrl(page, "조직 만들기", /\/settings\/group/);
 
     // 설정 화면의 계정 삭제 링크 → 안내 페이지
     await page.goto("/settings");

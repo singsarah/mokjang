@@ -1,7 +1,7 @@
 {
   "name": "목장 관리",
   "short_name": "목장",
-  "description": "교회 고등부 출석·일정·생일 관리",
+  "description": "교회 모임 출석·일정·생일 관리",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F0F9F0",

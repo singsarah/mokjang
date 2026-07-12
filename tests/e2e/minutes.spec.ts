@@ -14,8 +14,8 @@ test.describe.serial("Meeting minutes", () => {
     await signUp(page, email, password, "김회의");
 
     await page.goto("/new-group");
-    await page.getByLabel(/그룹 이름/).fill("고등부");
-    await submitUntilUrl(page, "그룹 만들기", /\/settings\/group/);
+    await page.getByLabel(/조직 이름/).fill("고등부");
+    await submitUntilUrl(page, "조직 만들기", /\/settings\/group/);
 
     // 작성 페이지로 이동해 폼 작성
     await page.goto("/minutes/new");

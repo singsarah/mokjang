@@ -1,8 +1,10 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service";
+import { CURRENT_GROUP_COOKIE } from "@/lib/memberships";
 
 // 계정 삭제 — 되돌릴 수 없음.
 // - 혼자 사용 중인 그룹(다른 활성 멤버 없음)은 그룹의 모든 기록과 함께 삭제.
@@ -59,5 +61,6 @@ export async function deleteAccount(): Promise<{ error?: string }> {
 
   // 브라우저 세션 쿠키 정리 (계정은 이미 삭제됨 — 실패해도 무시)
   await supabase.auth.signOut().catch(() => {});
+  (await cookies()).delete(CURRENT_GROUP_COOKIE);
   redirect("/");
 }

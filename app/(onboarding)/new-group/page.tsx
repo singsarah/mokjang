@@ -18,13 +18,13 @@ export default function NewGroupPage() {
 
   return (
     <div className="rounded-card border border-border/60 bg-white p-8 shadow-sm">
-      <h2 className="mb-2 font-display text-xl font-bold text-ink">새 그룹 만들기</h2>
+      <h2 className="mb-2 font-display text-xl font-bold text-ink">새 조직 만들기</h2>
       <p className="mb-6 text-sm text-ink-muted">
-        그룹을 만들면 자동으로 마스터가 되고, 8자리 코드가 발급됩니다.
+        조직을 만들면 자동으로 마스터가 되고, 초대용 8자리 코드가 발급됩니다.
       </p>
       <form action={onSubmit} className="space-y-4">
         <label className="block">
-          <span className="text-sm text-ink">그룹 이름 (예: 고등부)</span>
+          <span className="text-sm text-ink">조직 이름 (예: 고등부, 청년부)</span>
           <input
             name="name"
             required
@@ -38,7 +38,7 @@ export default function NewGroupPage() {
           disabled={isPending}
           className="w-full rounded-btn bg-sage py-3 font-medium text-white shadow-sm transition hover:bg-sage-deep disabled:opacity-50"
         >
-          {isPending ? "생성 중..." : "그룹 만들기"}
+          {isPending ? "생성 중..." : "조직 만들기"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-ink-muted">

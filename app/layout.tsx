@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "목장 관리",
-  description: "교회 고등부 출석·일정·생일·학적부 관리",
+  description: "교회 모임 출석·일정·생일·학적부 관리",
   manifest: "/manifest.json",
 };
 

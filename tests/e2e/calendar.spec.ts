@@ -14,8 +14,8 @@ test.describe.serial("Calendar events", () => {
     await signUp(page, email, password, "김달력");
 
     await page.goto("/new-group");
-    await page.getByLabel(/그룹 이름/).fill("고등부");
-    await submitUntilUrl(page, "그룹 만들기", /\/settings\/group/);
+    await page.getByLabel(/조직 이름/).fill("고등부");
+    await submitUntilUrl(page, "조직 만들기", /\/settings\/group/);
 
     await page.goto("/calendar");
 
@@ -72,10 +72,7 @@ test.describe.serial("Calendar events", () => {
   });
 
   test("event can be edited from the month list", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("이메일").fill(email);
-    await page.getByLabel("비밀번호").fill(password);
-    await submitUntilUrl(page, "로그인", /^(?!.*\/login).*$/);
+    await login(page, email, password);
 
     await page.goto("/calendar");
     const listSection = page.locator("section", { hasText: "이번 달 목록" });
@@ -99,10 +96,7 @@ test.describe.serial("Calendar events", () => {
   });
 
   test("event can be deleted with confirm", async ({ page }) => {
-    await page.goto("/login");
-    await page.getByLabel("이메일").fill(email);
-    await page.getByLabel("비밀번호").fill(password);
-    await submitUntilUrl(page, "로그인", /^(?!.*\/login).*$/);
+    await login(page, email, password);
 
     await page.goto("/calendar");
     const listSection = page.locator("section", { hasText: "이번 달 목록" });

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
 import { generateJoinCode } from "@/lib/join-code";
 import { isDemoEmail } from "@/lib/demo";
+import { CURRENT_GROUP_COOKIE } from "@/lib/memberships";
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "그룹 이름을 입력해주세요").max(100),
@@ -56,6 +57,13 @@ export async function createGroup(
     });
     if (memErr) return { error: memErr.message };
 
+    // 방금 만든 조직을 현재 조직으로 선택하고 바로 진입.
+    (await cookies()).set(CURRENT_GROUP_COOKIE, group.id, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: true,
+      sameSite: "lax",
+    });
     redirect("/settings/group");
   }
   return { error: "그룹 코드 발급에 실패했습니다. 다시 시도해주세요." };
@@ -106,11 +114,20 @@ export async function joinGroup(
     .eq("user_id", user.id)
     .maybeSingle();
 
+  // 다른 조직의 활성 멤버십이 있으면 승인 대기 화면 대신 조직 선택 화면으로
+  // (대기 중인 조직은 선택 화면에 "승인 대기 중"으로 표시됨).
+  const { data: actives } = await supabase
+    .from("memberships")
+    .select("group_id")
+    .eq("user_id", user.id)
+    .eq("status", "active");
+  const waitTarget = (actives ?? []).length > 0 ? "/select-group" : "/pending";
+
   if (existing?.status === "active") {
     redirect("/");
   }
   if (existing?.status === "pending") {
-    redirect("/pending");
+    redirect(waitTarget);
   }
   // 'removed' → allow re-request (fall through)
 
@@ -124,5 +141,5 @@ export async function joinGroup(
 
   // 초대 링크가 남긴 코드 쿠키는 참여를 마쳤으니 정리한다.
   (await cookies()).delete("pending_join_code");
-  redirect("/pending");
+  redirect(waitTarget);
 }

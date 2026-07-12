@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
+import { CURRENT_GROUP_COOKIE } from "@/lib/memberships";
 import {
   signInSchema,
   signUpSchema,
@@ -35,7 +37,9 @@ export async function signUpEmailPassword(
     })
     .eq("id", data.user.id);
 
-  redirect("/join");
+  // 초대 링크로 온 경우(코드 쿠키 있음)엔 참여 화면으로, 아니면 조직 선택(만들기/참여) 화면으로.
+  const invited = (await cookies()).get("pending_join_code")?.value;
+  redirect(invited ? "/join" : "/select-group");
 }
 
 export async function signInEmailPassword(
@@ -48,6 +52,8 @@ export async function signInEmailPassword(
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { error: "이메일 또는 비밀번호가 올바르지 않습니다" };
 
+  // 로그인할 때마다 조직 선택 화면을 거치도록 이전 선택을 지운다.
+  (await cookies()).delete(CURRENT_GROUP_COOKIE);
   revalidatePath("/", "layout");
   redirect("/");
 }
@@ -55,6 +61,7 @@ export async function signInEmailPassword(
 export async function signOut() {
   const supabase = await createServerClient();
   await supabase.auth.signOut();
+  (await cookies()).delete(CURRENT_GROUP_COOKIE);
   redirect("/login");
 }
 

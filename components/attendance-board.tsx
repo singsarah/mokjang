@@ -30,6 +30,7 @@ function shiftDate(iso: string, days: number): string {
 type RecMap = Record<string, BoardRecord>;
 
 export function AttendanceBoard({
+  groupName,
   date,
   note,
   canEdit,
@@ -39,6 +40,7 @@ export function AttendanceBoard({
   students,
   initialRecords,
 }: {
+  groupName: string;
   date: string;
   note: string;
   canEdit: boolean;
@@ -150,8 +152,12 @@ export function AttendanceBoard({
     // Warm Cream 바탕 + 하단 파스텔 언덕 풍경(탭바 위 고정) — pb는 고정된 언덕 높이만큼 확보
     <main className="min-h-screen bg-bg pb-36">
       <div className="mx-auto w-full max-w-md">
+        {/* 조직 이름 — 로그인 후 첫 화면에서 어느 조직인지 바로 보이게 */}
+        <div className="px-5 pt-4 font-display text-lg font-bold text-sage-deep">
+          {groupName}
+        </div>
         {/* 상단 날짜/세션 */}
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
             <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-sky-deep">◀</a>
             <span className="text-lg font-bold tabular-nums text-ink">{date}</span>

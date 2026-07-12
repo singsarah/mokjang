@@ -8,6 +8,7 @@ export * from "@/lib/attendance-cycle";
 export async function loadBoard(dateISO: string): Promise<{
   canEdit: boolean;
   isMaster: boolean;
+  groupName: string;
   date: string;
   note: string;
   closedAt: string | null;
@@ -50,6 +51,7 @@ export async function loadBoard(dateISO: string): Promise<{
   return {
     canEdit,
     isMaster,
+    groupName: m.groupName,
     date: dateISO,
     note: session?.note ?? "주일예배",
     closedAt: session?.closed_at ?? null,

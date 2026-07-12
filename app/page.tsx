@@ -12,16 +12,17 @@ export default async function LandingPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    const { data: membership } = await supabase
+    // 멤버십이 여러 개일 수 있다 — 활성이 하나라도 있으면 앱으로
+    // (조직 미선택이면 requireCurrentMembership이 /select-group으로 보냄).
+    const { data: memberships } = await supabase
       .from("memberships")
       .select("status")
       .eq("user_id", user.id)
-      .in("status", ["active", "pending"])
-      .maybeSingle();
+      .in("status", ["active", "pending"]);
 
-    if (membership?.status === "active") redirect("/attendance");
-    if (membership?.status === "pending") redirect("/pending");
-    redirect("/join");
+    if (memberships?.some((m) => m.status === "active")) redirect("/attendance");
+    if (memberships?.some((m) => m.status === "pending")) redirect("/pending");
+    redirect("/select-group");
   }
 
   return (
@@ -30,7 +31,7 @@ export default async function LandingPage() {
       <Icon name="sheep-face" size={104} alt="양 얼굴 로고" />
       <h1 className="font-display text-4xl font-bold text-sage-deep">목장 관리</h1>
       <p className="text-center text-lg text-ink">
-        교회 고등부 출석·일정·생일 관리
+        교회 모임 출석·일정·생일 관리
       </p>
       {/* 로그인/가입 두 상자 동일 크기, 체험 상자는 그 두 상자의 전체 폭에 좌우 정렬 */}
       <div className="grid w-full max-w-xs grid-cols-2 gap-3 pt-6">

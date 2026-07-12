@@ -10,8 +10,8 @@ test.describe.serial("Foundation golden path", () => {
     await signUp(page, masterEmail, password, "김마스터");
 
     await page.goto("/new-group");
-    await page.getByLabel(/그룹 이름/).fill("고등부");
-    await submitUntilUrl(page, "그룹 만들기", /\/settings\/group/);
+    await page.getByLabel(/조직 이름/).fill("고등부");
+    await submitUntilUrl(page, "조직 만들기", /\/settings\/group/);
 
     await expect(page.locator("text=참여 코드")).toBeVisible();
   });
@@ -31,6 +31,8 @@ test.describe.serial("Foundation golden path", () => {
     const page = await context.newPage();
 
     await signUp(page, teacherEmail, password, "이교사");
+    // 가입 후 조직 선택 화면 → 초대 코드 입력 화면으로 이동
+    await page.goto("/join");
     await page.getByLabel(/그룹 코드/).fill(joinCode);
     await submitUntilUrl(page, "참여 신청", /\/pending/);
 

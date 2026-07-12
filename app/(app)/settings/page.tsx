@@ -42,6 +42,14 @@ export default async function SettingsPage() {
       show: isMaster,
     },
     {
+      href: "/select-group",
+      icon: "🔄",
+      label: "조직 전환",
+      desc: "다른 조직으로 이동 · 새 조직",
+      chip: "bg-lavender-soft",
+      show: true,
+    },
+    {
       href: "/privacy",
       icon: "📋",
       label: "개인정보 처리 방침",

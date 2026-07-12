@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@/lib/supabase/server";
+import { CURRENT_GROUP_COOKIE } from "@/lib/memberships";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import { generateJoinCode } from "@/lib/join-code";
 import { DEMO_EMAIL_DOMAIN, DEMO_EMAIL_PREFIX, isDemoEmail } from "@/lib/demo";
@@ -258,6 +260,7 @@ export async function startDemo(): Promise<{ error?: string }> {
   if (userErr || !created.user) return { error: "체험 공간을 만들지 못했어요. 다시 시도해주세요." };
   const userId = created.user.id;
 
+  let groupId: string | null = null;
   try {
     // 프로필: 가입 트리거가 만든 행에 이름 + 개인정보 동의(체험용 더미 데이터라 동의 게이트 생략).
     await admin
@@ -266,7 +269,6 @@ export async function startDemo(): Promise<{ error?: string }> {
       .eq("id", userId);
 
     // 체험 그룹 + 마스터 멤버십 (join_code 충돌은 재시도)
-    let groupId: string | null = null;
     for (let attempt = 0; attempt < 5 && !groupId; attempt++) {
       const { data: group, error: groupErr } = await admin
         .from("groups")
@@ -302,6 +304,14 @@ export async function startDemo(): Promise<{ error?: string }> {
   const supabase = await createServerClient();
   const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
   if (signInErr) return { error: "체험 로그인에 실패했어요. 다시 시도해주세요." };
+
+  // 체험 그룹을 현재 조직으로 바로 선택 — 체험자는 조직 선택 화면을 거치지 않는다.
+  (await cookies()).set(CURRENT_GROUP_COOKIE, groupId!, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    sameSite: "lax",
+  });
 
   revalidatePath("/", "layout");
   redirect("/settings/teachers");
