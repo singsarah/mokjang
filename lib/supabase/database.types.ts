@@ -453,7 +453,7 @@ export type Database = {
       groups: {
         Row: {
           created_at: string
-          created_by: string
+          created_by: string | null
           id: string
           join_code: string
           last_promoted_year: number | null
@@ -461,7 +461,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by: string
+          created_by?: string | null
           id?: string
           join_code: string
           last_promoted_year?: number | null
@@ -469,7 +469,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          created_by?: string
+          created_by?: string | null
           id?: string
           join_code?: string
           last_promoted_year?: number | null
