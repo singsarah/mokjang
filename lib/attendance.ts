@@ -1,15 +1,34 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
 import type { AttStatus, BoardClass, BoardRecord, BoardStudent } from "@/lib/attendance-cycle";
+import {
+  hasSchedule,
+  latestMeetingOnOrBefore,
+  nextMeetingDate,
+  prevMeetingDate,
+  shiftDate,
+  todayISOSeoul,
+  weekdayOf,
+} from "@/lib/meeting-schedule";
 
 // 순수 로직/타입은 lib/attendance-cycle.ts로 분리(클라이언트 안전) — 기존 import 경로 유지용 재수출.
 export * from "@/lib/attendance-cycle";
 
-export async function loadBoard(dateISO: string): Promise<{
+// 세션 기본 메모 — 일요일이면 주일예배, 그 외 요일은 모임.
+export function defaultNote(dateISO: string): string {
+  return weekdayOf(dateISO) === 0 ? "주일예배" : "모임";
+}
+
+// requestedISO 가 없으면(=URL에 날짜가 없으면) 기본 날짜는 "오늘 이하의 가장 최근 모임일".
+// 예) 모임 요일이 일요일이고 오늘이 월요일이면 어제(일요일) 출석판이 뜬다.
+// 모임 요일이 미설정인 그룹은 기존처럼 오늘 날짜 + 매일 이동.
+export async function loadBoard(requestedISO: string | null): Promise<{
   canEdit: boolean;
   isMaster: boolean;
   groupName: string;
   date: string;
+  prevDate: string | null;
+  nextDate: string | null;
   note: string;
   closedAt: string | null;
   classes: BoardClass[];
@@ -20,6 +39,53 @@ export async function loadBoard(dateISO: string): Promise<{
   const supabase = await createServerClient();
   const canEdit = m.role === "master" || m.role === "editor";
   const isMaster = m.role === "master";
+
+  // 모임 일정: 정기 요일 + 임시 모임 날짜
+  const [{ data: groupRow }, { data: extraRows }] = await Promise.all([
+    supabase.from("groups").select("meeting_days").eq("id", m.groupId).single(),
+    supabase.from("extra_meetings").select("meeting_date").eq("group_id", m.groupId),
+  ]);
+  const meetingDays = groupRow?.meeting_days ?? [];
+  const extraDates = (extraRows ?? []).map((r) => r.meeting_date);
+  const scheduled = hasSchedule(meetingDays, extraDates);
+
+  let dateISO = requestedISO;
+  if (!dateISO) {
+    const today = todayISOSeoul();
+    if (scheduled) {
+      // 과거 기록이 있는 날짜(임시로 URL로 기록했던 날 등)도 기본 날짜 후보에 포함.
+      const { data: lastSession } = await supabase
+        .from("attendance_sessions").select("session_date")
+        .eq("group_id", m.groupId).lte("session_date", today)
+        .order("session_date", { ascending: false }).limit(1).maybeSingle();
+      const others = lastSession ? [...extraDates, lastSession.session_date] : extraDates;
+      dateISO = latestMeetingOnOrBefore(today, meetingDays, others) ?? today;
+    } else {
+      dateISO = today;
+    }
+  }
+
+  // ◀ ▶ 이동 대상: 모임일 사이만. 단, 출석 기록이 이미 있는 날짜는
+  // 모임일이 아니어도 계속 접근 가능해야 하므로 인접 세션 날짜도 후보에 넣는다.
+  let prevDate: string | null;
+  let nextDate: string | null;
+  if (scheduled) {
+    const [{ data: prevSess }, { data: nextSess }] = await Promise.all([
+      supabase.from("attendance_sessions").select("session_date")
+        .eq("group_id", m.groupId).lt("session_date", dateISO)
+        .order("session_date", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("attendance_sessions").select("session_date")
+        .eq("group_id", m.groupId).gt("session_date", dateISO)
+        .order("session_date", { ascending: true }).limit(1).maybeSingle(),
+    ]);
+    prevDate = prevMeetingDate(dateISO, meetingDays,
+      prevSess ? [...extraDates, prevSess.session_date] : extraDates);
+    nextDate = nextMeetingDate(dateISO, meetingDays,
+      nextSess ? [...extraDates, nextSess.session_date] : extraDates);
+  } else {
+    prevDate = shiftDate(dateISO, -1);
+    nextDate = shiftDate(dateISO, 1);
+  }
 
   const { data: classRows } = await supabase
     .from("classes").select("id, name, teacher_name, display_order")
@@ -53,7 +119,9 @@ export async function loadBoard(dateISO: string): Promise<{
     isMaster,
     groupName: m.groupName,
     date: dateISO,
-    note: session?.note ?? "주일예배",
+    prevDate,
+    nextDate,
+    note: session?.note ?? defaultNote(dateISO),
     closedAt: session?.closed_at ?? null,
     classes: (classRows ?? []).map((c) => ({ id: c.id, name: c.name, teacherName: c.teacher_name })),
     students: (studentRows ?? []).map((s) => ({ id: s.id, name: s.name, classId: s.class_id })),

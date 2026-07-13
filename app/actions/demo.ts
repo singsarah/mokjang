@@ -190,6 +190,15 @@ async function seedDemoData(admin: Admin, groupId: string, userId: string) {
   ]);
   if (minuteErr) throw minuteErr;
 
+  // 오늘이 일요일이 아니면 오늘을 임시 모임으로 등록 — 출석 화면 기본 날짜가 오늘이 되어
+  // 체험자가 바로 학생을 탭해볼 수 있다 (◀로는 지난 주일 마감 기록을 볼 수 있음).
+  if (dayOfWeek(today) !== 0) {
+    const { error: extraErr } = await admin
+      .from("extra_meetings")
+      .insert({ group_id: groupId, meeting_date: today, created_by: userId });
+    if (extraErr) throw extraErr;
+  }
+
   // 지난 3주 주일 출석 (전부 마감 상태 → 통계·추이 그래프·엑셀에 바로 보임)
   const lastSun = lastSundayBefore(today);
   const sundays = [shiftISO(lastSun, -14), shiftISO(lastSun, -7), lastSun];
@@ -272,7 +281,12 @@ export async function startDemo(): Promise<{ error?: string }> {
     for (let attempt = 0; attempt < 5 && !groupId; attempt++) {
       const { data: group, error: groupErr } = await admin
         .from("groups")
-        .insert({ name: "체험 목장", join_code: generateJoinCode(), created_by: userId })
+        .insert({
+          name: "체험 목장",
+          join_code: generateJoinCode(),
+          created_by: userId,
+          meeting_days: [0], // 주일 모임 — 출석 화면이 가장 최근 주일로 열린다
+        })
         .select("id")
         .single();
       if (groupErr) {

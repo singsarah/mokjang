@@ -11,6 +11,7 @@ import {
   type DisplayStatus,
 } from "@/lib/attendance-cycle";
 import { Icon } from "@/components/icon";
+import { WEEKDAY_LABELS_KO, weekdayOf } from "@/lib/meeting-schedule";
 import {
   setAttendance,
   clearAttendance,
@@ -19,19 +20,13 @@ import {
   deleteDraftSession,
 } from "@/app/actions/attendance";
 
-function shiftDate(iso: string, days: number): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  dt.setUTCDate(dt.getUTCDate() + days);
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${dt.getUTCFullYear()}-${p(dt.getUTCMonth() + 1)}-${p(dt.getUTCDate())}`;
-}
-
 type RecMap = Record<string, BoardRecord>;
 
 export function AttendanceBoard({
   groupName,
   date,
+  prevDate,
+  nextDate,
   note,
   canEdit,
   isMaster,
@@ -42,6 +37,8 @@ export function AttendanceBoard({
 }: {
   groupName: string;
   date: string;
+  prevDate: string | null; // 이전/다음 모임일 — null이면 이동 불가(화살표 숨김)
+  nextDate: string | null;
   note: string;
   canEdit: boolean;
   isMaster: boolean;
@@ -159,9 +156,19 @@ export function AttendanceBoard({
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
-            <a href={`/attendance?date=${shiftDate(date, -1)}`} className="text-lg text-sky-deep">◀</a>
-            <span className="text-lg font-bold tabular-nums text-ink">{date}</span>
-            <a href={`/attendance?date=${shiftDate(date, 1)}`} className="text-lg text-sky-deep">▶</a>
+            {prevDate ? (
+              <a href={`/attendance?date=${prevDate}`} className="text-lg text-sky-deep">◀</a>
+            ) : (
+              <span className="text-lg text-border">◀</span>
+            )}
+            <span className="text-lg font-bold tabular-nums text-ink">
+              {date} <span className="font-medium text-ink-muted">({WEEKDAY_LABELS_KO[weekdayOf(date)]})</span>
+            </span>
+            {nextDate ? (
+              <a href={`/attendance?date=${nextDate}`} className="text-lg text-sky-deep">▶</a>
+            ) : (
+              <span className="text-lg text-border">▶</span>
+            )}
           </div>
           <span className="flex items-center gap-1.5">
             {closed && (

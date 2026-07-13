@@ -450,6 +450,35 @@ export type Database = {
           },
         ]
       }
+      extra_meetings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          group_id: string
+          meeting_date: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          group_id: string
+          meeting_date: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          group_id?: string
+          meeting_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extra_meetings_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           created_at: string
@@ -457,6 +486,7 @@ export type Database = {
           id: string
           join_code: string
           last_promoted_year: number | null
+          meeting_days: number[]
           name: string
         }
         Insert: {
@@ -465,6 +495,7 @@ export type Database = {
           id?: string
           join_code: string
           last_promoted_year?: number | null
+          meeting_days?: number[]
           name: string
         }
         Update: {
@@ -473,6 +504,7 @@ export type Database = {
           id?: string
           join_code?: string
           last_promoted_year?: number | null
+          meeting_days?: number[]
           name?: string
         }
         Relationships: []

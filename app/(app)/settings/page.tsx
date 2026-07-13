@@ -36,8 +36,8 @@ export default async function SettingsPage() {
     {
       href: "/settings/group",
       icon: "🏷️",
-      label: "그룹 관리",
-      desc: "이름 · 참여 코드",
+      label: "조직 관리",
+      desc: "모임 요일 · 이름 · 참여 코드",
       chip: "bg-gold-soft",
       show: isMaster,
     },

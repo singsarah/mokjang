@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createServerClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import { requireCurrentMembership, type CurrentMembership } from "@/lib/memberships";
-import type { AttStatus } from "@/lib/attendance";
+import { defaultNote, type AttStatus } from "@/lib/attendance";
 import type { AttendanceExportSession, AttendanceExportStudent } from "@/lib/attendance-export";
 
 const CLOSED_MSG = "마감된 출석이에요. 수정하려면 마스터가 마감을 해제해야 해요.";
@@ -43,7 +43,7 @@ async function ensureOpenSessionId(
   }
   const { data: created, error } = await supabase
     .from("attendance_sessions")
-    .insert({ group_id: groupId, session_date: dateISO, note: "주일예배", created_by: userId })
+    .insert({ group_id: groupId, session_date: dateISO, note: defaultNote(dateISO), created_by: userId })
     .select("id").single();
   if (error) {
     // 동시 첫 기록 시 다른 편집자가 먼저 세션을 만들었을 수 있음 → 재조회.
