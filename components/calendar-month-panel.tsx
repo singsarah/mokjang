@@ -6,7 +6,13 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createEvent, updateEvent, deleteEvent } from "@/app/actions/events";
+import { createAbsence, updateAbsence, deleteAbsence } from "@/app/actions/absences";
 import { eventSchema, type EventInput, type EventParsed } from "@/lib/validation/event";
+import {
+  absenceSchema,
+  type AbsenceInput,
+  type AbsenceParsed,
+} from "@/lib/validation/absence";
 import { Icon } from "@/components/icon";
 
 export type CalendarEventItem = {
@@ -15,6 +21,15 @@ export type CalendarEventItem = {
   date: string; // YYYY-MM-DD
   time: string | null; // HH:MM
   description: string | null;
+};
+
+export type AbsenceItem = {
+  id: string;
+  teacherId: string;
+  teacherName: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  reason: string | null;
 };
 
 export type BirthdayItem = {
@@ -38,6 +53,12 @@ function weekdayOf(date: string): string {
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
+}
+
+// 출타 기간 라벨: "7/14~7/18"
+function rangeLabel(start: string, end: string): string {
+  const md = (d: string) => `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
+  return `${md(start)}~${md(end)}`;
 }
 
 // 성별 점 색 (class-detail/dashboard 패턴과 동일)
@@ -237,18 +258,214 @@ function EventFormModal({
   );
 }
 
+// ── 출타 추가/수정 모달 ──────────────────────────────────────────
+
+function AbsenceFormModal({
+  absence,
+  defaultDate,
+  teacherOptions,
+  myTeacherId,
+  isMaster,
+  onClose,
+}: {
+  absence: AbsenceItem | null; // null = 새 출타
+  defaultDate: string;
+  teacherOptions: { id: string; name: string }[];
+  myTeacherId: string | null;
+  isMaster: boolean;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string>();
+  const [isPending, startTransition] = useTransition();
+
+  const fixedTeacherId = absence?.teacherId ?? myTeacherId;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<AbsenceInput, unknown, AbsenceParsed>({
+    resolver: zodResolver(absenceSchema),
+    defaultValues: {
+      teacherId: fixedTeacherId ?? teacherOptions[0]?.id ?? "",
+      startDate: absence?.startDate ?? defaultDate,
+      endDate: absence?.endDate ?? defaultDate,
+      reason: absence?.reason ?? "",
+    },
+  });
+
+  const onSubmit = handleSubmit((data) => {
+    setServerError(undefined);
+    startTransition(async () => {
+      const result = absence
+        ? await updateAbsence({ id: absence.id, ...data })
+        : await createAbsence(data);
+      if (result?.error) {
+        setServerError(result.error);
+        return;
+      }
+      onClose();
+      router.refresh();
+    });
+  });
+
+  function onDelete() {
+    if (!absence) return;
+    if (!window.confirm("이 출타를 삭제할까요?")) return;
+    setServerError(undefined);
+    startTransition(async () => {
+      const result = await deleteAbsence({ id: absence.id });
+      if (result?.error) {
+        setServerError(result.error);
+        return;
+      }
+      onClose();
+      router.refresh();
+    });
+  }
+
+  const input =
+    "mt-1 w-full rounded-btn border border-border bg-white px-3 py-2 text-ink";
+
+  // 입력 불가 안내: 비마스터인데 내 계정이 명단에 연결돼 있지 않거나(새 출타),
+  // 마스터인데 명단 자체가 비어 있는 경우.
+  const guidance =
+    !isMaster && fixedTeacherId === null
+      ? "내 계정이 교사 명단에 아직 연결되지 않았어요. 대표 교사에게 설정 > 교사 관리에서 연결을 요청해주세요."
+      : isMaster && !absence && teacherOptions.length === 0
+        ? "교사 명단이 비어 있어요. 설정 > 교사 관리에서 교사를 먼저 추가해주세요."
+        : null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4">
+      <div className="w-full max-w-sm rounded-card bg-white p-5 shadow-lg">
+        <h2 className="font-display text-lg font-bold text-ink">
+          {absence ? "출타 수정" : "출타 등록"}
+        </h2>
+        {guidance ? (
+          <>
+            <p className="mt-3 text-sm text-ink-muted">{guidance}</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-4 w-full rounded-btn border border-border py-2.5 text-sm text-ink-muted transition hover:bg-card"
+            >
+              닫기
+            </button>
+          </>
+        ) : (
+          <form onSubmit={onSubmit} className="mt-4 space-y-3">
+            <label className="block">
+              <span className="text-sm text-ink-muted">교사 *</span>
+              {isMaster ? (
+                <select {...register("teacherId")} className={input}>
+                  {teacherOptions.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <>
+                  <input type="hidden" {...register("teacherId")} />
+                  <p className={`${input} bg-card`}>
+                    {teacherOptions.find((t) => t.id === fixedTeacherId)?.name ??
+                      "?"}
+                  </p>
+                </>
+              )}
+              {errors.teacherId && (
+                <p className="mt-1 text-sm text-danger">
+                  {errors.teacherId.message}
+                </p>
+              )}
+            </label>
+            <div className="flex gap-2">
+              <label className="block flex-1">
+                <span className="text-sm text-ink-muted">시작일 *</span>
+                <input type="date" {...register("startDate")} className={input} />
+              </label>
+              <label className="block flex-1">
+                <span className="text-sm text-ink-muted">종료일 *</span>
+                <input type="date" {...register("endDate")} className={input} />
+              </label>
+            </div>
+            {(errors.startDate || errors.endDate) && (
+              <p className="text-sm text-danger">
+                {errors.startDate?.message ?? errors.endDate?.message}
+              </p>
+            )}
+            <label className="block">
+              <span className="text-sm text-ink-muted">사유 (선택)</span>
+              <input
+                {...register("reason")}
+                placeholder="예: 출장, 가족 여행"
+                className={input}
+              />
+              {errors.reason && (
+                <p className="mt-1 text-sm text-danger">{errors.reason.message}</p>
+              )}
+            </label>
+
+            {serverError && <p className="text-sm text-danger">{serverError}</p>}
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isPending}
+                className="flex-1 rounded-btn border border-border py-2.5 text-sm text-ink-muted transition hover:bg-card disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="flex-1 rounded-btn bg-gold-deep py-2.5 text-sm font-medium text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+              >
+                {isPending ? "저장 중..." : "저장"}
+              </button>
+            </div>
+            {absence && (
+              <button
+                type="button"
+                onClick={onDelete}
+                disabled={isPending}
+                className="w-full rounded-btn border border-danger py-2 text-sm text-danger transition hover:bg-unconfirmed-soft disabled:opacity-50"
+              >
+                이 출타 삭제
+              </button>
+            )}
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── 그리드 + 플로팅 팝업 + 이번 달 목록 ──────────────────────────
 
 type ListEntry =
   | { kind: "event"; day: number; event: CalendarEventItem }
+  | { kind: "absence"; day: number; a: AbsenceItem }
   | { kind: "birthday"; day: number; b: BirthdayItem };
 
-type DayMarker = { type: "event" | "birthday"; label: string };
+// 같은 날 정렬: 일정 → 출타 → 생일
+const KIND_ORDER: Record<ListEntry["kind"], number> = {
+  event: 0,
+  absence: 1,
+  birthday: 2,
+};
+
+type DayMarker = { type: "event" | "absence" | "birthday"; label: string };
 
 type ModalState =
   | null
   | { kind: "create"; date: string }
-  | { kind: "edit"; event: CalendarEventItem };
+  | { kind: "edit"; event: CalendarEventItem }
+  | { kind: "absence-create"; date: string }
+  | { kind: "absence-edit"; absence: AbsenceItem };
 
 export function CalendarMonthView({
   month, // YYYY-MM
@@ -256,6 +473,9 @@ export function CalendarMonthView({
   defaultDate, // 새 일정 기본 날짜
   events,
   birthdays,
+  absences,
+  teacherOptions,
+  myTeacherId,
   canEdit,
   isMaster,
 }: {
@@ -264,6 +484,9 @@ export function CalendarMonthView({
   defaultDate: string;
   events: CalendarEventItem[];
   birthdays: BirthdayItem[];
+  absences: AbsenceItem[];
+  teacherOptions: { id: string; name: string }[];
+  myTeacherId: string | null;
   canEdit: boolean;
   isMaster: boolean;
 }) {
@@ -277,34 +500,86 @@ export function CalendarMonthView({
   const lastDay = new Date(Date.UTC(year, monthNum, 0)).getUTCDate();
   const firstWeekday = new Date(Date.UTC(year, monthNum - 1, 1)).getUTCDay();
 
+  // 출타 기간을 이번 달 범위로 클램프한 [시작일, 종료일] (일 단위 숫자).
+  function absenceDaySpan(a: AbsenceItem): [number, number] {
+    const from =
+      a.startDate < `${month}-01` ? 1 : Number(a.startDate.slice(8, 10));
+    const to =
+      a.endDate > `${month}-${pad(lastDay)}`
+        ? lastDay
+        : Number(a.endDate.slice(8, 10));
+    return [from, to];
+  }
+  function absenceCovers(a: AbsenceItem, day: number): boolean {
+    const [from, to] = absenceDaySpan(a);
+    return from <= day && day <= to;
+  }
+
   // ── 목록 엔트리 (시간순) ──
+  // 출타는 기간당 1행 — 시작일(월 이전이면 1일)에 앵커.
   const entries: ListEntry[] = [
     ...events.map((e) => ({
       kind: "event" as const,
       day: Number(e.date.slice(8, 10)),
       event: e,
     })),
+    ...absences.map((a) => ({
+      kind: "absence" as const,
+      day: absenceDaySpan(a)[0],
+      a,
+    })),
     ...birthdays.map((b) => ({ kind: "birthday" as const, day: b.day, b })),
   ].sort((a, b) => {
     if (a.day !== b.day) return a.day - b.day;
-    // 같은 날엔 일정 먼저(시간순), 생일 나중
-    if (a.kind !== b.kind) return a.kind === "event" ? -1 : 1;
+    if (a.kind !== b.kind) return KIND_ORDER[a.kind] - KIND_ORDER[b.kind];
     if (a.kind === "event" && b.kind === "event")
       return (a.event.time ?? "99:99").localeCompare(b.event.time ?? "99:99");
     return 0;
   });
 
-  const selectedEntries =
-    selectedDay === null ? [] : entries.filter((e) => e.day === selectedDay);
+  // 선택한 날짜 항목: 일정·생일은 그 날짜, 출타는 기간이 그 날을 포함하면 표시.
+  const selectedEntries: ListEntry[] =
+    selectedDay === null
+      ? []
+      : entries
+          .filter((e) =>
+            e.kind === "absence"
+              ? absenceCovers(e.a, selectedDay)
+              : e.day === selectedDay,
+          )
+          .map((e) =>
+            e.kind === "absence" ? { ...e, day: selectedDay } : e,
+          );
   const restEntries =
-    selectedDay === null ? entries : entries.filter((e) => e.day !== selectedDay);
+    selectedDay === null
+      ? entries
+      : entries.filter((e) =>
+          e.kind === "absence"
+            ? !absenceCovers(e.a, selectedDay)
+            : e.day !== selectedDay,
+        );
 
-  // ── 그리드 마커 (일정 칩 먼저, 생일은 하루에 하나로 압축) ──
+  // ── 그리드 마커 (일정 칩 먼저, 출타·생일은 하루에 하나로 압축) ──
   const markersByDay = new Map<number, DayMarker[]>();
   for (const e of events) {
     const day = Number(e.date.slice(8, 10));
     if (!markersByDay.has(day)) markersByDay.set(day, []);
     markersByDay.get(day)!.push({ type: "event", label: e.title });
+  }
+  const absentNamesByDay = new Map<number, string[]>();
+  for (const a of absences) {
+    const [from, to] = absenceDaySpan(a);
+    for (let day = from; day <= to; day++) {
+      if (!absentNamesByDay.has(day)) absentNamesByDay.set(day, []);
+      absentNamesByDay.get(day)!.push(a.teacherName);
+    }
+  }
+  for (const [day, names] of absentNamesByDay) {
+    if (!markersByDay.has(day)) markersByDay.set(day, []);
+    markersByDay.get(day)!.push({
+      type: "absence",
+      label: names.length > 1 ? `${names[0]} 외 ${names.length - 1}` : names[0],
+    });
   }
   const birthdayCountByDay = new Map<number, number>();
   for (const b of birthdays) {
@@ -376,6 +651,47 @@ export function CalendarMonthView({
               {inner}
               <span className="shrink-0 text-lg text-ink-muted">›</span>
             </Link>
+          ) : (
+            <div className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm">
+              {inner}
+            </div>
+          )}
+        </li>
+      );
+    }
+    if (entry.kind === "absence") {
+      const a = entry.a;
+      const canEditAbsence = isMaster || a.teacherId === myTeacherId;
+      const inner = (
+        <>
+          <span className="w-16 shrink-0 text-sm text-ink-muted">{dayLabel}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-ink">
+              ✈️ {a.teacherName} 출타
+              {a.startDate !== a.endDate && (
+                <span className="ml-1.5 text-sm font-normal text-gold-deep">
+                  {rangeLabel(a.startDate, a.endDate)}
+                </span>
+              )}
+            </span>
+            {a.reason && (
+              <span className="block truncate text-sm text-ink-muted">
+                {a.reason}
+              </span>
+            )}
+          </span>
+        </>
+      );
+      return (
+        <li key={a.id}>
+          {canEditAbsence ? (
+            <button
+              onClick={() => setModal({ kind: "absence-edit", absence: a })}
+              className="flex w-full items-center gap-3 rounded-card border border-border/60 bg-white p-3 text-left shadow-sm transition hover:shadow-md"
+            >
+              {inner}
+              <span className="shrink-0 text-lg text-ink-muted">›</span>
+            </button>
           ) : (
             <div className="flex items-center gap-3 rounded-card border border-border/60 bg-white p-3 shadow-sm">
               {inner}
@@ -495,6 +811,13 @@ export function CalendarMonthView({
                       >
                         {mk.label}
                       </div>
+                    ) : mk.type === "absence" ? (
+                      <div
+                        key={j}
+                        className="truncate rounded-sm bg-gold-soft px-0.5 text-sm leading-none text-gold-deep"
+                      >
+                        {mk.label}
+                      </div>
                     ) : (
                       <div
                         key={j}
@@ -547,7 +870,23 @@ export function CalendarMonthView({
             ) : (
               <ul className="mt-3 space-y-2.5">
                 {selectedEntries.map((entry, i) =>
-                  entry.kind === "birthday" ? (
+                  entry.kind === "absence" ? (
+                    <li key={`pa-${entry.a.id}`} className="text-sm">
+                      <span className="font-medium text-ink">
+                        ✈️ {entry.a.teacherName} 출타
+                        {entry.a.startDate !== entry.a.endDate && (
+                          <span className="ml-1.5 text-sm font-normal text-gold-deep">
+                            {rangeLabel(entry.a.startDate, entry.a.endDate)}
+                          </span>
+                        )}
+                      </span>
+                      {entry.a.reason && (
+                        <span className="mt-0.5 block text-sm text-ink-muted">
+                          {entry.a.reason}
+                        </span>
+                      )}
+                    </li>
+                  ) : entry.kind === "birthday" ? (
                     <li key={`pb-${i}`}>
                       {birthdayHref(entry.b) ? (
                         <Link
@@ -595,6 +934,16 @@ export function CalendarMonthView({
                 + 이 날짜에 일정 추가
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => {
+                setPopupOpen(false);
+                setModal({ kind: "absence-create", date: selectedDate });
+              }}
+              className={`${canEdit ? "mt-2" : "mt-4"} w-full rounded-btn border border-gold-deep/40 py-2 text-sm font-medium text-gold-deep transition hover:bg-gold-soft/60`}
+            >
+              ✈️ 이 날짜에 출타 등록
+            </button>
           </div>
         </div>
       )}
@@ -617,6 +966,13 @@ export function CalendarMonthView({
             </Link>
           </div>
         )}
+        {/* 출타 등록은 viewer 포함 모든 활성 멤버에게 노출 — 본인 출타는 누구나 입력 가능 */}
+        <button
+          onClick={() => setModal({ kind: "absence-create", date: defaultDate })}
+          className={`${canEdit ? "mt-2" : ""} w-full rounded-btn border border-gold-deep/40 py-2.5 text-sm font-medium text-gold-deep transition hover:bg-gold-soft/60`}
+        >
+          ✈️ 출타 등록
+        </button>
 
         <h2 className="mt-6 text-sm font-bold text-ink-muted">이번 달 목록</h2>
 
@@ -652,10 +1008,20 @@ export function CalendarMonthView({
         ) : null}
       </section>
 
-      {modal !== null && (
+      {(modal?.kind === "create" || modal?.kind === "edit") && (
         <EventFormModal
           event={modal.kind === "edit" ? modal.event : null}
           defaultDate={modal.kind === "create" ? modal.date : defaultDate}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {(modal?.kind === "absence-create" || modal?.kind === "absence-edit") && (
+        <AbsenceFormModal
+          absence={modal.kind === "absence-edit" ? modal.absence : null}
+          defaultDate={modal.kind === "absence-create" ? modal.date : defaultDate}
+          teacherOptions={teacherOptions}
+          myTeacherId={myTeacherId}
+          isMaster={isMaster}
           onClose={() => setModal(null)}
         />
       )}

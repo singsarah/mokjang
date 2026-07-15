@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
 import {
   CalendarMonthView,
+  type AbsenceItem,
   type BirthdayItem,
   type CalendarEventItem,
 } from "@/components/calendar-month-panel";
@@ -47,6 +48,7 @@ export default async function CalendarPage({
     { data: studentRows },
     { data: teacherRows },
     { data: classRows },
+    { data: absenceRows },
   ] = await Promise.all([
     supabase
       .from("calendar_events")
@@ -64,16 +66,23 @@ export default async function CalendarPage({
       .is("deleted_at", null)
       .is("graduated_at", null)
       .not("birthday_day", "is", null),
+    // 교사 전체: 생일 표시 + 출타 이름 조인 + 출타 폼 옵션 + 본인 판정에 공용.
     supabase
       .from("teachers")
-      .select("id, name, birthday_day")
-      .eq("group_id", membership.groupId)
-      .eq("birthday_month", month)
-      .not("birthday_day", "is", null),
+      .select("id, name, birthday_month, birthday_day, user_id")
+      .eq("group_id", membership.groupId),
     supabase
       .from("classes")
       .select("id, name")
       .eq("group_id", membership.groupId),
+    // 출타: 이번 달과 기간이 겹치는 것 (start <= 월말 AND end >= 월초).
+    supabase
+      .from("teacher_absences")
+      .select("id, teacher_id, start_date, end_date, reason")
+      .eq("group_id", membership.groupId)
+      .lte("start_date", `${ym}-${pad(lastDay)}`)
+      .gte("end_date", `${ym}-01`)
+      .order("start_date", { ascending: true }),
   ]);
 
   const events: CalendarEventItem[] = (eventRows ?? []).map((e) => ({
@@ -115,17 +124,37 @@ export default async function CalendarPage({
       className: s.class_id ? classNameById.get(s.class_id) ?? null : null,
       photoUrl: s.photo_path ? signedUrlByPath.get(s.photo_path) ?? null : null,
     })),
-    ...(teacherRows ?? []).map((t) => ({
-      id: t.id,
-      name: t.name,
-      day: t.birthday_day as number,
-      who: "teacher" as const,
-      gender: null,
-      grade: null,
-      className: null,
-      photoUrl: null,
-    })),
+    ...(teacherRows ?? [])
+      .filter((t) => t.birthday_month === month && t.birthday_day !== null)
+      .map((t) => ({
+        id: t.id,
+        name: t.name,
+        day: t.birthday_day as number,
+        who: "teacher" as const,
+        gender: null,
+        grade: null,
+        className: null,
+        photoUrl: null,
+      })),
   ].sort((a, b) => a.day - b.day || a.name.localeCompare(b.name, "ko"));
+
+  // 출타: 교사 이름 조인 + camelCase 변환. user_id는 클라이언트로 내리지 않는다.
+  const teacherNameById = new Map(
+    (teacherRows ?? []).map((t) => [t.id, t.name]),
+  );
+  const absences: AbsenceItem[] = (absenceRows ?? []).map((a) => ({
+    id: a.id,
+    teacherId: a.teacher_id,
+    teacherName: teacherNameById.get(a.teacher_id) ?? "?",
+    startDate: a.start_date,
+    endDate: a.end_date,
+    reason: a.reason,
+  }));
+  const myTeacherId =
+    (teacherRows ?? []).find((t) => t.user_id === membership.userId)?.id ?? null;
+  const teacherOptions = (teacherRows ?? [])
+    .map((t) => ({ id: t.id, name: t.name }))
+    .sort((a, b) => a.name.localeCompare(b.name, "ko"));
 
   const isThisMonth = todayISO.slice(0, 7) === ym;
   const todayDay = isThisMonth ? Number(todayISO.slice(8, 10)) : null;
@@ -169,6 +198,9 @@ export default async function CalendarPage({
           defaultDate={defaultDate}
           events={events}
           birthdays={birthdays}
+          absences={absences}
+          teacherOptions={teacherOptions}
+          myTeacherId={myTeacherId}
           canEdit={canEdit}
           isMaster={membership.role === "master"}
         />

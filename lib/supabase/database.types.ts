@@ -335,6 +335,57 @@ export type Database = {
           },
         ]
       }
+      teacher_absences: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string
+          group_id: string
+          id: string
+          reason: string | null
+          start_date: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          group_id: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          group_id?: string
+          id?: string
+          reason?: string | null
+          start_date?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_absences_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_absences_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           group_id: string

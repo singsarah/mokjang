@@ -47,6 +47,21 @@ export function anonClient(accessToken?: string) {
 
 let counter = 0;
 
+// Supabase Auth는 시간창당 요청 수를 제한한다("Request rate limit reached").
+// 전체 스위트는 테스트 유저를 수십 명 만들므로(생성+로그인 각 1회) 한도에
+// 닿을 수 있다 — rate limit 에러만 잠시 기다렸다가 재시도하고, 다른 에러는
+// 즉시 던진다. vitest testTimeout/hookTimeout이 이 대기를 감당할 만큼 커야 함.
+const RATE_LIMIT_WAIT_MS = 30_000;
+const RATE_LIMIT_MAX_TRIES = 10;
+
+function isRateLimit(error: { message?: string } | null | undefined): boolean {
+  return !!error?.message?.toLowerCase().includes("rate limit");
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function createTestUser(): Promise<{
   userId: string;
   email: string;
@@ -56,24 +71,36 @@ export async function createTestUser(): Promise<{
   const email = `${TEST_EMAIL_PREFIX}${Date.now()}-${counter++}${TEST_EMAIL_DOMAIN}`;
   const password = "TestPass!23";
 
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-  });
-  if (error || !data.user) throw error ?? new Error("createUser failed");
+  let userId: string | undefined;
+  for (let attempt = 1; ; attempt++) {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (!error && data.user) {
+      userId = data.user.id;
+      break;
+    }
+    if (!isRateLimit(error) || attempt >= RATE_LIMIT_MAX_TRIES)
+      throw error ?? new Error("createUser failed");
+    await sleep(RATE_LIMIT_WAIT_MS);
+  }
 
-  const { data: session, error: signInErr } = await anonClient().auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (signInErr || !session.session) throw signInErr ?? new Error("signIn failed");
-
-  return {
-    userId: data.user.id,
-    email,
-    accessToken: session.session.access_token,
-  };
+  for (let attempt = 1; ; attempt++) {
+    const { data: session, error: signInErr } =
+      await anonClient().auth.signInWithPassword({ email, password });
+    if (!signInErr && session.session) {
+      return {
+        userId,
+        email,
+        accessToken: session.session.access_token,
+      };
+    }
+    if (!isRateLimit(signInErr) || attempt >= RATE_LIMIT_MAX_TRIES)
+      throw signInErr ?? new Error("signIn failed");
+    await sleep(RATE_LIMIT_WAIT_MS);
+  }
 }
 
 // SAFE cleanup: only removes test users and the groups those test users

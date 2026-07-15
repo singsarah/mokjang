@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // "YYYY-MM-DD"가 실제 존재하는 날짜인지 확인 (예: 2026-02-30 거부).
-function isRealDate(s: string): boolean {
+export function isRealDate(s: string): boolean {
   const [y, m, d] = s.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
   return (
