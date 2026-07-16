@@ -900,23 +900,26 @@ export function CalendarMonthView({
                 {selectedAbsences.length > 0 && (
                   <li className="text-sm">
                     <span className="font-medium text-ink">✈️ 출타중</span>
-                    <ul className="mt-1 space-y-1">
-                      {selectedAbsences.map((entry) => (
-                        <li key={entry.a.id} className="pl-6 text-sm text-ink">
+                    <span className="mt-0.5 block text-sm text-ink">
+                      {selectedAbsences.map((entry, i) => (
+                        <span key={entry.a.id}>
+                          {i > 0 && ", "}
                           {entry.a.teacherName}
                           {entry.a.startDate !== entry.a.endDate && (
-                            <span className="ml-1.5 text-gold-deep">
+                            <span className="text-gold-deep">
+                              {" "}
                               {rangeLabel(entry.a.startDate, entry.a.endDate)}
                             </span>
                           )}
                           {entry.a.reason && (
-                            <span className="ml-1.5 text-ink-muted">
-                              · {entry.a.reason}
+                            <span className="text-ink-muted">
+                              {" "}
+                              ({entry.a.reason})
                             </span>
                           )}
-                        </li>
+                        </span>
                       ))}
-                    </ul>
+                    </span>
                   </li>
                 )}
                 {selectedBirthdays.map((entry, i) => (
