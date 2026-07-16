@@ -559,6 +559,17 @@ export function CalendarMonthView({
             : e.day !== selectedDay,
         );
 
+  // 팝업용: 출타는 "출타중" 헤더 아래 이름만 나열 (사람마다 "출타" 반복 방지).
+  const selectedEvents = selectedEntries.filter(
+    (e): e is Extract<ListEntry, { kind: "event" }> => e.kind === "event",
+  );
+  const selectedAbsences = selectedEntries.filter(
+    (e): e is Extract<ListEntry, { kind: "absence" }> => e.kind === "absence",
+  );
+  const selectedBirthdays = selectedEntries.filter(
+    (e): e is Extract<ListEntry, { kind: "birthday" }> => e.kind === "birthday",
+  );
+
   // ── 그리드 마커 (일정 칩 먼저, 출타·생일은 하루에 하나로 압축) ──
   const markersByDay = new Map<number, DayMarker[]>();
   for (const e of events) {
@@ -667,7 +678,7 @@ export function CalendarMonthView({
           <span className="w-16 shrink-0 text-sm text-ink-muted">{dayLabel}</span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium text-ink">
-              ✈️ {a.teacherName} 출타
+              ✈️ {a.teacherName}
               {a.startDate !== a.endDate && (
                 <span className="ml-1.5 text-sm font-normal text-gold-deep">
                   {rangeLabel(a.startDate, a.endDate)}
@@ -869,57 +880,62 @@ export function CalendarMonthView({
               <p className="mt-3 text-sm text-ink-muted">일정 없음</p>
             ) : (
               <ul className="mt-3 space-y-2.5">
-                {selectedEntries.map((entry, i) =>
-                  entry.kind === "absence" ? (
-                    <li key={`pa-${entry.a.id}`} className="text-sm">
-                      <span className="font-medium text-ink">
-                        ✈️ {entry.a.teacherName} 출타
-                        {entry.a.startDate !== entry.a.endDate && (
-                          <span className="ml-1.5 text-sm font-normal text-gold-deep">
-                            {rangeLabel(entry.a.startDate, entry.a.endDate)}
-                          </span>
-                        )}
+                {selectedEvents.map((entry) => (
+                  <li key={entry.event.id} className="text-sm">
+                    <span className="font-medium text-ink">
+                      {entry.event.time && (
+                        <span className="mr-1.5 text-sm font-normal text-sage-deep">
+                          {entry.event.time}
+                        </span>
+                      )}
+                      {entry.event.title}
+                    </span>
+                    {entry.event.description && (
+                      <span className="mt-0.5 block text-sm text-ink-muted">
+                        {entry.event.description}
                       </span>
-                      {entry.a.reason && (
-                        <span className="mt-0.5 block text-sm text-ink-muted">
-                          {entry.a.reason}
-                        </span>
-                      )}
-                    </li>
-                  ) : entry.kind === "birthday" ? (
-                    <li key={`pb-${i}`}>
-                      {birthdayHref(entry.b) ? (
-                        <Link
-                          href={birthdayHref(entry.b)!}
-                          className="-mx-1.5 flex items-center gap-1 rounded-btn px-1.5 py-1 transition hover:bg-card"
-                        >
-                          <BirthdayBody b={entry.b} />
-                          <span className="shrink-0 text-base text-ink-muted">›</span>
-                        </Link>
-                      ) : (
-                        <span className="flex items-center">
-                          <BirthdayBody b={entry.b} />
-                        </span>
-                      )}
-                    </li>
-                  ) : (
-                    <li key={entry.event.id} className="text-sm">
-                      <span className="font-medium text-ink">
-                        {entry.event.time && (
-                          <span className="mr-1.5 text-sm font-normal text-sage-deep">
-                            {entry.event.time}
-                          </span>
-                        )}
-                        {entry.event.title}
-                      </span>
-                      {entry.event.description && (
-                        <span className="mt-0.5 block text-sm text-ink-muted">
-                          {entry.event.description}
-                        </span>
-                      )}
-                    </li>
-                  ),
+                    )}
+                  </li>
+                ))}
+                {selectedAbsences.length > 0 && (
+                  <li className="text-sm">
+                    <span className="font-medium text-ink">✈️ 출타중</span>
+                    <ul className="mt-1 space-y-1">
+                      {selectedAbsences.map((entry) => (
+                        <li key={entry.a.id} className="pl-6 text-sm text-ink">
+                          {entry.a.teacherName}
+                          {entry.a.startDate !== entry.a.endDate && (
+                            <span className="ml-1.5 text-gold-deep">
+                              {rangeLabel(entry.a.startDate, entry.a.endDate)}
+                            </span>
+                          )}
+                          {entry.a.reason && (
+                            <span className="ml-1.5 text-ink-muted">
+                              · {entry.a.reason}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
                 )}
+                {selectedBirthdays.map((entry, i) => (
+                  <li key={`pb-${i}`}>
+                    {birthdayHref(entry.b) ? (
+                      <Link
+                        href={birthdayHref(entry.b)!}
+                        className="-mx-1.5 flex items-center gap-1 rounded-btn px-1.5 py-1 transition hover:bg-card"
+                      >
+                        <BirthdayBody b={entry.b} />
+                        <span className="shrink-0 text-base text-ink-muted">›</span>
+                      </Link>
+                    ) : (
+                      <span className="flex items-center">
+                        <BirthdayBody b={entry.b} />
+                      </span>
+                    )}
+                  </li>
+                ))}
               </ul>
             )}
             {canEdit && (

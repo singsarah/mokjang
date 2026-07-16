@@ -36,13 +36,13 @@ test.describe.serial("Teacher absences", () => {
     await teacherSelect.selectOption({ label: teacherName });
     await page.getByLabel(/사유/).fill("해외 출장");
 
-    // 저장 — 이번 달 목록에 출타 행이 나타날 때까지 재시도
+    // 저장 — 이번 달 목록에 출타 행(✈️ 이름)이 나타날 때까지 재시도
     const listSection = page.locator("section", { hasText: "이번 달 목록" });
     await expect(async () => {
       const save = page.getByRole("button", { name: /^저장/ });
       if (await save.isVisible()) await save.click();
       await expect(
-        listSection.getByText(`${teacherName} 출타`).first(),
+        listSection.getByText(`✈️ ${teacherName}`).first(),
       ).toBeVisible({ timeout: 8_000 });
     }).toPass({ timeout: 45_000 });
   });
@@ -62,13 +62,12 @@ test.describe.serial("Teacher absences", () => {
     });
     await expect(cell.getByText(teacherName)).toBeVisible({ timeout: 15_000 });
 
-    // 셀 탭 → 팝업에 출타 표시
+    // 셀 탭 → 팝업에 "출타중" 헤더 + 이름 표시
     const dialog = page.getByRole("dialog", { name: "선택한 날짜 일정" });
     await expect(async () => {
       if (!(await dialog.isVisible())) await cell.click();
-      await expect(dialog).toContainText(`${teacherName} 출타`, {
-        timeout: 5_000,
-      });
+      await expect(dialog).toContainText("출타중", { timeout: 5_000 });
+      await expect(dialog).toContainText(teacherName, { timeout: 5_000 });
     }).toPass({ timeout: 45_000 });
     await expect(dialog).toContainText("해외 출장");
   });
@@ -84,7 +83,7 @@ test.describe.serial("Teacher absences", () => {
     const deleteButton = page.getByRole("button", { name: "이 출타 삭제" });
     await expect(async () => {
       const row = listSection.getByRole("button", {
-        name: new RegExp(`${teacherName} 출타`),
+        name: new RegExp(`✈️ ${teacherName}`),
       });
       if (await row.isVisible()) await row.click();
       await expect(deleteButton).toBeVisible({ timeout: 5_000 });
@@ -93,7 +92,7 @@ test.describe.serial("Teacher absences", () => {
     await expect(async () => {
       if (await deleteButton.isVisible()) await deleteButton.click();
       // 결과 상태로 검증: 목록에서 사라졌는지
-      await expect(listSection.getByText(`${teacherName} 출타`)).toHaveCount(0, {
+      await expect(listSection.getByText(`✈️ ${teacherName}`)).toHaveCount(0, {
         timeout: 8_000,
       });
     }).toPass({ timeout: 45_000 });
