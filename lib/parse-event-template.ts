@@ -3,6 +3,7 @@
 // tests/unit/parse-event-template.test.ts 양쪽에서 import 하므로 순수 함수만 두고
 // next/headers 등 서버 전용 import 는 절대 추가하지 말 것.
 import * as XLSX from "xlsx";
+import { excelDateToYmd } from "@/lib/excel-date";
 
 export type ExtractedEvent = {
   date: string; // YYYY-MM-DD
@@ -71,13 +72,13 @@ function parseDateString(s: string): string | null {
 }
 
 // 엑셀 날짜 셀 → YYYY-MM-DD. cellDates:true 로 읽은 워크북이면 Date, 아니면 serial 숫자,
-// 자유 형식이면 문자열로 들어옴. Date 는 항상 UTC 컴포넌트로 읽어 타임존 오프바이원을 피함
-// (SheetJS 는 cellDates 사용 시 시트에 적힌 날짜를 UTC 자정 기준 Date 로 만듦).
+// 자유 형식이면 문자열로 들어옴. Date 는 excelDateToYmd 로 읽음 — SheetJS 의 Date 는
+// 로컬 자정 기준인데 초 단위 타임존 잔차로 전날 23:59:xx 가 될 수 있어(하루 당겨짐 버그)
+// UTC/로컬 컴포넌트를 그대로 읽으면 안 됨 (lib/excel-date.ts 참고).
 function parseDateCell(v: unknown): string | null {
   if (v == null) return null;
   if (v instanceof Date) {
-    if (Number.isNaN(v.getTime())) return null;
-    return formatYMD(v.getUTCFullYear(), v.getUTCMonth() + 1, v.getUTCDate());
+    return excelDateToYmd(v);
   }
   if (typeof v === "number") {
     const parsed = XLSX.SSF.parse_date_code(v);
@@ -102,7 +103,9 @@ function parseTimeCell(v: unknown): string | null | "invalid" {
   if (v == null) return null;
   if (v instanceof Date) {
     if (Number.isNaN(v.getTime())) return "invalid";
-    return formatHM(v.getUTCHours(), v.getUTCMinutes()) ?? "invalid";
+    // SheetJS Date 는 로컬 기준 + 초 단위 잔차로 몇 초 이르게 나옴 → 30초 더해 분 단위 반올림.
+    const t = new Date(v.getTime() + 30_000);
+    return formatHM(t.getHours(), t.getMinutes()) ?? "invalid";
   }
   if (typeof v === "number") {
     const parsed = XLSX.SSF.parse_date_code(v);

@@ -7,6 +7,7 @@ import {
   type TeacherImportRow,
   type TeacherImportResult,
 } from "@/app/actions/teachers";
+import { excelDateToYmd } from "@/lib/excel-date";
 
 // 엑셀 열 이름(한국어) → 내부 원시 필드. 실파일 열명과 양식 열명을 모두 별칭으로 지원.
 // 열 순서는 무관, 이름으로 매핑.
@@ -48,17 +49,11 @@ type Checked = RawRow & {
   reason?: string;
 };
 
-function fmtDate(d: Date): string {
-  const y = d.getFullYear();
-  const mo = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${mo}-${day}`;
-}
-
 // 셀 값을 문자열로 정규화(엑셀 날짜 셀은 Date, 전화번호 숫자 셀은 number 로 들어옴).
+// 날짜 셀은 excelDateToYmd 로 — 로컬 컴포넌트를 그대로 읽으면 하루 당겨짐 (lib/excel-date.ts 참고).
 function cell(v: unknown): string {
   if (v == null) return "";
-  if (v instanceof Date) return fmtDate(v);
+  if (v instanceof Date) return excelDateToYmd(v) ?? "";
   return String(v).trim();
 }
 

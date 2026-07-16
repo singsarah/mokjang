@@ -80,6 +80,25 @@ describe("parseEventTemplate", () => {
     expect(result.events[0].date).toBe("2026-07-19");
   });
 
+  it("구글 시트 export 처럼 날짜 서식 serial 셀도 하루 안 밀리고 읽는다", () => {
+    // serial 46222 = 2026-07-19. 날짜 서식을 입히면 cellDates:true 읽기에서 Date 로 변환되는데,
+    // 그 Date 가 로컬 자정보다 몇 초 이른 값이어도 날짜가 당겨지면 안 된다 (학적부 생일 버그 회귀).
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["날짜", "시간", "제목"],
+      [46222, 0.4375, "연합예배"],
+    ]);
+    (ws["A2"] as XLSX.CellObject).z = "yyyy-mm-dd";
+    (ws["B2"] as XLSX.CellObject).z = "hh:mm";
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "일정");
+    const result = parseEventTemplate(roundTrip(wb));
+    expect(result.matched).toBe(true);
+    if (!result.matched) return;
+    expect(result.events).toEqual([
+      { date: "2026-07-19", title: "연합예배", time: "10:30", description: null },
+    ]);
+  });
+
   it("엑셀 시간 소수값과 '9:30' 문자열을 모두 HH:MM 으로 정규화한다", () => {
     const wb = wbFromRows([
       ["날짜", "시간", "제목"],
