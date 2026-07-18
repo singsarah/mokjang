@@ -56,5 +56,5 @@ npm run test:e2e    # playwright test (자체 dev 서버 기동)
 - 배포(GitHub/Vercel/Supabase)는 `DEPLOY.md` 참고 — **사용자 계정으로 진행하는 별도 수동 단계**.
 
 ## 진행 상황
-- **Plan 1 (기반 + 인증) 완료** — 스캐폴딩·Supabase SSR·기반 테이블·RLS·인증(이메일+구글)·개인정보·그룹 생성/참여·교사 관리·앱 셸·PWA·E2E 12개 태스크 전부. 브랜치 `plan-1-foundation-auth` (아직 main 미병합).
-- **Plan 2~7 미작성** — Plan 1 병합 후 학습을 반영해 작성. 병합·리뷰·다음 플랜 작성은 **사용자 확인 후에만**.
+- **main = 배포 브랜치** (push → Vercel 자동 배포, mokjang-eight.vercel.app). Plan 1~6 전부 병합·배포 완료, 이후 기능은 플랜 문서 없이 세션 단위로 개발·배포 중.
+- **현재 구현 현황 + 미구현 백로그는 설계 문서(`docs/superpowers/specs/2026-07-03-mokjang-design.md`, 2026-07-18 전면 개정) §1~§9 / §10 참고.** 기능이 바뀌면 같은 커밋에서 이 문서도 갱신할 것.
