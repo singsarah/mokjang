@@ -14,12 +14,12 @@ export default async function GroupSettingsPage() {
   const [{ data: group }, { data: extraRows }] = await Promise.all([
     supabase
       .from("groups")
-      .select("name, join_code, created_at, meeting_days")
+      .select("name, join_code, created_at, meeting_days, meeting_day_names")
       .eq("id", m.groupId)
       .single(),
     supabase
       .from("extra_meetings")
-      .select("meeting_date")
+      .select("meeting_date, name")
       .eq("group_id", m.groupId),
   ]);
 
@@ -52,7 +52,8 @@ export default async function GroupSettingsPage() {
         <section className="mt-4 rounded-card border border-border/60 bg-white p-6 shadow-sm">
           <MeetingScheduleSettings
             initialDays={group?.meeting_days ?? []}
-            initialExtras={(extraRows ?? []).map((r) => r.meeting_date)}
+            initialDayNames={(group?.meeting_day_names ?? {}) as Record<string, string>}
+            initialExtras={(extraRows ?? []).map((r) => ({ date: r.meeting_date, name: r.name }))}
           />
         </section>
 

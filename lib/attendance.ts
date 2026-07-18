@@ -2,6 +2,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
 import type { AttStatus, BoardClass, BoardRecord, BoardStudent } from "@/lib/attendance-cycle";
 import {
+  configuredMeetingName,
   hasSchedule,
   latestMeetingOnOrBefore,
   nextMeetingDate,
@@ -9,6 +10,7 @@ import {
   shiftDate,
   todayISOSeoul,
   weekdayOf,
+  type MeetingDayNames,
 } from "@/lib/meeting-schedule";
 
 // 순수 로직/타입은 lib/attendance-cycle.ts로 분리(클라이언트 안전) — 기존 import 경로 유지용 재수출.
@@ -40,13 +42,16 @@ export async function loadBoard(requestedISO: string | null): Promise<{
   const canEdit = m.role === "master" || m.role === "editor";
   const isMaster = m.role === "master";
 
-  // 모임 일정: 정기 요일 + 임시 모임 날짜
+  // 모임 일정: 정기 요일(+이름) + 임시 모임 날짜(+이름)
   const [{ data: groupRow }, { data: extraRows }] = await Promise.all([
-    supabase.from("groups").select("meeting_days").eq("id", m.groupId).single(),
-    supabase.from("extra_meetings").select("meeting_date").eq("group_id", m.groupId),
+    supabase.from("groups").select("meeting_days, meeting_day_names").eq("id", m.groupId).single(),
+    supabase.from("extra_meetings").select("meeting_date, name").eq("group_id", m.groupId),
   ]);
   const meetingDays = groupRow?.meeting_days ?? [];
+  const dayNames = (groupRow?.meeting_day_names ?? {}) as MeetingDayNames;
   const extraDates = (extraRows ?? []).map((r) => r.meeting_date);
+  const extraNames: Record<string, string | null> = {};
+  for (const r of extraRows ?? []) extraNames[r.meeting_date] = r.name;
   const scheduled = hasSchedule(meetingDays, extraDates);
 
   let dateISO = requestedISO;
@@ -121,7 +126,9 @@ export async function loadBoard(requestedISO: string | null): Promise<{
     date: dateISO,
     prevDate,
     nextDate,
-    note: session?.note ?? defaultNote(dateISO),
+    // 조직 관리에서 설정한 이름이 있으면 그게 우선(이름 바꾸면 과거 세션도 즉시 반영),
+    // 없으면 세션에 저장된 note → 기본값 순.
+    note: configuredMeetingName(dateISO, dayNames, extraNames) ?? session?.note ?? defaultNote(dateISO),
     closedAt: session?.closed_at ?? null,
     classes: (classRows ?? []).map((c) => ({ id: c.id, name: c.name, teacherName: c.teacher_name })),
     students: (studentRows ?? []).map((s) => ({ id: s.id, name: s.name, classId: s.class_id })),

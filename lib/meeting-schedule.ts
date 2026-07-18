@@ -3,6 +3,19 @@
 
 export const WEEKDAY_LABELS_KO = ["일", "월", "화", "수", "목", "금", "토"] as const;
 
+// 요일별 정기 모임 이름 — DB jsonb 라 키가 문자열("0"~"6").
+export type MeetingDayNames = Record<string, string>;
+
+// 조직 관리에서 설정한 해당 날짜의 모임 이름 — 임시 모임 이름 > 요일 이름, 없으면 null.
+// 호출부에서 세션 note/기본값(defaultNote)으로 폴백한다.
+export function configuredMeetingName(
+  iso: string,
+  dayNames: MeetingDayNames,
+  extraNames: Record<string, string | null>, // 날짜(YYYY-MM-DD) → 임시 모임 이름
+): string | null {
+  return extraNames[iso] || dayNames[String(weekdayOf(iso))] || null;
+}
+
 export function shiftDate(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));

@@ -5,6 +5,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import { requireCurrentMembership, type CurrentMembership } from "@/lib/memberships";
 import { defaultNote, type AttStatus } from "@/lib/attendance";
+import { configuredMeetingName, type MeetingDayNames } from "@/lib/meeting-schedule";
 import type { AttendanceExportSession, AttendanceExportStudent } from "@/lib/attendance-export";
 
 const CLOSED_MSG = "마감된 출석이에요. 수정하려면 마스터가 마감을 해제해야 해요.";
@@ -41,9 +42,21 @@ async function ensureOpenSessionId(
     if (existing.closed_at) return { error: CLOSED_MSG };
     return { id: existing.id };
   }
+  // 새 세션 note = 조직 관리에서 설정한 모임 이름(임시 모임 > 요일 이름), 없으면 기본값.
+  const [{ data: g }, { data: extra }] = await Promise.all([
+    supabase.from("groups").select("meeting_day_names").eq("id", groupId).single(),
+    supabase.from("extra_meetings").select("name")
+      .eq("group_id", groupId).eq("meeting_date", dateISO).maybeSingle(),
+  ]);
+  const note =
+    configuredMeetingName(
+      dateISO,
+      (g?.meeting_day_names ?? {}) as MeetingDayNames,
+      { [dateISO]: extra?.name ?? null },
+    ) ?? defaultNote(dateISO);
   const { data: created, error } = await supabase
     .from("attendance_sessions")
-    .insert({ group_id: groupId, session_date: dateISO, note: defaultNote(dateISO), created_by: userId })
+    .insert({ group_id: groupId, session_date: dateISO, note, created_by: userId })
     .select("id").single();
   if (error) {
     // 동시 첫 기록 시 다른 편집자가 먼저 세션을 만들었을 수 있음 → 재조회.

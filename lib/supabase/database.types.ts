@@ -507,18 +507,21 @@ export type Database = {
           created_by: string | null
           group_id: string
           meeting_date: string
+          name: string | null
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           group_id: string
           meeting_date: string
+          name?: string | null
         }
         Update: {
           created_at?: string
           created_by?: string | null
           group_id?: string
           meeting_date?: string
+          name?: string | null
         }
         Relationships: [
           {
@@ -537,6 +540,7 @@ export type Database = {
           id: string
           join_code: string
           last_promoted_year: number | null
+          meeting_day_names: Json
           meeting_days: number[]
           name: string
         }
@@ -546,6 +550,7 @@ export type Database = {
           id?: string
           join_code: string
           last_promoted_year?: number | null
+          meeting_day_names?: Json
           meeting_days?: number[]
           name: string
         }
@@ -555,6 +560,7 @@ export type Database = {
           id?: string
           join_code?: string
           last_promoted_year?: number | null
+          meeting_day_names?: Json
           meeting_days?: number[]
           name?: string
         }

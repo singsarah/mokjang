@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  configuredMeetingName,
   hasSchedule,
   isMeetingDate,
   latestMeetingOnOrBefore,
@@ -96,5 +97,23 @@ describe("hasSchedule / isMeetingDate", () => {
     expect(isMeetingDate("2026-07-12", [0], [])).toBe(true);
     expect(isMeetingDate("2026-07-13", [0], [])).toBe(false);
     expect(isMeetingDate("2026-07-13", [0], ["2026-07-13"])).toBe(true);
+  });
+});
+
+describe("configuredMeetingName (조직 관리 모임 이름)", () => {
+  it("임시 모임 이름 > 요일 이름 순으로 이긴다", () => {
+    // 2026-07-12 = 일요일
+    expect(
+      configuredMeetingName("2026-07-12", { "0": "주일 2부 예배" }, { "2026-07-12": "수련회" }),
+    ).toBe("수련회");
+    expect(configuredMeetingName("2026-07-12", { "0": "주일 2부 예배" }, {})).toBe("주일 2부 예배");
+  });
+
+  it("설정이 없으면 null (호출부가 기본값으로 폴백)", () => {
+    expect(configuredMeetingName("2026-07-12", {}, {})).toBeNull();
+    // 임시 모임인데 이름이 비어 있어도 null
+    expect(configuredMeetingName("2026-07-12", {}, { "2026-07-12": null })).toBeNull();
+    // 다른 요일 이름은 적용되지 않는다
+    expect(configuredMeetingName("2026-07-13", { "0": "주일예배" }, {})).toBeNull();
   });
 });

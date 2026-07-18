@@ -49,9 +49,22 @@ test.describe("모임 일정(조직 관리)", () => {
       await expect(chip()).toHaveAttribute("aria-pressed", "true", { timeout: 8_000 });
     }).toPass({ timeout: 45_000 });
 
-    // 출석 화면(날짜 파라미터 없음) → 어제(가장 최근 모임일)가 뜬다
+    // 요일 모임 이름 입력 — 리로드 후 값이 남아 있어야 저장된 것.
+    await expect(async () => {
+      const nameInput = page.getByLabel(`${yLabel}요일 모임 이름`);
+      await nameInput.fill("");
+      await nameInput.fill("청년예배");
+      await nameInput.blur();
+      await page.reload();
+      await expect(page.getByLabel(`${yLabel}요일 모임 이름`)).toHaveValue("청년예배", {
+        timeout: 8_000,
+      });
+    }).toPass({ timeout: 45_000 });
+
+    // 출석 화면(날짜 파라미터 없음) → 어제(가장 최근 모임일) + 설정한 모임 이름이 뜬다
     await page.goto("/attendance");
     await expect(page.getByText(`${yesterday} (${yLabel})`)).toBeVisible();
+    await expect(page.getByText("청년예배")).toBeVisible();
 
     // 오늘을 임시 모임으로 추가 — 목록에 나타나야 저장된 것.
     // 하이드레이션 전 fill은 React가 놓치고, 같은 값 재-fill은 change가 안 나므로
@@ -61,15 +74,19 @@ test.describe("모임 일정(조직 관리)", () => {
       const input = page.getByLabel("임시 모임 날짜");
       await input.fill("");
       await input.fill(today);
+      const nameInput = page.getByLabel("임시 모임 이름");
+      await nameInput.fill("");
+      await nameInput.fill("수련회");
       const add = page.getByRole("button", { name: "추가" });
       await expect(add).toBeEnabled({ timeout: 2_000 });
       await add.click();
       await expect(page.getByText(`${today} (${tLabel})`)).toBeVisible({ timeout: 8_000 });
     }).toPass({ timeout: 45_000 });
 
-    // 이제 출석 기본 날짜는 오늘(임시 모임)
+    // 이제 출석 기본 날짜는 오늘(임시 모임) + 임시 모임 이름이 배지로 뜬다
     await page.goto("/attendance");
     await expect(page.getByText(`${today} (${tLabel})`)).toBeVisible();
+    await expect(page.getByText("수련회")).toBeVisible();
 
     // ◀ = 이전 모임일(어제)로 이동
     await page.getByRole("link", { name: "◀" }).click();

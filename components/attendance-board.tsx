@@ -149,9 +149,15 @@ export function AttendanceBoard({
     // Warm Cream 바탕 + 하단 파스텔 언덕 풍경(탭바 위 고정) — pb는 고정된 언덕 높이만큼 확보
     <main className="min-h-screen bg-bg pb-36">
       <div className="mx-auto w-full max-w-md">
-        {/* 조직 이름 — 로그인 후 첫 화면에서 어느 조직인지 바로 보이게 */}
-        <div className="px-5 pt-4 font-display text-lg font-bold text-sage-deep">
-          {groupName}
+        {/* 조직 이름 + 모임 이름 배지 — 좁은 폰에서 날짜가 두 줄로 밀리지 않게
+            모임 이름은 날짜 줄이 아니라 조직 이름 줄 오른쪽에 둔다 */}
+        <div className="flex items-center justify-between gap-2 px-5 pt-4">
+          <div className="min-w-0 truncate font-display text-lg font-bold text-sage-deep">
+            {groupName}
+          </div>
+          <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-sm font-medium text-ink shadow-sm">
+            <span className="text-sky-deep">✝</span> {note}
+          </span>
         </div>
         {/* 상단 날짜/세션 */}
         <div className="flex items-center justify-between px-5 py-3">
@@ -170,14 +176,9 @@ export function AttendanceBoard({
               <span className="text-lg text-border">▶</span>
             )}
           </div>
-          <span className="flex items-center gap-1.5">
-            {closed && (
-              <span className="rounded-full bg-sage-deep px-3 py-1 text-sm font-bold text-white">마감됨</span>
-            )}
-            <span className="flex items-center gap-1.5 rounded-full border border-border bg-white px-3.5 py-1.5 text-sm font-medium text-ink shadow-sm">
-              <span className="text-sky-deep">✝</span> {note}
-            </span>
-          </span>
+          {closed && (
+            <span className="rounded-full bg-sage-deep px-3 py-1 text-sm font-bold text-white">마감됨</span>
+          )}
         </div>
 
         {/* 반 탭 */}

@@ -6,22 +6,33 @@ import { WEEKDAY_LABELS_KO, weekdayOf } from "@/lib/meeting-schedule";
 import {
   addExtraMeeting,
   removeExtraMeeting,
+  updateMeetingDayName,
   updateMeetingDays,
 } from "@/app/actions/meeting-schedule";
 
-// 조직 관리(마스터): 정기 모임 요일 토글 + 임시 모임 날짜 추가/삭제.
-// 요일 토글은 누르는 즉시 저장(낙관적 UI, 실패 시 롤백).
+export type ExtraMeetingItem = { date: string; name: string | null };
+
+// 조직 관리(마스터): 정기 모임 요일 토글(+요일별 모임 이름) + 임시 모임 날짜/이름 추가·삭제.
+// 요일 토글은 누르는 즉시 저장(낙관적 UI, 실패 시 롤백), 모임 이름은 입력 칸을 벗어날 때 저장.
 export function MeetingScheduleSettings({
   initialDays,
+  initialDayNames,
   initialExtras,
 }: {
   initialDays: number[];
-  initialExtras: string[]; // YYYY-MM-DD, 정렬은 여기서
+  initialDayNames: Record<string, string>; // 키 = 요일("0"~"6")
+  initialExtras: ExtraMeetingItem[]; // 정렬은 여기서
 }) {
   const router = useRouter();
   const [days, setDays] = useState<number[]>(initialDays);
-  const [extras, setExtras] = useState<string[]>([...initialExtras].sort());
+  const [dayNames, setDayNames] = useState<Record<string, string>>(initialDayNames);
+  // 마지막으로 저장에 성공한 이름 — blur 때 바뀐 경우에만 서버 호출.
+  const [savedNames, setSavedNames] = useState<Record<string, string>>(initialDayNames);
+  const [extras, setExtras] = useState<ExtraMeetingItem[]>(
+    [...initialExtras].sort((a, b) => a.date.localeCompare(b.date)),
+  );
   const [newDate, setNewDate] = useState("");
+  const [newName, setNewName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -47,17 +58,42 @@ export function MeetingScheduleSettings({
     }
   }
 
+  async function saveDayName(day: number) {
+    const key = String(day);
+    const name = (dayNames[key] ?? "").trim();
+    if (name === (savedNames[key] ?? "")) return; // 안 바뀌었으면 저장 안 함
+    setError(undefined);
+    setBusy(true);
+    try {
+      const r = await updateMeetingDayName({ day, name });
+      if (r?.error) {
+        setError(r.error);
+      } else {
+        setSavedNames((s) => ({ ...s, [key]: name }));
+        router.refresh();
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onAddExtra() {
     if (!newDate || busy) return;
     setError(undefined);
     setBusy(true);
     try {
-      const r = await addExtraMeeting({ dateISO: newDate });
+      const r = await addExtraMeeting({ dateISO: newDate, name: newName });
       if (r?.error) {
         setError(r.error);
       } else {
-        setExtras((xs) => [...new Set([...xs, newDate])].sort());
+        const item = { date: newDate, name: newName.trim() || null };
+        setExtras((xs) =>
+          [...xs.filter((x) => x.date !== newDate), item].sort((a, b) =>
+            a.date.localeCompare(b.date),
+          ),
+        );
         setNewDate("");
+        setNewName("");
         router.refresh();
       }
     } finally {
@@ -74,7 +110,7 @@ export function MeetingScheduleSettings({
       if (r?.error) {
         setError(r.error);
       } else {
-        setExtras((xs) => xs.filter((x) => x !== date));
+        setExtras((xs) => xs.filter((x) => x.date !== date));
         router.refresh();
       }
     } finally {
@@ -115,45 +151,87 @@ export function MeetingScheduleSettings({
             아직 요일을 선택하지 않아서 출석 화면이 매일 단위로 움직여요.
           </p>
         )}
+        {days.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs text-ink-muted">
+              모임 이름을 적으면 출석 화면 위에 그 이름이 보여요. (비우면 일요일은
+              &ldquo;주일예배&rdquo;, 다른 요일은 &ldquo;모임&rdquo;)
+            </p>
+            {days.map((day) => (
+              <label key={day} className="flex items-center gap-2">
+                <span className="w-14 shrink-0 text-sm text-ink">
+                  {WEEKDAY_LABELS_KO[day]}요일
+                </span>
+                <input
+                  type="text"
+                  value={dayNames[String(day)] ?? ""}
+                  onChange={(e) =>
+                    setDayNames((s) => ({ ...s, [String(day)]: e.target.value }))
+                  }
+                  onBlur={() => saveDayName(day)}
+                  placeholder={day === 0 ? "주일예배" : "모임"}
+                  maxLength={50}
+                  aria-label={`${WEEKDAY_LABELS_KO[day]}요일 모임 이름`}
+                  className="min-w-0 flex-1 rounded-btn border border-border bg-white px-3 py-2 text-sm text-ink"
+                />
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
         <div className="text-sm text-ink-muted">임시 모임</div>
         <p className="mt-0.5 text-xs text-ink-muted">
           정기 요일 외에 모임이 있는 날을 추가하면 그날도 출석을 체크할 수 있어요.
+          모임 이름은 출석 화면 위에 보여요.
         </p>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 space-y-2">
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={newDate}
+              onChange={(e) => setNewDate(e.target.value)}
+              aria-label="임시 모임 날짜"
+              className="min-w-0 flex-1 rounded-btn border border-border bg-white px-3 py-2 text-sm text-ink"
+            />
+            <button
+              type="button"
+              onClick={onAddExtra}
+              disabled={busy || !newDate}
+              className="shrink-0 rounded-btn bg-sage-deep px-4 py-2 text-sm font-bold text-white shadow-sm disabled:opacity-50"
+            >
+              추가
+            </button>
+          </div>
           <input
-            type="date"
-            value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
-            aria-label="임시 모임 날짜"
-            className="min-w-0 flex-1 rounded-btn border border-border bg-white px-3 py-2 text-sm text-ink"
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="모임 이름 (예: 수련회, 성탄 예배)"
+            maxLength={50}
+            aria-label="임시 모임 이름"
+            className="w-full rounded-btn border border-border bg-white px-3 py-2 text-sm text-ink"
           />
-          <button
-            type="button"
-            onClick={onAddExtra}
-            disabled={busy || !newDate}
-            className="shrink-0 rounded-btn bg-sage-deep px-4 py-2 text-sm font-bold text-white shadow-sm disabled:opacity-50"
-          >
-            추가
-          </button>
         </div>
         {extras.length > 0 && (
           <ul className="mt-3 space-y-2">
-            {extras.map((d) => (
+            {extras.map((x) => (
               <li
-                key={d}
-                className="flex items-center justify-between rounded-btn border border-border bg-white px-3 py-2 text-sm"
+                key={x.date}
+                className="flex items-center justify-between gap-2 rounded-btn border border-border bg-white px-3 py-2 text-sm"
               >
-                <span className="tabular-nums text-ink">
-                  {d} ({WEEKDAY_LABELS_KO[weekdayOf(d)]})
+                <span className="min-w-0 text-ink">
+                  <span className="tabular-nums">
+                    {x.date} ({WEEKDAY_LABELS_KO[weekdayOf(x.date)]})
+                  </span>
+                  {x.name && <span className="text-ink-muted"> · {x.name}</span>}
                 </span>
                 <button
                   type="button"
-                  onClick={() => onRemoveExtra(d)}
+                  onClick={() => onRemoveExtra(x.date)}
                   disabled={busy}
-                  className="text-sm text-danger underline underline-offset-2 disabled:opacity-50"
+                  className="shrink-0 text-sm text-danger underline underline-offset-2 disabled:opacity-50"
                 >
                   삭제
                 </button>
