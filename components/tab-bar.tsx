@@ -39,11 +39,15 @@ export function TabBar() {
                     : "font-normal text-ink-muted hover:text-ink",
                 )}
               >
-                {tab.img ? (
-                  <Icon name={tab.img} size={26} />
-                ) : tab.FlatIcon ? (
-                  <tab.FlatIcon className="h-[22px] w-[22px]" />
-                ) : null}
+                {/* 아이콘 슬롯 높이를 22px로 통일 — 양 이미지(26px)는 슬롯 밖으로
+                    살짝 삐져나오게 중앙 배치해 라벨 줄이 다른 탭과 어긋나지 않게 */}
+                <span className="flex h-[22px] w-[26px] items-center justify-center">
+                  {tab.img ? (
+                    <Icon name={tab.img} size={26} className="max-w-none shrink-0" />
+                  ) : tab.FlatIcon ? (
+                    <tab.FlatIcon className="h-[22px] w-[22px]" />
+                  ) : null}
+                </span>
                 <span>{tab.label}</span>
               </Link>
             </li>
