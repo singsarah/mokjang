@@ -111,11 +111,12 @@ export default async function DashboardPage({
             unconfirmedList={summary.unconfirmedList}
           />
 
-          {/* 반별 통계 — 3열 그리드(반이 늘어도 열 정렬 유지), 이름 왼쪽·숫자 오른쪽 */}
+          {/* 반별 통계 — 3열 그리드(반이 늘어도 열 정렬 유지), 이름 왼쪽·숫자 오른쪽.
+              칸 안쪽 px-3.5 여백 + 위 3칸 상자와 같은 열 간격 = 사라가 고른 시안 2 */}
           {summary.classSummaries.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-x-4 gap-y-1 text-sm text-ink-muted">
+            <div className="mt-4 grid grid-cols-3 gap-x-2 gap-y-1 text-sm text-ink-muted">
               {summary.classSummaries.map((c, i) => (
-                <span key={i} className="flex items-baseline justify-between gap-1">
+                <span key={i} className="flex items-baseline justify-between gap-1 px-3.5">
                   <span className="truncate">{c.name}</span>
                   <span className="shrink-0 tabular-nums">{c.present}/{c.total}</span>
                 </span>
