@@ -130,9 +130,9 @@ export default async function DashboardPage({
       <div className={cardClass}>
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-display text-lg font-bold text-ink">출석 추이</h2>
-          {canCall && trend.length > 0 && <AttendanceExportButton />}
+          {canCall && trend.some((p) => p.date != null) && <AttendanceExportButton />}
         </div>
-        <AttendanceTrend points={trend} highlightDate={!isLatest ? summary?.date ?? null : null} />
+        <AttendanceTrend points={trend} />
       </div>
 
       {/* 3. 연락필요 카드 */}

@@ -2,6 +2,8 @@
 // (lib/attendance.ts는 next/headers를 쓰는 서버 전용 loadBoard를 포함하므로
 //  클라이언트 컴포넌트는 이 파일에서 import해야 함.)
 
+import { shiftDate, weekdayOf } from "@/lib/meeting-schedule";
+
 // 저장 상태(DB). "unconfirmed"는 하위호환용 — 새 모델은 저장하지 않고 화면에서 계산.
 export type AttStatus = "present" | "absent_with_reason" | "unconfirmed";
 
@@ -31,4 +33,29 @@ export function tapAction(rec: BoardRecord | undefined): "present" | "clear" {
 export type ReasonAction = { kind: "reason"; reason: string } | { kind: "clear" };
 export function reasonAction(reason: string): ReasonAction {
   return reason.trim() ? { kind: "reason", reason } : { kind: "clear" };
+}
+
+// ── 출석 추이(대시보드) 주간 버킷 ──────────────────────────────
+// 주 시작 = 일요일. todayISO는 KST 기준 오늘(todayISOSeoul()).
+
+// 이번주 포함 직전 4주의 주 시작일(일요일) 4개, 오름차순.
+export function trendWeekStarts(todayISO: string): string[] {
+  const thisWeekStart = shiftDate(todayISO, -weekdayOf(todayISO));
+  return [-21, -14, -7, 0].map((d) => shiftDate(thisWeekStart, d));
+}
+
+// 각 주 버킷에 그 주 [일~토] 안에서 날짜가 가장 늦은 세션을 매핑. 없으면 null.
+export function bucketSessionsByWeek<T extends { session_date: string }>(
+  weekStarts: string[],
+  sessions: T[],
+): { weekStart: string; session: T | null }[] {
+  return weekStarts.map((weekStart) => {
+    const weekEnd = shiftDate(weekStart, 6);
+    let last: T | null = null;
+    for (const s of sessions) {
+      if (s.session_date < weekStart || s.session_date > weekEnd) continue;
+      if (last === null || s.session_date > last.session_date) last = s;
+    }
+    return { weekStart, session: last };
+  });
 }

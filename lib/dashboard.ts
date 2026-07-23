@@ -1,7 +1,7 @@
 import { createServerClient } from "@/lib/supabase/server";
 import { requireCurrentMembership } from "@/lib/memberships";
 import { maskPhone } from "@/lib/students";
-import { displayStatus, type AttStatus, type BoardRecord } from "@/lib/attendance-cycle";
+import { bucketSessionsByWeek, displayStatus, trendWeekStarts, type AttStatus, type BoardRecord } from "@/lib/attendance-cycle";
 
 export type DashboardStudentEntry = { name: string; gender: string | null; grade: number; className: string | null; reason: string | null };
 
@@ -46,8 +46,16 @@ export type DashboardSummary = {
   nextDate: string | null;
 };
 
-// 출석 추이 그래프용 세션별 데이터 (최근 최대 12개, 날짜 오름차순).
-export type TrendPoint = { date: string; present: number; total: number };
+// 출석 추이 그래프용 주간 데이터 — 이번주 포함 직전 4주 고정(오름차순).
+// date는 그 주 대표(마지막 마감) 세션 날짜, null이면 그 주에 마감된 출석 없음(빈 칸).
+export type TrendPoint = {
+  weekStart: string; // 그 주 일요일
+  date: string | null;
+  present: number;
+  reason: number; // 사유결석
+  unconfirmed: number; // 미확인
+  total: number; // 현재 재적
+};
 
 export type DashboardData = {
   summary: DashboardSummary | null;
@@ -265,26 +273,49 @@ export async function loadDashboard(selectedDate?: string): Promise<DashboardDat
     nextDate,
   };
 
-  // 출석 추이: 최근 최대 12개 "마감된" 세션의 출석(present) 인원 수. 미마감은 아직 확정 전이라 제외.
-  // 총원은 현재 재적 인원(조회 시점 고정)으로 통일.
-  const trendSessions = sessions.filter((s) => s.closed_at != null).slice(-12);
-  const trend: TrendPoint[] = [];
-  if (trendSessions.length > 0) {
-    const trendIds = trendSessions.map((s) => s.id);
-    const { data: presentRows } = await supabase
+  // 출석 추이: 이번주 포함 직전 4주 고정. 각 주는 그 주 마지막 "마감된" 세션 기준
+  // (미마감은 아직 확정 전이라 제외 — 마감 전인 주는 빈 칸). 총원은 현재 재적 인원으로 통일.
+  const closedSessions = sessions.filter((s) => s.closed_at != null);
+  const buckets = bucketSessionsByWeek(trendWeekStarts(kst), closedSessions);
+  const trendIds = buckets.flatMap((b) => (b.session ? [b.session.id] : []));
+
+  // 대표 세션(최대 4개)의 기록을 status 포함 한 번에 조회 → 세션별 records 맵.
+  const recordsBySession = new Map<string, Record<string, BoardRecord>>();
+  if (trendIds.length > 0) {
+    const { data: trendRecRows } = await supabase
       .from("attendance_records")
-      .select("session_id")
+      .select("session_id, student_id, status, reason")
       .in("session_id", trendIds)
-      .eq("status", "present")
       .eq("group_id", m.groupId);
-    const presentBySession = new Map<string, number>();
-    for (const r of presentRows ?? []) {
-      presentBySession.set(r.session_id, (presentBySession.get(r.session_id) ?? 0) + 1);
-    }
-    for (const s of trendSessions) {
-      trend.push({ date: s.session_date, present: presentBySession.get(s.id) ?? 0, total: students.length });
+    for (const r of trendRecRows ?? []) {
+      if (!recordsBySession.has(r.session_id)) recordsBySession.set(r.session_id, {});
+      recordsBySession.get(r.session_id)![r.student_id] = { status: r.status as AttStatus, reason: r.reason };
     }
   }
+
+  // 요약 카드와 동일한 의미론(반별 active 판정 + displayStatus)으로 카운트만 집계.
+  function countStats(records: Record<string, BoardRecord>): { present: number; reason: number; unconfirmed: number } {
+    let present = 0, reason = 0, unconfirmed = 0;
+    for (const grp of order) {
+      const list = byClass.get(grp.key) ?? [];
+      const classActive = list.some((s) => Boolean(records[s.id]));
+      for (const s of list) {
+        const d = displayStatus(records[s.id], classActive);
+        if (d === "present") present++;
+        else if (d === "absent_with_reason") reason++;
+        else if (d === "unconfirmed") unconfirmed++;
+      }
+    }
+    return { present, reason, unconfirmed };
+  }
+
+  const trend: TrendPoint[] = buckets.map((b) => {
+    if (!b.session) {
+      return { weekStart: b.weekStart, date: null, present: 0, reason: 0, unconfirmed: 0, total: students.length };
+    }
+    const stats = countStats(recordsBySession.get(b.session.id) ?? {});
+    return { weekStart: b.weekStart, date: b.session.session_date, ...stats, total: students.length };
+  });
 
   return { summary, canCall, contact, birthdays, trend, unclosedDates };
 }

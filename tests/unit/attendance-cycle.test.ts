@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { displayStatus, tapAction, reasonAction } from "@/lib/attendance-cycle";
+import { bucketSessionsByWeek, displayStatus, tapAction, reasonAction, trendWeekStarts } from "@/lib/attendance-cycle";
 
 describe("displayStatus", () => {
   it("present 기록 → present", () =>
@@ -30,4 +30,50 @@ describe("reasonAction", () => {
     expect(reasonAction("가족여행")).toEqual({ kind: "reason", reason: "가족여행" }));
   it("공백만 → clear", () => expect(reasonAction("   ")).toEqual({ kind: "clear" }));
   it("빈 문자열 → clear", () => expect(reasonAction("")).toEqual({ kind: "clear" }));
+});
+
+describe("trendWeekStarts", () => {
+  it("일요일이면 그 날이 이번주 시작", () =>
+    // 2026-07-19 = 일요일
+    expect(trendWeekStarts("2026-07-19")).toEqual(["2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19"]));
+  it("주중이면 직전 일요일이 이번주 시작", () =>
+    // 2026-07-23 = 목요일 → 이번주 시작 7/19
+    expect(trendWeekStarts("2026-07-23")).toEqual(["2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19"]));
+  it("토요일도 같은 주 (다음 일요일로 넘어가지 않음)", () =>
+    expect(trendWeekStarts("2026-07-25")).toEqual(["2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19"]));
+  it("월 경계를 넘어도 정상 계산", () =>
+    // 2026-08-01 = 토요일 → 이번주 시작 7/26
+    expect(trendWeekStarts("2026-08-01")).toEqual(["2026-07-05", "2026-07-12", "2026-07-19", "2026-07-26"]));
+});
+
+describe("bucketSessionsByWeek", () => {
+  const weeks = ["2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19"];
+  const s = (session_date: string, id = session_date) => ({ id, session_date });
+
+  it("각 주에 해당 세션 매핑, 없는 주는 null", () => {
+    const result = bucketSessionsByWeek(weeks, [s("2026-07-05"), s("2026-07-19")]);
+    expect(result).toEqual([
+      { weekStart: "2026-06-28", session: null },
+      { weekStart: "2026-07-05", session: s("2026-07-05") },
+      { weekStart: "2026-07-12", session: null },
+      { weekStart: "2026-07-19", session: s("2026-07-19") },
+    ]);
+  });
+
+  it("한 주에 세션 여러 개면 마지막(가장 늦은 날짜) 선택", () => {
+    // 7/12(일) 주일예배 + 7/15(수) 임시모임 → 7/15
+    const result = bucketSessionsByWeek(weeks, [s("2026-07-12"), s("2026-07-15")]);
+    expect(result[2]).toEqual({ weekStart: "2026-07-12", session: s("2026-07-15") });
+  });
+
+  it("주 경계: 토요일은 그 주, 다음 일요일은 다음 주", () => {
+    const result = bucketSessionsByWeek(weeks, [s("2026-07-11"), s("2026-07-12")]);
+    expect(result[1]).toEqual({ weekStart: "2026-07-05", session: s("2026-07-11") });
+    expect(result[2]).toEqual({ weekStart: "2026-07-12", session: s("2026-07-12") });
+  });
+
+  it("4주 창 밖(과거·미래) 세션은 무시", () => {
+    const result = bucketSessionsByWeek(weeks, [s("2026-06-27"), s("2026-07-26")]);
+    expect(result.every((b) => b.session === null)).toBe(true);
+  });
 });

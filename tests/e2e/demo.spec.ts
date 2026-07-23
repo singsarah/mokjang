@@ -27,5 +27,13 @@ test.describe("Demo mode", () => {
     await expect(page.getByText("지난 예배 출석")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText("출석 추이")).toBeVisible();
     await expect(page.getByText("아직 마감하지 않은 출석이 있어요")).toHaveCount(0);
+
+    // 추이 그래프 출석/결석 토글 — 결석 탭으로 전환되고 범례가 보인다.
+    // (단일 click은 하이드레이션과 경쟁하므로 효과가 날 때까지 재시도)
+    const absentToggle = page.getByRole("button", { name: "결석", exact: true });
+    await expect(async () => {
+      await absentToggle.click();
+      await expect(absentToggle).toHaveAttribute("aria-pressed", "true");
+    }).toPass();
   });
 });
