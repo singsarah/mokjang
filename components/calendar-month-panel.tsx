@@ -14,6 +14,7 @@ import {
   type AbsenceParsed,
 } from "@/lib/validation/absence";
 import { Icon } from "@/components/icon";
+import { PencilIcon } from "@/components/flat-icons";
 
 export type CalendarEventItem = {
   id: string;
@@ -903,14 +904,25 @@ export function CalendarMonthView({
                       {canEdit ? (
                         <button
                           type="button"
+                          aria-label={`${entry.event.title} 수정`}
                           onClick={() => {
                             setPopupOpen(false);
                             setModal({ kind: "edit", event: entry.event });
                           }}
-                          className="-mx-1.5 flex w-full items-center gap-2 rounded-btn px-1.5 py-1 text-left transition hover:bg-card"
+                          className="group -mx-1.5 flex w-full items-center gap-2 rounded-btn px-1.5 py-1 text-left transition hover:bg-card"
                         >
                           {body}
-                          <span className="shrink-0 text-sm text-ink-muted">수정 ›</span>
+                          {/* 연필 아이콘 — 호버(PC) 시 아이콘 바로 위에 "수정" 말풍선 */}
+                          <span className="relative shrink-0 text-ink-muted transition group-hover:text-ink">
+                            <PencilIcon className="h-[17px] w-[17px]" />
+                            <span className="pointer-events-none absolute bottom-full left-1/2 mb-1.5 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-ink px-2 py-1 text-sm font-normal text-white group-hover:block">
+                              수정
+                              <span
+                                aria-hidden
+                                className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-ink"
+                              />
+                            </span>
+                          </span>
                         </button>
                       ) : (
                         <span className="flex items-center">{body}</span>
