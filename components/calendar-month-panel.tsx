@@ -496,6 +496,8 @@ export function CalendarMonthView({
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [popupOpen, setPopupOpen] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
+  // 이번 달 목록 탭: 주요 일정(교회 일정) / 생일·출타 — 섞어 보여주면 복잡하다는 피드백.
+  const [listTab, setListTab] = useState<"events" | "people">("events");
 
   const [year, monthNum] = month.split("-").map(Number);
   const lastDay = new Date(Date.UTC(year, monthNum, 0)).getUTCDate();
@@ -559,6 +561,10 @@ export function CalendarMonthView({
             ? !absenceCovers(e.a, selectedDay)
             : e.day !== selectedDay,
         );
+  // 탭 필터: 주요 일정 = 교회 일정만, 생일/출타 = 나머지 (둘 다 날짜순 유지)
+  const shownEntries = restEntries.filter((e) =>
+    listTab === "events" ? e.kind === "event" : e.kind !== "event",
+  );
 
   // 팝업용: 출타는 "출타중" 헤더 아래 이름만 나열 (사람마다 "출타" 반복 방지).
   const selectedEvents = selectedEntries.filter(
@@ -1028,6 +1034,36 @@ export function CalendarMonthView({
 
         <h2 className="mt-6 text-sm font-bold text-ink-muted">이번 달 목록</h2>
 
+        {/* 주요 일정 / 생일·출타 탭 (스카이 — 사라 확정 옵션 C) */}
+        {entries.length > 0 && (
+          <div className="mt-3 grid grid-cols-2 gap-1 rounded-btn bg-sky-soft p-1">
+            <button
+              type="button"
+              aria-pressed={listTab === "events"}
+              onClick={() => setListTab("events")}
+              className={`rounded-btn py-1.5 text-sm transition ${
+                listTab === "events"
+                  ? "bg-white font-bold text-sky-deep shadow-sm"
+                  : "text-sky-deep/80"
+              }`}
+            >
+              주요 일정
+            </button>
+            <button
+              type="button"
+              aria-pressed={listTab === "people"}
+              onClick={() => setListTab("people")}
+              className={`rounded-btn py-1.5 text-sm transition ${
+                listTab === "people"
+                  ? "bg-white font-bold text-sky-deep shadow-sm"
+                  : "text-sky-deep/80"
+              }`}
+            >
+              생일/출타
+            </button>
+          </div>
+        )}
+
         {/* 선택한 날짜 항목을 맨 위에 고정 */}
         {selectedDay !== null && (
           <div className="mt-3 rounded-card border border-sage bg-sage-soft/60 p-3">
@@ -1055,9 +1091,15 @@ export function CalendarMonthView({
           <p className="mt-2 text-sm text-ink-muted">
             이번 달에는 등록된 일정과 생일이 없어요.
           </p>
-        ) : restEntries.length > 0 ? (
-          <ul className="mt-3 space-y-2">{restEntries.map(renderEntry)}</ul>
-        ) : null}
+        ) : shownEntries.length > 0 ? (
+          <ul className="mt-3 space-y-2">{shownEntries.map(renderEntry)}</ul>
+        ) : (
+          <p className="mt-3 text-sm text-ink-muted">
+            {listTab === "events"
+              ? "이번 달 주요 일정이 없어요."
+              : "이번 달 생일·출타가 없어요."}
+          </p>
+        )}
       </section>
 
       {(modal?.kind === "create" || modal?.kind === "edit") && (

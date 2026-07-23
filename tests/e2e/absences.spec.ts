@@ -36,14 +36,21 @@ test.describe.serial("Teacher absences", () => {
     await teacherSelect.selectOption({ label: teacherName });
     await page.getByLabel(/사유/).fill("해외 출장");
 
-    // 저장 — 이번 달 목록에 출타 행(✈️ 이름)이 나타날 때까지 재시도
+    // 저장 — 모달이 닫힐 때까지 재시도
     const listSection = page.locator("section", { hasText: "이번 달 목록" });
     await expect(async () => {
       const save = page.getByRole("button", { name: /^저장/ });
       if (await save.isVisible()) await save.click();
+      await expect(save).toHaveCount(0, { timeout: 8_000 });
+    }).toPass({ timeout: 45_000 });
+
+    // 출타는 "생일/출타" 탭에 나온다 — 탭 전환 후 행 확인
+    const peopleTab = listSection.getByRole("button", { name: "생일/출타" });
+    await expect(async () => {
+      if (await peopleTab.isVisible()) await peopleTab.click();
       await expect(
         listSection.getByText(`✈️ ${teacherName}`).first(),
-      ).toBeVisible({ timeout: 8_000 });
+      ).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 45_000 });
   });
 
@@ -80,12 +87,18 @@ test.describe.serial("Teacher absences", () => {
     // window.confirm 자동 수락
     page.on("dialog", (dialog) => dialog.accept());
 
+    // "생일/출타" 탭으로 전환 후 출타 행 탭 → 수정 모달의 삭제 버튼.
+    // 모달이 이미 열려 있으면(오버레이가 클릭을 막음) 탭/행 클릭은 건너뛴다.
     const deleteButton = page.getByRole("button", { name: "이 출타 삭제" });
+    const peopleTab = listSection.getByRole("button", { name: "생일/출타" });
     await expect(async () => {
-      const row = listSection.getByRole("button", {
-        name: new RegExp(`✈️ ${teacherName}`),
-      });
-      if (await row.isVisible()) await row.click();
+      if (!(await deleteButton.isVisible())) {
+        if (await peopleTab.isVisible()) await peopleTab.click();
+        const row = listSection.getByRole("button", {
+          name: new RegExp(`✈️ ${teacherName}`),
+        });
+        if (await row.isVisible()) await row.click();
+      }
       await expect(deleteButton).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 45_000 });
 
