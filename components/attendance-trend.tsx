@@ -17,6 +17,7 @@ const PAD_LEFT = 26; // y축 인원수 눈금 공간
 const PAD_RIGHT = 4;
 const CORNER = 3; // 막대 상단 둥근 모서리
 const MIN_BAR_H = 2; // 0명이어도 보이도록 최소 높이
+const SEG_LABEL_MIN_H = 14; // 스택 세그먼트 안 숫자를 넣을 수 있는 최소 높이
 
 // 상단이 둥근 막대 path.
 function roundedTopBarPath(x: number, y: number, w: number, h: number, r: number): string {
@@ -133,6 +134,17 @@ export function AttendanceTrend({ points }: { points: TrendPoint[] }) {
                     ))}
                   {v === 0 && (
                     <path d={roundedTopBarPath(x, y, barW, h, CORNER)} fill="currentColor" className="text-gold-deep" />
+                  )}
+                  {/* 세그먼트 안 숫자 — 좁아서 안 들어가면 생략(합계·툴팁으로 확인) */}
+                  {unconfirmedH >= SEG_LABEL_MIN_H && (
+                    <text x={labelX} y={y + unconfirmedH / 2 + 4} textAnchor="middle" fill="#fff" className="text-sm font-bold">
+                      {p.unconfirmed}
+                    </text>
+                  )}
+                  {reasonH >= SEG_LABEL_MIN_H && (
+                    <text x={labelX} y={baselineY - reasonH / 2 + 4} textAnchor="middle" fill="#fff" className="text-sm font-bold">
+                      {p.reason}
+                    </text>
                   )}
                   <title>{title}</title>
                 </g>
