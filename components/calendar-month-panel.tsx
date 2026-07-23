@@ -880,23 +880,44 @@ export function CalendarMonthView({
               <p className="mt-3 text-sm text-ink-muted">일정 없음</p>
             ) : (
               <ul className="mt-3 space-y-2.5">
-                {selectedEvents.map((entry) => (
-                  <li key={entry.event.id} className="text-sm">
-                    <span className="font-medium text-ink">
-                      {entry.event.time && (
-                        <span className="mr-1.5 text-sm font-normal text-sage-deep">
-                          {entry.event.time}
+                {selectedEvents.map((entry) => {
+                  const body = (
+                    <span className="min-w-0 flex-1">
+                      <span className="font-medium text-ink">
+                        {entry.event.time && (
+                          <span className="mr-1.5 text-sm font-normal text-sage-deep">
+                            {entry.event.time}
+                          </span>
+                        )}
+                        {entry.event.title}
+                      </span>
+                      {entry.event.description && (
+                        <span className="mt-0.5 block text-sm text-ink-muted">
+                          {entry.event.description}
                         </span>
                       )}
-                      {entry.event.title}
                     </span>
-                    {entry.event.description && (
-                      <span className="mt-0.5 block text-sm text-ink-muted">
-                        {entry.event.description}
-                      </span>
-                    )}
-                  </li>
-                ))}
+                  );
+                  return (
+                    <li key={entry.event.id} className="text-sm">
+                      {canEdit ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPopupOpen(false);
+                            setModal({ kind: "edit", event: entry.event });
+                          }}
+                          className="-mx-1.5 flex w-full items-center gap-2 rounded-btn px-1.5 py-1 text-left transition hover:bg-card"
+                        >
+                          {body}
+                          <span className="shrink-0 text-sm text-ink-muted">수정 ›</span>
+                        </button>
+                      ) : (
+                        <span className="flex items-center">{body}</span>
+                      )}
+                    </li>
+                  );
+                })}
                 {selectedAbsences.length > 0 && (
                   <li className="text-sm">
                     <span className="font-medium text-ink">✈️ 출타중</span>

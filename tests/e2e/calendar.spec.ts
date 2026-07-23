@@ -69,6 +69,16 @@ test.describe.serial("Calendar events", () => {
     await expect(
       page.getByText(`${monthNum}월 ${dayNum}일`).first(),
     ).toBeVisible();
+
+    // 팝업의 일정 줄 탭 → 수정 모달이 기존 제목이 채워진 채 열린다.
+    const titleInput = page.getByLabel(/제목/);
+    await expect(async () => {
+      const row = dialog.getByRole("button", { name: new RegExp(eventTitle) });
+      if (await row.isVisible()) await row.click();
+      await expect(titleInput).toHaveValue(eventTitle, { timeout: 5_000 });
+    }).toPass({ timeout: 45_000 });
+    // 다음 테스트(목록에서 수정)가 원래 제목을 기대하므로 저장하지 않고 닫는다.
+    await page.getByRole("button", { name: "취소" }).click();
   });
 
   test("event can be edited from the month list", async ({ page }) => {
